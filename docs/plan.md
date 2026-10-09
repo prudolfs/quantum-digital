@@ -52,17 +52,19 @@ Guardrails:
 
 ## Phase 1: Project foundation
 
-- [ ] Create or confirm the TanStack Start project structure.
-- [ ] Configure TypeScript, Tailwind CSS, and shadcn/ui.
-- [ ] Define the Convex integration boundary; connect the backend when implementing admin and chat.
-- [ ] Configure environment variables for local development and deployment.
-- [ ] Configure the quality commands defined below, including browser checks for desktop and mobile.
-- [ ] Establish shared layout, navigation, typography, spacing, and responsive breakpoints.
-- [ ] Add accessible focus states, reduced-motion handling, and useful loading/error states.
-- [ ] Set up deployment and verify a minimal production build.
-- [ ] Document setup, environment variables, development, and deployment in the README.
+- [x] Create or confirm the TanStack Start project structure.
+- [x] Configure TypeScript, Tailwind CSS, and shadcn/ui.
+- [x] Define the Convex integration boundary; connect the backend when implementing admin and chat.
+- [x] Configure environment variables for local development and deployment.
+- [x] Configure the quality commands defined below, including browser checks for desktop and mobile.
+- [x] Establish shared layout, navigation, typography, spacing, and responsive breakpoints.
+- [x] Add accessible focus states, reduced-motion handling, and useful loading/error states.
+- [x] Set up deployment and verify a minimal production build. Production build and Cloudflare Worker deployment dry-run pass; live deployment remains a separate release step.
+- [x] Document setup, environment variables, development, and deployment in the README.
 
-**Exit criteria:** The app runs locally, passes foundation checks, and deploys successfully without requiring admin or chat.
+**Exit criteria:** The app runs locally, passes foundation checks, and packages successfully for Cloudflare Workers without requiring admin or chat. Verify the live deployment during the public release.
+
+**Review status:** Dependencies are installed. Runtime type-checking, linting, formatting verification, all six unit tests, all eight desktop/mobile browser tests, the production build, and Cloudflare deployment dry-run pass. Browser checks cover navigation, keyboard focus, accessibility, 404 recovery, JavaScript-free rendering, and reduced motion. Corrected the Worker compatibility date to `2026-09-18`, supported by the installed local runtime. Phase 1 exit criteria are met. No site has been published. Stop here for review before Phase 2.
 
 ## Phase 2: Public marketing site
 
@@ -209,19 +211,19 @@ Run the relevant launch checks for each release. The first public release requir
 
 ## Quality workflow
 
-Configure these commands in the project; this planning repository does not yet contain an application or runnable checks.
+These commands are configured in the project. Install dependencies before running them; the README contains setup and review instructions.
 
-| Command | Purpose |
-| --- | --- |
-| `pnpm format` | Format with Oxfmt |
-| `pnpm format:check` | Check formatting without changes |
-| `pnpm lint` | Run Oxlint |
-| `pnpm typecheck` | Run TypeScript without emitting files |
-| `pnpm test` | Run Vitest; use convex-test for backend behavior |
-| `pnpm check` | Run typecheck, lint, format:check, and unit tests |
-| `pnpm build` | Build for production |
-| `pnpm test:e2e` | Run Playwright on desktop Chromium and mobile Chromium |
-| `pnpm test:launch` | Run check, production build, and browser tests |
+| Command             | Purpose                                                |
+| ------------------- | ------------------------------------------------------ |
+| `pnpm format`       | Format with Oxfmt                                      |
+| `pnpm format:check` | Check formatting without changes                       |
+| `pnpm lint`         | Run Oxlint                                             |
+| `pnpm typecheck`    | Run TypeScript without emitting files                  |
+| `pnpm test`         | Run Vitest; use convex-test for backend behavior       |
+| `pnpm check`        | Run typecheck, lint, format:check, and unit tests      |
+| `pnpm build`        | Build for production                                   |
+| `pnpm test:e2e`     | Run Playwright on desktop Chromium and mobile Chromium |
+| `pnpm test:launch`  | Run check, production build, and browser tests         |
 
 - Test behavior that can fail meaningfully: protected backend access, publication visibility, inquiry confirmation, and tool success/failure. Avoid tests that merely repeat implementation details.
 - Cover public navigation, direct booking, the icon opening `/chat`, and the full-page conversation flow when live chat is added.

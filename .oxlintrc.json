@@ -1,0 +1,16 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "react", "unicorn", "oxc"],
+  "categories": { "correctness": "error", "suspicious": "warn" },
+  "rules": { "react/react-in-jsx-scope": "off" },
+  "ignorePatterns": [
+    ".agents/**",
+    ".pnpm-store/**",
+    ".wrangler/**",
+    ".tanstack/**",
+    "dist/**",
+    "src/routeTree.gen.ts",
+    "test-results/**",
+    "playwright-report/**"
+  ]
+}

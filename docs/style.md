@@ -8,23 +8,23 @@ Keep positioning and website copy in [the plan](plan.md). This document defines 
 
 ## Color tokens
 
-| Token | Value | Role |
-| --- | --- | --- |
-| `canvas` | `#030812` | Page background |
-| `surface` | `#07182B` | Navigation and section surfaces |
-| `surface-raised` | `#0A2038` | Cards and panels |
-| `brand` | `#00AEEF` | Primary accent and highlighted headline phrase |
-| `signal` | `#238BFF` | Links, active controls, and focus |
-| `ice` | `#CCE9FA` | Display text and soft highlights |
-| `white` | `#F7FBFF` | Main text and high-contrast controls |
-| `muted` | `#8FA8BA` | Supporting text |
-| `border` | `#17334A` | Borders and dividers |
-| `portal-blue` | `#007BFF` | Shape particles |
-| `portal-cyan` | `#398FFF` | Lit particle surfaces |
-| `portal-ice` | `#AFD7FF` | Particle highlights |
-| `portal-gold` | `#F5B85B` | Hero cursor trail and sparks |
-| `portal-amber` | `#C47B35` | Fading cursor trail |
-| `portal-core` | `#FFF0BD` | Bright cursor particle cores |
+| Token            | Value     | Role                                           |
+| ---------------- | --------- | ---------------------------------------------- |
+| `canvas`         | `#030812` | Page background                                |
+| `surface`        | `#07182B` | Navigation and section surfaces                |
+| `surface-raised` | `#0A2038` | Cards and panels                               |
+| `brand`          | `#00AEEF` | Primary accent and highlighted headline phrase |
+| `signal`         | `#238BFF` | Links, active controls, and focus              |
+| `ice`            | `#CCE9FA` | Display text and soft highlights               |
+| `white`          | `#F7FBFF` | Main text and high-contrast controls           |
+| `muted`          | `#8FA8BA` | Supporting text                                |
+| `border`         | `#17334A` | Borders and dividers                           |
+| `portal-blue`    | `#007BFF` | Shape particles                                |
+| `portal-cyan`    | `#398FFF` | Lit particle surfaces                          |
+| `portal-ice`     | `#AFD7FF` | Particle highlights                            |
+| `portal-gold`    | `#F5B85B` | Hero cursor trail and sparks                   |
+| `portal-amber`   | `#C47B35` | Fading cursor trail                            |
+| `portal-core`    | `#FFF0BD` | Bright cursor particle cores                   |
 
 Reserve gold for hero cursor effects. Keep highlighted heading text solid brand blue. Check contrast in the actual compositions, especially small text, borders, and focus states.
 
