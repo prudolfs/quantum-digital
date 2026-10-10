@@ -39,3 +39,11 @@ Create a managed widget in the Cloudflare dashboard under Turnstile. Allow `quan
 For local integration testing, Cloudflare documents an always-pass public key `1x00000000000000000000AA` and matching secret `1x0000000000000000000000000000000AA`. These are public test credentials, not production protection. Use explicit local configuration and a real widget before launch. Tokens expire after five minutes, are single-use, and must be refreshed for retry. The backend always requires verification; real keys require the current hostname and action `chat`. Explicit dummy keys on loopback require successful Cloudflare testing metadata. Public domains reject the always-pass testing secret, and missing configuration disables the assistant.
 
 Sources: [Cloudflare token validation](https://developers.cloudflare.com/turnstile/get-started/server-side-validation/), [Cloudflare testing](https://developers.cloudflare.com/turnstile/troubleshooting/testing/).
+
+## Production, previews, and build variables
+
+Wrangler top-level `vars` configure production runtime values. `previews.vars` configure branch Previews independently; do not move production settings into that block. Keep `AI_MODEL` configured in both. The public Turnstile site key may be listed in both runtime blocks, but this application reads `VITE_*` from Vite’s build-time `import.meta.env`. Set `VITE_TURNSTILE_SITE_KEY`, `VITE_CONVEX_URL`, `VITE_CONVEX_SITE_URL`, and `VITE_SITE_URL` in Workers Builds variables before building. A runtime binding alone will not update the browser bundle. Rebuild and redeploy after changing build variables.
+
+Set `TURNSTILE_SECRET_KEY`, `AI_GATEWAY_API_KEY`, and `INTAKE_BRIDGE_SECRET` as production Worker secrets. For branch Previews, configure them separately in Settings → Previews Base; existing Previews need their own updates because Base secret changes apply only to newly created Previews. Never put secret values in Wrangler `vars`. Ensure the Turnstile widget permits the actual production/preview hostname and the bridge secret matches the Convex backend selected at build time.
+
+References: [Preview configuration](https://developers.cloudflare.com/workers/previews/configuration/), [Workers Builds configuration](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/).
