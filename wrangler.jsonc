@@ -5,11 +5,11 @@
   "compatibility_date": "2026-09-18",
   "compatibility_flags": ["nodejs_compat"],
   "observability": { "enabled": true },
-  // Production runtime variables. VITE_* values must also be set in Workers Builds.
+  // Public VITE_* values also supply build defaults; local/CI env values override them.
   "vars": {
     "AI_MODEL": "google/gemini-2.5-flash",
     "VITE_CONVEX_SITE_URL": "https://peaceful-koala-818.convex.site",
     "VITE_CONVEX_URL": "https://peaceful-koala-818.convex.cloud",
-    "VITE_TURNSTILE_SITE_KEY": "0x4AAAAAAB6aIcdXW2s0-u5y"
+    "VITE_TURNSTILE_SITE_KEY": "0x4AAAAAAB6aIcdXW2s0-u5y",
   },
 }

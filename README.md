@@ -44,7 +44,7 @@ Open http://localhost:3000. Convex generates local deployment values in `.env.lo
 | `ADMIN_OWNER_EMAIL`       | Convex environment                    | Sole allowed owner account                                     |
 | `BETTER_AUTH_SECRET`      | Convex environment                    | Server-side authentication secret                              |
 
-`VITE_*` values are public and fixed at build time. Never put credentials in them. Backend URLs require HTTPS except explicit loopback development URLs. `.dev.vars`, `.env.local`, `.env.convex.local`, and `.convex/` are ignored.
+`VITE_*` values are public and fixed at build time. Vite uses the four approved public values from Wrangler `vars` as defaults; `.env.local` and Cloudflare build variables override them. Server secrets are never copied from Wrangler into browser definitions. Never put credentials in them. Backend URLs require HTTPS except explicit loopback development URLs. `.dev.vars`, `.env.local`, `.env.convex.local`, and `.convex/` are ignored.
 
 ## Quality checks
 
