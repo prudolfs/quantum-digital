@@ -25,7 +25,7 @@ test('renders accessible navigation and supports the complete page round trip', 
     .click()
   await expect(page).toHaveURL(/\/about$/)
   await expect(page.getByRole('heading', { level: 1 })).toContainText(
-    'working product.',
+    'Product to engineering.',
   )
   if (isMobile) await page.getByRole('button', { name: 'Open menu' }).click()
   await expect(
@@ -79,7 +79,7 @@ test('serves readable pages and navigation without JavaScript', async ({
     .getByRole('link', { name: 'About' })
     .click()
   await expect(page.getByRole('heading', { level: 1 })).toContainText(
-    'working product.',
+    'Product to engineering.',
   )
   await context.close()
 })

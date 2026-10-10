@@ -1,0 +1,20 @@
+[
+  {
+    "name": "warehouse-overview",
+    "source": "robotics-lab/apps/warehouse-demo/screenshots/overview.png",
+    "width": 1080,
+    "height": 1080,
+    "quality": 0.72,
+    "bytes": 46540,
+    "qualification": "Existing application capture of a simulated environment, not a new execution or physical-robot benchmark."
+  },
+  {
+    "name": "slam-workbench",
+    "source": "robotics-lab/apps/slam-demo/screenshots/workbench.png",
+    "width": 1080,
+    "height": 1080,
+    "quality": 0.48,
+    "bytes": 47160,
+    "qualification": "Existing application capture of a simulated environment, not a new execution or physical-robot benchmark."
+  }
+]

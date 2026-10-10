@@ -14,7 +14,7 @@ A mobile and web app for booking, tracking, and coordinating service jobs, with 
 
 ## 3. Robotics Lab | 2026
 
-A browser-based robotics platform with a robot simulator, 3D drone mission planner, and visual SLAM explorer. Built with TypeScript, React, and Three.js.
+A browser-based robotics platform with a robot simulator, 3D drone mission planner, visual SLAM explorer, and seeded warehouse delivery simulation. Built with TypeScript, React, and Three.js.
 
 [GitHub](https://github.com/prudolfs/robotics-lab)
 

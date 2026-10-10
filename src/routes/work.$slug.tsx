@@ -4,27 +4,32 @@ import { ArrowLeft, ArrowUpRight } from 'lucide-react'
 import { loadPublishedContent } from '@/server/content'
 import { ChatLink } from '@/components/chat-link'
 import { pageHead } from '@/lib/seo'
+import { findPublishedWork } from '@/content/work-stories'
+import { WorkStoryPage } from '@/components/work-story'
 
 export const Route = createFileRoute('/work/$slug')({
   loader: async ({ params }) => {
-    const { caseStudies } = await loadPublishedContent()
-    const study = caseStudies.find((entry) => entry.slug === params.slug)
-    if (!study) throw notFound()
-    return study
+    const result = findPublishedWork(await loadPublishedContent(), params.slug)
+    if (!result) throw notFound()
+    return result
   },
   head: ({ loaderData }) =>
     loaderData
       ? pageHead(
-          `${loaderData.title} | Quantum Digital`,
-          loaderData.summary,
-          `/work/${loaderData.slug}`,
+          `${loaderData.study.title} | Quantum Digital`,
+          loaderData.study.summary,
+          `/work/${loaderData.study.slug}`,
         )
       : {},
   component: CaseStudyPage,
 })
 
 function CaseStudyPage() {
-  const study = Route.useLoaderData()
+  const { study, story, related, art } = Route.useLoaderData()
+  if (story && art)
+    return (
+      <WorkStoryPage study={study} story={story} related={related} art={art} />
+    )
   const sections = [
     ['Context', study.context],
     ['Challenge', study.challenge],
@@ -33,7 +38,7 @@ function CaseStudyPage() {
     ['Engineering focus', study.evidence],
   ]
   return (
-    <article className="case-study">
+    <article className="case-study section-shell">
       <Link to="/" hash="work" className="text-link">
         <ArrowLeft aria-hidden="true" size={16} /> Selected work
       </Link>

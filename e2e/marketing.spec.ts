@@ -85,7 +85,7 @@ test('work, services and full-page chat remain usable with reduced motion', asyn
     page.getByRole('textbox', { name: 'Message the assistant' }),
   ).toBeDisabled()
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
-  await page.getByRole('link', { name: 'Back to the website' }).click()
+  await page.getByRole('link', { name: 'Quantum Digital home' }).click()
   await expect(page.getByRole('heading', { level: 1 })).toContainText(
     'Put AI to work.',
   )

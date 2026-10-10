@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from 'vitest'
 import { convertToModelMessages, validateUIMessages, type UIMessage } from 'ai'
 import { defaultContent } from '../../shared/content-defaults'
 import { chatContext, conversationError, createChatTools } from './chat-policy'
+import { caseStudyResultSchema } from '../../shared/chat'
+import { findPublishedWork } from '../content/work-stories'
 
 const user = (text = 'Tell me about your work'): UIMessage => ({
   id: 'user-1',
@@ -24,6 +26,148 @@ function tools() {
 }
 
 describe('published chat tools', () => {
+  it('shares the approved About journey without introducing unpublished work links', () => {
+    const context = chatContext({ ...defaultContent, caseStudies: [] })
+    expect(context.about.url).toBe('/about')
+    expect(context.about.journey).toHaveLength(5)
+    expect(context.about.journey[1].contribution).toBe(
+      'Team contributions · leadership on selected projects',
+    )
+    expect(context.about.journey[3].contribution).toBe(
+      'Team contribution · frontend and full-stack development',
+    )
+    expect(
+      context.about.workingPractices.some(
+        (practice) => 'exampleSlug' in practice,
+      ),
+    ).toBe(false)
+    expect(context.caseStudies).toEqual([])
+  })
+  it.each(['research-workflow', 'service-operations-copilot', 'robotics-lab'])(
+    'bounds %s story publication and related work to the published collection',
+    async (slug) => {
+      const original = defaultContent.caseStudies.find(
+        (study) => study.slug === slug,
+      )!
+      const edited = { ...original, summary: 'Published owner-edited summary.' }
+      const content = { ...defaultContent, caseStudies: [edited] }
+      const fixture = tools()
+      fixture.loadContent.mockResolvedValue(content)
+      const result = caseStudyResultSchema.parse(
+        await fixture.tools.getCaseStudy.execute!({ slug }, options),
+      )
+      if (!result.available) throw new Error('Expected published result')
+      expect(result.study.summary).toBe(edited.summary)
+      expect(result.story?.steps.length).toBe(
+        slug === 'research-workflow' ? 6 : 4,
+      )
+      expect(findPublishedWork(content, slug)?.related).toEqual([])
+      if (slug === 'robotics-lab') {
+        expect(result.story?.applications).toHaveLength(4)
+        expect(
+          result.story?.applications?.find((app) => app.title === 'SLAM Studio')
+            ?.status,
+        ).toContain('relocalization remains planned')
+      }
+      if (slug !== 'research-workflow')
+        expect(result.study.repositoryUrl).toBe(original.repositoryUrl)
+      fixture.loadContent.mockResolvedValue({
+        ...defaultContent,
+        caseStudies: [],
+      })
+      expect(
+        await fixture.tools.getCaseStudy.execute!({ slug }, options),
+      ).toMatchObject({ available: false })
+      expect(
+        findPublishedWork({ ...defaultContent, caseStudies: [] }, slug),
+      ).toBeUndefined()
+    },
+  )
+  it.each(['care-coordination', 'accounting-workflows', 'research-workflow'])(
+    'keeps %s abstract even if saved records contain project links',
+    async (slug) => {
+      const fixture = tools()
+      const original = defaultContent.caseStudies.find(
+        (study) => study.slug === slug,
+      )!
+      fixture.loadContent.mockResolvedValue({
+        ...defaultContent,
+        caseStudies: [
+          {
+            ...original,
+            repositoryUrl: 'https://example.com/private-repository',
+            demoUrl: 'https://example.com/client',
+          },
+        ],
+      })
+      const result = caseStudyResultSchema.parse(
+        await fixture.tools.getCaseStudy.execute!({ slug }, options),
+      )
+      expect(result.available).toBe(true)
+      if (!result.available) throw new Error('Expected published result')
+      expect(result.study.repositoryUrl).toBeUndefined()
+      expect(result.study.demoUrl).toBeUndefined()
+      expect(
+        result.story?.evidence.every((entry) =>
+          entry.caption.startsWith('Reconstructed workflow'),
+        ),
+      ).toBe(true)
+      if (slug === 'accounting-workflows')
+        expect(result.story?.stack).toBe('React Native')
+      expect(original.title).toBe(result.study.title)
+    },
+  )
+  it('returns the rich story only while the record is published and keeps saved fields authoritative', async () => {
+    const fixture = tools()
+    const finance = defaultContent.caseStudies.find(
+      (entry) => entry.slug === 'finance-document-assistant',
+    )!
+    const edited = {
+      ...finance,
+      title: 'Edited finance title',
+      summary: 'Published editorial summary.',
+      repositoryUrl: undefined,
+    }
+    fixture.loadContent.mockResolvedValue({
+      ...defaultContent,
+      caseStudies: [edited],
+    })
+    const result = await fixture.tools.getCaseStudy.execute!(
+      { slug: finance.slug },
+      options,
+    )
+    expect(caseStudyResultSchema.parse(result)).toMatchObject({
+      available: true,
+      study: edited,
+      story: { highlight: 'See the evidence.' },
+    })
+    expect(
+      findPublishedWork(
+        { ...defaultContent, caseStudies: [edited] },
+        finance.slug,
+      )?.related,
+    ).toEqual([])
+    fixture.loadContent.mockResolvedValue({
+      ...defaultContent,
+      caseStudies: [],
+    })
+    const missing = await fixture.tools.getCaseStudy.execute!(
+      { slug: finance.slug },
+      options,
+    )
+    expect(missing).toMatchObject({ available: false })
+    expect(missing).not.toHaveProperty('story')
+    expect(
+      findPublishedWork({ ...defaultContent, caseStudies: [] }, finance.slug),
+    ).toBeUndefined()
+    expect(
+      caseStudyResultSchema.parse({
+        available: true,
+        study: finance,
+        url: `/work/${finance.slug}`,
+      }),
+    ).not.toHaveProperty('story')
+  })
   it('opens a contact form without preparing or submitting an inquiry', async () => {
     const fixture = tools()
     const details = { summary: 'A coordination app with practical AI.' }
@@ -38,9 +182,10 @@ describe('published chat tools', () => {
       { slug: 'care-coordination' },
       options,
     )
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       available: true,
       study: defaultContent.caseStudies[0],
+      story: { highlight: 'Everyone connected.' },
       url: '/work/care-coordination',
     })
     expect(fixture.prepare).not.toHaveBeenCalled()

@@ -117,7 +117,7 @@ export const caseStudies: CaseStudy[] = [
     title: 'Robotics Lab',
     category: 'Interactive software / 2026',
     summary:
-      'A browser-based robotics platform with a robot simulator, a 3D drone mission planner, and a visual SLAM explorer.',
+      'A browser-based robotics platform with a robot simulator, a 3D drone mission planner, a visual SLAM explorer, and a seeded warehouse delivery simulation.',
     role: 'Engineering portfolio project',
     context:
       'A browser-based robotics platform built with TypeScript, React, and Three.js.',
@@ -126,7 +126,7 @@ export const caseStudies: CaseStudy[] = [
     approach:
       'Combine React and TypeScript application interfaces with Three.js for interactive 3D views.',
     delivery:
-      'A robot simulator, a 3D drone mission planner, and a visual SLAM explorer.',
+      'A robot simulator, a 3D drone mission planner, a visual SLAM explorer, and a warehouse delivery simulation.',
     repositoryUrl: 'https://github.com/prudolfs/robotics-lab',
     featured: false,
   },

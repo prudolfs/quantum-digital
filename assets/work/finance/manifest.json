@@ -1,0 +1,10 @@
+{
+  "blender": "4.5.14 LTS",
+  "camera": [5.099999904632568, -10.0, 5.599999904632568],
+  "target": [0.11999999731779099, 0.1599999964237213, 1.7000000476837158],
+  "orthographicScale": 7.349999904632568,
+  "resolution": [1600, 1400],
+  "triangles": 5335,
+  "glbBytes": 292936,
+  "illustration": "Synthetic conceptual document, review fields and chart; not a shipped interface or calculated dataset."
+}

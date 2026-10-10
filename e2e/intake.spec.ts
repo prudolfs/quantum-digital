@@ -119,6 +119,7 @@ test('chat requires explicit confirmation, retains the draft on failure, and sho
 
 test('rejects cross-origin and unconfirmed submission requests', async ({
   request,
+  baseURL,
 }) => {
   expect(
     (
@@ -132,7 +133,7 @@ test('rejects cross-origin and unconfirmed submission requests', async ({
   expect(
     (
       await request.post('/api/inquiries', {
-        headers: { Origin: 'http://127.0.0.1:3000' },
+        headers: { Origin: new URL(baseURL!).origin },
         data: { draftId: 'forged', confirmed: false },
       })
     ).status(),
@@ -164,8 +165,12 @@ test('case studies and professional profile links match the supplied references'
 }) => {
   await page.goto('/work/finance-document-assistant')
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Ask the question.See the evidence.',
+  )
+  await expect(page.locator('.work-hero .eyebrow')).toContainText(
     'Finance Document Assistant',
   )
+  await page.locator('.work-context summary').first().click()
   for (const heading of ['Context', 'Challenge', 'Approach', 'Delivery'])
     await expect(
       page.getByRole('heading', { name: heading, exact: true }),

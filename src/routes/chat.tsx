@@ -1,3 +1,4 @@
+import { publicWorkRecord } from '../../shared/work-disclosure'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { ArrowUp, Square, RotateCcw, MessageSquare } from 'lucide-react'
 import { useChat } from '@ai-sdk/react'
@@ -22,7 +23,6 @@ import {
   chatLimits,
   starterPrompts,
   chatErrorNotice,
-  caseStudyResultSchema,
   contactFormSchema,
 } from '../../shared/chat'
 import { profileLinks } from '@/content/site'
@@ -134,19 +134,7 @@ function ChatPage() {
     )
     .at(-1)
   const allowedLinks = useMemo(() => {
-    const studies = [...caseStudies]
-    for (const message of messages)
-      for (const part of message.parts) {
-        if (
-          isToolUIPart(part) &&
-          part.type === 'tool-getCaseStudy' &&
-          part.state === 'output-available'
-        ) {
-          const result = caseStudyResultSchema.safeParse(part.output)
-          if (result.success && result.data.available)
-            studies.push(result.data.study)
-        }
-      }
+    const studies = caseStudies.map(publicWorkRecord)
     const paths = [
       '/',
       '/about',
@@ -168,7 +156,7 @@ function ChatPage() {
         ),
       ),
     ])
-  }, [caseStudies, contactEmail, messages])
+  }, [caseStudies, contactEmail])
   useEffect(() => {
     if (sessionVersion > 0) followLatest.current = true
     const abort = new AbortController()

@@ -26,6 +26,8 @@ Navigation and closing/reloading the tab warn about unsaved changes. Saving or p
 
 ## Scope and public rendering
 
+Rich work-story layouts, illustration configuration, workflow explanations, and annotated evidence are code-managed. All six work presentations supplement existing published records; title, summary, role, and original narrative fields still use saved published values. Care/accounting/research repository/demo links are suppressed by their abstract-client disclosure policy; approved finance/service/robotics links use saved published values. No new editor fields or migration are needed. Changing its slug selects the ordinary layout until a matching code-managed story is defined. Unpublishing removes the route and assistant lookup result; public illustration files remain static assets.
+
 Engagement structure, professional profile links, broader experience, page structure, animation, and layout remain in source code. No arbitrary page builder or media upload library is introduced.
 
 Public pages use server-side loaders. Before import, approved source defaults provide the site. After import, only published snapshots are returned, including genuinely empty collections after unpublishing everything. A configured backend failure does not restore defaults and accidentally expose unpublished material. Published changes are loaded on the next route request/navigation; already-open pages are not live subscriptions.
@@ -43,3 +45,9 @@ Implementation references: [Convex Better Auth with TanStack Start](https://labs
 ## Chat refinement
 
 Conversation transcripts are stored privately in Convex `chatThreads` and `chatMessages`; the inbox continues to list confirmed inquiries, not a recent-chats interface. Conversations restore for the anonymous visitor’s browser and expire after 30 days of inactivity. Restart clears messages while preserving confirmed inquiries. Contact details may come from conversation or a tool-rendered form; either path still requires explicit review and confirmation. Public résumé/portfolio snapshots are currently maintained in source, separately from published website content. Turnstile keys belong in Cloudflare/build configuration, not admin content or Convex auth environment.
+
+Robotics adds a code-managed overview of all four applications. The bootstrap summary now includes Warehouse Demo; imported records keep their saved title, summary, and context until the owner edits/publishes them. Research remains abstract and unlinked. Service/robotics repository actions continue to use approved saved published values.
+
+About’s public introduction, career journey, working practices, and workbench illustration are code-managed, alongside the approved résumé/portfolio snapshots. Its example and exploration links resolve published project titles from the existing loader, so unpublished examples disappear. These changes add no admin fields or record migration; homepage and existing saved case-study copy remain owner-managed.
+
+Restored chat references follow current publication and disclosure rules. Old tool results cannot reactivate an unpublished route or an abstract project’s external link. Existing saved messages remain readable; no transcript or content migration is required.

@@ -5,9 +5,11 @@ import { useRef } from 'react'
 export function FaqItem({
   question,
   answer,
+  heading = false,
 }: {
   question: string
   answer: string
+  heading?: boolean
 }) {
   const controls = useAnimationControls()
   const reducedMotion = useReducedMotion()
@@ -55,7 +57,7 @@ export function FaqItem({
         }}
       >
         <ChevronRight className="faq-icon" aria-hidden="true" />
-        <span>{question}</span>
+        {heading ? <h3>{question}</h3> : <span>{question}</span>}
       </summary>
       <motion.div
         initial={false}

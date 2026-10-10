@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { caseStudySchema } from './content'
 import { inquirySchema } from './inquiry'
+import { workStorySchema } from './work-story'
 
 export const chatLimits = {
   messages: 40,
@@ -33,6 +34,7 @@ export const caseStudyResultSchema = z.discriminatedUnion('available', [
     available: z.literal(true),
     study: caseStudySchema,
     url: z.string(),
+    story: workStorySchema.optional(),
   }),
   z.object({ available: z.literal(false), message: z.string() }),
 ])

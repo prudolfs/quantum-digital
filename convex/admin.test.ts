@@ -1,3 +1,4 @@
+import { findPublishedWork } from '../src/content/work-stories'
 // @vitest-environment edge-runtime
 import { convexTest } from 'convex-test'
 import betterAuthTest from '@convex-dev/better-auth/test'
@@ -213,6 +214,9 @@ it('imports approved content once and keeps draft edits private until publicatio
   await owner.mutation(api.content.initialize, {})
   await owner.mutation(api.content.initialize, {})
   expect(await t.query(api.content.published, {})).toEqual(defaultContent)
+  const initial = (await t.query(api.content.published, {}))!
+  for (const study of initial.caseStudies)
+    expect(findPublishedWork(initial, study.slug)?.story).toBeDefined()
   const workspace = await owner.query(api.content.workspace, {})
   const record = workspace.caseStudies[0]
   const content = {
@@ -251,6 +255,16 @@ it('imports approved content once and keeps draft edits private until publicatio
   })
   const published = (await t.query(api.content.published, {}))!
   expect(published.caseStudies.at(-1)).toEqual(content)
+  expect(findPublishedWork(published, record.draft.slug)).toBeUndefined()
+  expect(findPublishedWork(published, content.slug)).toMatchObject({
+    study: content,
+    story: undefined,
+  })
+  expect(
+    findPublishedWork(published, 'service-operations-copilot')?.related.some(
+      (study) => study.slug === record.draft.slug,
+    ),
+  ).toBe(false)
   expect(
     published.caseStudies.some((item) => item.slug === record.draft.slug),
   ).toBe(false)
@@ -269,6 +283,12 @@ it('imports approved content once and keeps draft edits private until publicatio
       (item) => item._id === record._id,
     )?.draft,
   ).toEqual(content)
+  expect(
+    findPublishedWork(
+      (await t.query(api.content.published, {}))!,
+      content.slug,
+    ),
+  ).toBeUndefined()
 })
 
 it('keeps new records private, validates slugs and HTTPS links, and protects published slug uniqueness', async () => {

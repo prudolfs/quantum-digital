@@ -18,3 +18,6 @@ public/services/*.png
 
 # Local Convex backend state
 .convex/
+
+# Private local planning documents
+/docs/local/

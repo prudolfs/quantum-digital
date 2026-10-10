@@ -17,7 +17,8 @@ test('abstract case studies can be read without exposing project links', async (
     'Research to Action',
   ]) {
     await page.getByRole('link', { name: new RegExp(title) }).click()
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText(title)
+    await expect(page.locator('.work-hero .eyebrow')).toContainText(title)
+    await page.locator('.work-context summary').first().click()
     for (const heading of [
       'Context',
       'Challenge',
@@ -31,6 +32,7 @@ test('abstract case studies can be read without exposing project links', async (
     }
     const header = page.locator('.case-study > header')
     await expect(header.getByRole('link')).toHaveCount(0)
+    await expect(page.locator('main a[href^="https://"]')).toHaveCount(0)
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth,
@@ -46,7 +48,9 @@ test('abstract case studies can be read without exposing project links', async (
     }),
   ).toBeVisible()
   await expect(
-    page.getByRole('link', { name: 'Service Operations Copilot' }),
+    page
+      .locator('.about-explorations')
+      .getByRole('link', { name: /Service Operations Copilot/ }),
   ).toHaveAttribute('href', '/work/service-operations-copilot')
   await expect(
     page.getByRole('link', { name: 'Robotics Lab' }),

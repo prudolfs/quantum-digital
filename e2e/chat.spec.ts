@@ -553,3 +553,71 @@ test('header contact action opens an editable tool form and requires review plus
     page.getByRole('button', { name: 'Confirm and submit inquiry' }),
   ).toHaveCount(0)
 })
+
+test('restored tool results cannot reactivate unpublished or abstract project links', async ({
+  page,
+}) => {
+  const oldStudy = {
+    ...caseStudies[0],
+    slug: 'no-longer-published',
+    repositoryUrl: 'https://private.example/old-repository',
+  }
+  const abstractStudy = {
+    ...caseStudies[0],
+    demoUrl: 'https://private.example/client-demo',
+  }
+  await page.route('**/api/chat-session', (route) =>
+    route.fulfill({
+      json: {
+        available: true,
+        revision: 1,
+        messages: [
+          {
+            id: 'saved-references',
+            role: 'assistant',
+            parts: [
+              {
+                type: 'text',
+                text: 'Saved context: [Old project](/work/no-longer-published), [Old repository](https://private.example/old-repository), [Client demo](https://private.example/client-demo).',
+              },
+              {
+                type: 'tool-getCaseStudy',
+                toolCallId: 'old-reference',
+                state: 'output-available',
+                input: { slug: oldStudy.slug },
+                output: {
+                  available: true,
+                  study: oldStudy,
+                  url: `/work/${oldStudy.slug}`,
+                },
+              },
+              {
+                type: 'tool-getCaseStudy',
+                toolCallId: 'abstract-reference',
+                state: 'output-available',
+                input: { slug: abstractStudy.slug },
+                output: {
+                  available: true,
+                  study: abstractStudy,
+                  url: `/work/${abstractStudy.slug}`,
+                },
+              },
+            ],
+          },
+        ],
+      },
+    }),
+  )
+  await page.goto('/chat')
+  await expect(page.locator('.chat-message')).toHaveCount(1)
+  await expect(
+    page.getByRole('link', { name: /Old project|Old repository|Client demo/ }),
+  ).toHaveCount(0)
+  await expect(
+    page.getByRole('complementary', { name: 'Referenced case study' }),
+  ).toHaveCount(1)
+  await expect(
+    page.getByRole('link', { name: 'Read the case study' }),
+  ).toHaveAttribute('href', '/work/care-coordination')
+  await expect(page.getByText('Saved context:', { exact: false })).toBeVisible()
+})

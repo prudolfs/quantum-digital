@@ -17,6 +17,10 @@ export function SiteLayout({ children }: { children: ReactNode }) {
   const isHome = useLocation({
     select: (location) => location.pathname === '/',
   })
+  const isWork = useLocation({
+    select: (location) =>
+      location.pathname.startsWith('/work/') || location.pathname === '/about',
+  })
   const { scrollY } = useScroll()
   const reducedMotion = useReducedMotion()
   const [scrolled, setScrolled] = useState(false)
@@ -61,7 +65,9 @@ export function SiteLayout({ children }: { children: ReactNode }) {
         className={
           isHome
             ? 'page-content page-content--home'
-            : 'section-shell page-content'
+            : isWork
+              ? 'page-content page-content--work'
+              : 'section-shell page-content'
         }
       >
         {children}

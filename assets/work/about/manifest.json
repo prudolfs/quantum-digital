@@ -1,0 +1,10 @@
+{
+  "blender": "4.5.14 LTS",
+  "camera": [5.0, -11.0, 6.599999904632568],
+  "target": [0.0, 0.05000000074505806, 1.4500000476837158],
+  "orthographicScale": 7.300000190734863,
+  "resolution": [1600, 1400],
+  "triangles": 4704,
+  "glbBytes": 289764,
+  "illustration": "Original conceptual workbench connecting interfaces, mobile products, documents, and robotics; no portrait or client interface."
+}

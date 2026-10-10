@@ -1,0 +1,10 @@
+{
+  "blender": "4.5.14 LTS",
+  "camera": [6.0, -9.0, 8.0],
+  "target": [0.0, 0.0, 0.75],
+  "orthographicScale": 6.900000095367432,
+  "resolution": [1600, 1400],
+  "triangles": 4128,
+  "glbBytes": 211056,
+  "illustration": "Original conceptual workflow illustration; synthetic records or simulated environment."
+}

@@ -8,7 +8,7 @@ The public site has the shared fluid/particle hero, original Blender service ill
 
 The AI conversation collects project and contact details and prepares a temporary inquiry draft. Only the visitor’s explicit confirmation saves it in Convex. `/admin` provides an owner-only inbox with status filtering and updates. An optional contact form opens inside chat; there is no standalone public contact form or calendar booking. Chat has a dedicated hexagon-background workspace, a home-linked logo, Restart chat, and a compact bottom composer. Convex restores one anonymous conversation per browser; messages expire after 30 days of inactivity. The assistant also receives the approved public résumé and portfolio snapshots. Cloudflare Turnstile protects chat generation and inline draft preparation. The same workspace manages case studies, services, site settings, and FAQs with explicit draft/publish controls.
 
-The Quantum Digital cloud development backend is connected and configured for owner setup. The owner has configured local AI Gateway credentials and Gemini 2.5 Flash; Phase 5 live streaming and inquiry draft preparation were verified. The chat refinement also passed live streaming, Convex restoration/restart, and inline-form draft preparation with Cloudflare’s official local test widget. Real Turnstile keys and the deployed hostname still need release verification. Production Convex and the real owner account still need release verification. No site has been published. See [Inquiry setup](docs/inquiry-setup.md) for exact setup steps and verification limits.
+The Quantum Digital cloud development backend is connected and configured for owner setup. The owner has configured local AI Gateway credentials and Gemini 2.5 Flash; Phase 5 live streaming and inquiry draft preparation were verified. The chat refinement also passed live streaming, Convex restoration/restart, and inline-form draft preparation with Cloudflare’s official local test widget. The owner confirmed that chat works on the public deployment after correcting Turnstile hostname authorization. Production inquiry delivery and the real owner account still need release verification. See [Inquiry setup](docs/inquiry-setup.md) for exact setup steps and verification limits.
 
 ## Development
 
@@ -59,11 +59,11 @@ pnpm deploy:check
 
 `check` runs TypeScript for frontend/backend, Oxlint, Oxfmt, Vitest, and convex-test behavior checks. Browser tests use production preview on desktop and mobile Chromium and include keyboard/accessibility, JavaScript-free rendering, graphics fallback, responsive screenshots, metadata, case studies, streamed chat review/retry receipts, and private inbox access. Model streaming is mocked in browser tests; persistence and access controls are tested against Convex’s test runtime. The separate opt-in live chat check verified real Gateway streaming, published tools, and an unsubmitted draft. Production owner sign-in and deployed-domain confirmation still require release verification.
 
-Use `pnpm test:launch` for checks, production build, and browser tests together. `pnpm deploy:check` builds and packages the Worker with `--dry-run`; it does not publish.
+Use `pnpm test:launch` for checks, production build, and browser tests together. `pnpm deploy:check` builds with the release configuration guard and packages the Worker with `--dry-run`; it does not publish. `pnpm build:release` overrides ignored local Vite settings with Wrangler/CI public values and rejects test Turnstile keys or mismatched Convex endpoints. Keep ordinary `pnpm build` for local browser tests.
 
 ## Cloudflare deployment
 
-The Worker is named `quantum-digital`; no custom-domain routes are required for the supplied `workers.dev` URL. Set `PNPM_VERSION=10.18.3` in Cloudflare Workers Builds. Use `pnpm build` as the build command and `pnpm exec wrangler deploy` as the deploy command. Configure the production Convex endpoints and server bindings first, as described in [Inquiry setup](docs/inquiry-setup.md).
+The Worker is named `quantum-digital`; no custom-domain routes are required for the supplied `workers.dev` URL. Set `PNPM_VERSION=10.18.3` in Cloudflare Workers Builds. Use `pnpm build:release` as the build command and `pnpm exec wrangler deploy` as the deploy command, or run `pnpm deploy` for a guarded build and deployment together. Configure the production Convex endpoints and server bindings first, as described in [Inquiry setup](docs/inquiry-setup.md).
 
 Publishing and live verification remain separate from local review. Confirm the complete chat → review → save → admin-inbox flow after deploying.
 
@@ -75,6 +75,12 @@ The lazy hero reuses the owner’s `qd-ai-native-studio` renderer and optimized 
 
 Service illustrations are original Blender scenes, exported as lazy-loaded JPEGs totaling about 200 KB. Rebuild them with `blender --background --python scripts/render-services.py`; they are conceptual illustrations, not client-product screenshots.
 
+All six selected-work pages use the shared visual work-story layout with distinct Blender heroes, workflow steps, annotated evidence, decisions, and related published work. Care, accounting, and research use clearly labelled synthetic reconstructions and omit external project links. `src/content/work-stories.ts` holds the code-managed narrative; existing published records control identity, summary, role, links, and visibility. Each optional demand-rendered viewer has an immediate responsive still fallback; mobile and reduced-motion modes use the still. Care/accounting artwork is rebuilt with `blender --background --python scripts/work/build-client.py -- care` (or `accounting`), followed by `node scripts/work/prepare-work-posters.mjs care` (or `accounting`). Rebuild the reconstructed diagrams with `node scripts/work/build-walkthroughs.mjs`. Rebuild the finance model/render with `blender --background --python scripts/work/build-finance.py`; see [the asset guide](assets/work/finance/README.md).
+
+Research, service operations, and robotics artwork is rebuilt with `blender --background --python scripts/work/build-explorations.py -- research` (or `services` / `robotics`), followed by `node scripts/work/prepare-work-posters.mjs research` (or the matching theme). Robotics has a four-application overview with explicit development limits. Its existing application captures are optimized by `node scripts/work/prepare-robotics-evidence.mjs`, using the adjacent source checkout; see [the robotics asset guide](assets/work/robotics/README.md).
+
+About uses the approved résumé-grounded career journey in `src/content/about.ts`, shared with the assistant, and an original mouse-interactive workbench illustration. Rebuild with `blender --background --python scripts/work/build-about.py` and `node scripts/work/prepare-work-posters.mjs about`; see [the About asset guide](assets/work/about/README.md). Its project links resolve only published work.
+
 - [Plan](docs/plan.md)
 - [Architecture](docs/architecture.md)
 - [Style guide](docs/style.md)
@@ -82,3 +88,5 @@ Service illustrations are original Blender scenes, exported as lazy-loaded JPEGs
 - [Inquiry setup](docs/inquiry-setup.md)
 - [Admin workflow](docs/admin-workflow.md)
 - [Chat behavior](docs/chat-behavior.md)
+
+Project context and delivery uses the same gold-chevron FAQ rows and Motion transitions as the homepage, with keyboard and JavaScript-free support. See [Release checks](docs/work-release.md) for verification and rollback guidance.

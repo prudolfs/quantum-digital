@@ -7,6 +7,7 @@ import {
 import type { ReactNode } from 'react'
 import { SiteLayout } from '@/components/site-layout'
 import appCss from '@/styles.css?url'
+import interFont from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -22,6 +23,13 @@ export const Route = createRootRoute({
       { name: 'theme-color', content: '#030812' },
     ],
     links: [
+      {
+        rel: 'preload',
+        href: interFont,
+        as: 'font',
+        type: 'font/woff2',
+        crossOrigin: 'anonymous',
+      },
       { rel: 'stylesheet', href: appCss },
       { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' },
     ],
