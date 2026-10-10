@@ -3,10 +3,9 @@ import {
   internalMutation,
   mutation,
   query,
-  type QueryCtx,
   type MutationCtx,
 } from './_generated/server'
-import { authComponent } from './auth'
+import { requireOwner } from './owner'
 import { inquirySchema } from '../shared/inquiry'
 
 const detailFields = {
@@ -15,19 +14,6 @@ const detailFields = {
   summary: v.string(),
   timing: v.optional(v.string()),
   budget: v.optional(v.string()),
-}
-
-async function requireOwner(ctx: QueryCtx | MutationCtx) {
-  const user = await authComponent.safeGetAuthUser(ctx)
-  const owner = process.env.ADMIN_OWNER_EMAIL?.trim().toLowerCase()
-  if (
-    !user ||
-    !owner ||
-    user.email.toLowerCase() !== owner ||
-    !user.emailVerified
-  ) {
-    throw new ConvexError('Unauthorized')
-  }
 }
 
 async function consumeRate(

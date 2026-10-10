@@ -112,31 +112,33 @@ Guardrails:
 
 **Exit criteria:** All public claims are accurate, useful, and safe to disclose.
 
-## Phase 4: Private inquiry inbox and later content admin
+## Phase 4: Private inquiry inbox and content admin
 
-Bring the minimum private inquiry inbox forward for the first inquiry-enabled release. Content management remains a later increment, without turning it into a CMS project.
+Provide a private owner workspace for inquiries, work, services, and a small set of site settings. Use one-time key-protected account setup and explicit draft/publish actions.
 
-- [ ] Define typed content models for site settings, case studies, service cards, and inquiries.
-- [ ] Decide which content belongs in source files and which needs admin editing.
-- [ ] Add Convex schema, queries, and mutations for admin-managed content.
+- [x] Define typed content models for site settings, case studies, service cards, and inquiries.
+- [x] Decide which content belongs in source files and which needs admin editing.
+- [x] Add Convex schema, queries, and mutations for admin-managed content.
 - [x] Add authentication to the admin area using a maintained approach compatible with the stack.
 - [x] Restrict admin access to an explicit owner account or allowlist.
 - [x] Create a private `/admin` route with a simple overview.
-- [ ] Add create, edit, publish, and unpublish flows for case studies.
-- [ ] Add create, edit, publish, and unpublish flows for service cards.
-- [ ] Add basic editing for a small set of site settings and core copy.
+- [x] Add create, edit, publish, and unpublish flows for case studies.
+- [x] Add create, edit, publish, and unpublish flows for service cards.
+- [x] Add basic editing for a small set of site settings and core copy.
 - [x] Add an inquiry list with creation timestamp and status.
 - [x] Add inquiry status updates, for example `new`, `contacted`, and `closed`.
 - [x] Validate inputs server-side and show useful save/error feedback.
-- [ ] Add empty states and confirmation before destructive actions.
-- [ ] Ensure unpublished content is excluded from public queries and AI context.
+- [x] Add empty states and confirmation before destructive actions.
+- [x] Ensure unpublished content is excluded from public queries and AI context.
 - [x] Test access control, including unauthenticated calls to protected Convex functions.
+
+**Implementation status:** Better Auth owner setup requires `ADMIN_OWNER_EMAIL` and a server-only `ADMIN_SETUP_KEY`, then a password entered twice. No emails or public registration. Content imports from the approved source once; draft and published snapshots stay separate. Public pages, metadata, sitemap, and assistant context use published content. The cloud development project is connected; the real owner account remains uncreated. See [Admin workflow](admin-workflow.md).
 
 **Scope limit:** No drag-and-drop page builder, arbitrary layouts, role matrix, analytics dashboard, or complex media library.
 
 **Inbox exit criteria:** The configured owner can sign in, review confirmed inquiries, filter by status, and mark them `new`, `contacted`, or `closed`. Unauthorized direct backend reads/writes fail. Production authentication must be verified before release.
 
-**Later content-admin exit criteria:** The owner can securely publish work/service content without changing code.
+**Content-admin exit criteria:** The owner can securely publish work/service content without changing code.
 
 ## Phase 5: AI chat experience
 

@@ -144,10 +144,12 @@ test('admin never reveals inquiry data to an unauthenticated visitor', async ({
 }) => {
   await page.goto('/admin')
   await expect(
-    page.getByRole('heading', { name: 'Inquiry inbox' }),
+    page.getByRole('heading', {
+      name: /Inquiry inbox|Set up your owner account/,
+    }),
   ).toBeVisible()
   await expect(
-    page.getByRole('button', { name: 'Sign in', exact: true }),
+    page.getByRole('button', { name: /^(Sign in|Create owner account)$/ }),
   ).toBeVisible()
   await expect(page.locator('.inquiry-card')).toHaveCount(0)
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute(

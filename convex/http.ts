@@ -4,7 +4,7 @@ import { internal } from './_generated/api'
 import { authComponent, createAuth } from './auth'
 
 const http = httpRouter()
-authComponent.registerRoutes(http, createAuth)
+authComponent.registerRoutesLazy(http, createAuth)
 
 http.route({
   path: '/intake',

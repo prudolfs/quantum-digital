@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { publicEnv } from '@/env'
-import { caseStudies } from '@/content/site'
+import { fetchPublishedContent } from '@/server/content'
 
 const escape = (value: string) =>
   value
@@ -13,7 +13,8 @@ const escape = (value: string) =>
 export const Route = createFileRoute('/sitemap.xml')({
   server: {
     handlers: {
-      GET: () => {
+      GET: async () => {
+        const { caseStudies } = await fetchPublishedContent()
         const origin = new URL(publicEnv.VITE_SITE_URL).origin
         const paths = [
           '/',

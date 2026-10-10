@@ -1,5 +1,6 @@
 import { defineSchema, defineTable } from 'convex/server'
 import { v } from 'convex/values'
+import { caseFields, serviceFields, settingsFields } from './contentFields'
 
 const fields = {
   name: v.string(),
@@ -10,6 +11,43 @@ const fields = {
 }
 
 export default defineSchema({
+  ownerSetup: defineTable({
+    key: v.literal('owner'),
+    email: v.string(),
+    createdAt: v.number(),
+  }).index('by_key', ['key']),
+  contentState: defineTable({
+    key: v.literal('site'),
+    initializedAt: v.number(),
+  }).index('by_key', ['key']),
+  caseStudies: defineTable({
+    draft: v.object(caseFields),
+    sortOrder: v.number(),
+    version: v.number(),
+    updatedAt: v.number(),
+    publishedVersion: v.optional(v.number()),
+    published: v.optional(
+      v.object({ content: v.object(caseFields), sortOrder: v.number() }),
+    ),
+  }).index('by_slug', ['draft.slug']),
+  services: defineTable({
+    draft: v.object(serviceFields),
+    sortOrder: v.number(),
+    version: v.number(),
+    updatedAt: v.number(),
+    publishedVersion: v.optional(v.number()),
+    published: v.optional(
+      v.object({ content: v.object(serviceFields), sortOrder: v.number() }),
+    ),
+  }).index('by_slug', ['draft.id']),
+  siteSettings: defineTable({
+    key: v.literal('site'),
+    draft: v.object(settingsFields),
+    published: v.object(settingsFields),
+    version: v.number(),
+    publishedVersion: v.number(),
+    updatedAt: v.number(),
+  }).index('by_key', ['key']),
   inquiryDrafts: defineTable({
     ...fields,
     sessionHash: v.string(),

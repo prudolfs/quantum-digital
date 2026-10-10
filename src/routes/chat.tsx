@@ -9,8 +9,10 @@ import {
   preparedInquirySchema,
 } from '@/components/inquiry-review'
 import { pageHead } from '@/lib/seo'
+import { loadPublishedContent } from '@/server/content'
 
 export const Route = createFileRoute('/chat')({
+  loader: () => loadPublishedContent(),
   head: () =>
     pageHead(
       'Let’s talk | Quantum Digital',
@@ -21,6 +23,9 @@ export const Route = createFileRoute('/chat')({
 })
 
 function ChatPage() {
+  const {
+    settings: { contactEmail },
+  } = Route.useLoaderData()
   const [availability, setAvailability] = useState<
     'loading' | 'ready' | 'unavailable'
   >('loading')
@@ -87,10 +92,8 @@ function ChatPage() {
           </h2>
           <p className="body-copy">
             You can still browse the work and services, or email{' '}
-            <a href="mailto:rudolfs.pukitis@proton.me">
-              rudolfs.pukitis@proton.me
-            </a>
-            . No inquiry has been submitted.
+            <a href={`mailto:${contactEmail}`}>{contactEmail}</a>. No inquiry
+            has been submitted.
           </p>
         </div>
       )}
@@ -237,8 +240,8 @@ function ChatPage() {
       )}
       <noscript>
         <p className="body-copy">
-          Chat requires JavaScript. You can email rudolfs.pukitis@proton.me or
-          browse the website.
+          Chat requires JavaScript. You can email {contactEmail} or browse the
+          website.
         </p>
       </noscript>
     </section>

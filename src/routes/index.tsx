@@ -7,29 +7,27 @@ import { HorizontalSection } from '@/components/horizontal-section'
 import { FaqItem } from '@/components/faq-item'
 import { Hero } from '@/components/hero'
 import { ServiceArt } from '@/components/service-art'
-import {
-  caseStudies,
-  services,
-  engagements,
-  positioning,
-  commonQuestions,
-} from '@/content/site'
+import { engagements } from '@/content/site'
 import { pageHead } from '@/lib/seo'
+import { loadPublishedContent } from '@/server/content'
 
 export const Route = createFileRoute('/')({
-  head: () =>
+  loader: () => loadPublishedContent(),
+  head: ({ loaderData }) =>
     pageHead(
-      'Quantum Digital | Product Engineering & Applied AI',
-      'Build better products. Put AI to work. Independent product engineering, AI integrations, and workflow automation for founders and product teams.',
+      loaderData?.settings.homeTitle ?? 'Quantum Digital',
+      loaderData?.settings.homeDescription ??
+        'Product Engineering & Applied AI',
       '/',
     ),
   component: HomePage,
 })
 
 function HomePage() {
+  const { caseStudies, services, settings } = Route.useLoaderData()
   return (
     <>
-      <Hero />
+      <Hero description={settings.heroDescription} />
       <HorizontalSection id="work" heading="work-heading">
         <div className="section-shell">
           <div className="section-intro">
@@ -111,7 +109,7 @@ function HomePage() {
               <article className="service-card" key={service.id}>
                 <div className="service-card__visual">
                   <span className="service-number">{service.number}</span>
-                  <ServiceArt theme={service.id} />
+                  <ServiceArt theme={service.art} />
                   <span className="illustration-caption">
                     Conceptual illustration
                   </span>
@@ -146,7 +144,7 @@ function HomePage() {
             </h2>
           </div>
           <div className="approach-copy">
-            <p className="body-copy">{positioning.approach}</p>
+            <p className="body-copy">{settings.approachDescription}</p>
             <p className="body-copy">
               I work directly with founders and product teams, taking ownership
               across the stack. We start with the problem, make the tradeoffs
@@ -195,7 +193,7 @@ function HomePage() {
             A few useful answers.
           </h2>
           <div className="faq-list">
-            {commonQuestions.map((entry) => (
+            {settings.questions.map((entry) => (
               <FaqItem
                 key={entry.question}
                 question={entry.question}

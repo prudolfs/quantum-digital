@@ -1,12 +1,13 @@
 import { ActionIcon } from '@/components/action-icon'
 import { createFileRoute, Link, notFound } from '@tanstack/react-router'
 import { ArrowLeft, ArrowUpRight } from 'lucide-react'
-import { caseStudies } from '@/content/site'
+import { loadPublishedContent } from '@/server/content'
 import { ChatLink } from '@/components/chat-link'
 import { pageHead } from '@/lib/seo'
 
 export const Route = createFileRoute('/work/$slug')({
-  loader: ({ params }) => {
+  loader: async ({ params }) => {
+    const { caseStudies } = await loadPublishedContent()
     const study = caseStudies.find((entry) => entry.slug === params.slug)
     if (!study) throw notFound()
     return study

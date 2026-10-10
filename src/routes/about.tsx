@@ -1,11 +1,13 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { experience, caseStudies } from '@/content/site'
+import { experience } from '@/content/site'
+import { loadPublishedContent } from '@/server/content'
 import { ActionIcon } from '@/components/action-icon'
 import { ArrowRight } from 'lucide-react'
 import { ChatLink } from '@/components/chat-link'
 import { pageHead } from '@/lib/seo'
 
 export const Route = createFileRoute('/about')({
+  loader: () => loadPublishedContent(),
   head: () =>
     pageHead(
       'About | Quantum Digital',
@@ -16,6 +18,7 @@ export const Route = createFileRoute('/about')({
 })
 
 function AboutPage() {
+  const { caseStudies } = Route.useLoaderData()
   return (
     <section className="intro-section" aria-labelledby="about-heading">
       <p className="eyebrow">The approach</p>
@@ -81,8 +84,7 @@ function AboutPage() {
             More engineering work.
           </h2>
           <p className="body-copy intro-copy">
-            These portfolio projects explore service operations across web and
-            mobile, and interactive robotics tools in the browser.
+            Explore additional projects and the engineering behind them.
           </p>
           <div className="action-row">
             {caseStudies

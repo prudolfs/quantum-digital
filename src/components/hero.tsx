@@ -30,7 +30,11 @@ class GraphicsBoundary extends Component<
   }
 }
 
-export function Hero() {
+export function Hero({
+  description = positioning.description,
+}: {
+  description?: string
+}) {
   const root = useRef<HTMLElement>(null)
   const [enhance, setEnhance] = useState(false)
   const [reveal, setReveal] = useState(false)
@@ -107,7 +111,7 @@ export function Hero() {
             </span>
           </h1>
           <p className="hero-fluid-copy__description body-copy">
-            {positioning.description}
+            {description}
           </p>
           <div className="action-row hero-actions">
             <ChatLink />

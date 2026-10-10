@@ -10,6 +10,9 @@ import {
 import { profileLinks } from '@/content/site'
 
 export function SiteLayout({ children }: { children: ReactNode }) {
+  const isAdmin = useLocation({
+    select: (location) => location.pathname === '/admin',
+  })
   const isHome = useLocation({
     select: (location) => location.pathname === '/',
   })
@@ -24,6 +27,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
     const frame = requestAnimationFrame(() => setScrolled(window.scrollY > 0))
     return () => cancelAnimationFrame(frame)
   }, [])
+  if (isAdmin) return children
   const showHeaderBackground = scrolled || hovered
   return (
     <div className={`site-frame${isHome ? ' site-frame--home' : ''}`}>

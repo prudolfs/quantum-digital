@@ -9,9 +9,12 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as content from "../content.js";
+import type * as contentFields from "../contentFields.js";
 import type * as crons from "../crons.js";
 import type * as http from "../http.js";
 import type * as inquiries from "../inquiries.js";
+import type * as owner from "../owner.js";
 
 import type {
   ApiFromModules,
@@ -21,9 +24,12 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  content: typeof content;
+  contentFields: typeof contentFields;
   crons: typeof crons;
   http: typeof http;
   inquiries: typeof inquiries;
+  owner: typeof owner;
 }>;
 
 /**

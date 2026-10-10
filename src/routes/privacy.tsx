@@ -1,7 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { pageHead } from '@/lib/seo'
+import { loadPublishedContent } from '@/server/content'
 
 export const Route = createFileRoute('/privacy')({
+  loader: () => loadPublishedContent(),
   head: () =>
     pageHead(
       'Privacy | Quantum Digital',
@@ -12,6 +14,9 @@ export const Route = createFileRoute('/privacy')({
 })
 
 function PrivacyPage() {
+  const {
+    settings: { contactEmail },
+  } = Route.useLoaderData()
   return (
     <article className="case-study">
       <p className="eyebrow">Your information</p>
@@ -20,8 +25,8 @@ function PrivacyPage() {
         <h2 className="section-title">Who receives your inquiry</h2>
         <p className="body-copy">
           Quantum Digital is Rudolfs Pukitis’s independent engineering practice.
-          Contact rudolfs.pukitis@proton.me about your information or to ask for
-          its removal.
+          Contact <a href={`mailto:${contactEmail}`}>{contactEmail}</a> about
+          your information or to ask for its removal.
         </p>
       </section>
       <section>
