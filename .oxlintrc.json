@@ -2,7 +2,13 @@
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["typescript", "react", "unicorn", "oxc"],
   "categories": { "correctness": "error", "suspicious": "warn" },
-  "rules": { "react/react-in-jsx-scope": "off" },
+  "rules": {
+    "react/react-in-jsx-scope": "off",
+    "eslint/no-underscore-dangle": [
+      "warn",
+      { "allow": ["_id", "_creationTime"] }
+    ]
+  },
   "ignorePatterns": [
     ".agents/**",
     ".pnpm-store/**",
@@ -10,6 +16,7 @@
     ".tanstack/**",
     "dist/**",
     "src/routeTree.gen.ts",
+    "convex/_generated/**",
     "test-results/**",
     "playwright-report/**"
   ]

@@ -1,26 +1,29 @@
-# Foundation architecture
+# Website architecture
 
-## Runtime
+TanStack Start supplies server-rendered React, typed routes, and server functions. Vite builds assets and a Cloudflare Worker. Public metadata uses `https://quantum-digital.pukitis-rudolfs.workers.dev`; no deployment or domain changes have been made during local work.
 
-TanStack Start supplies server-rendered React and typed file-based routes. Vite builds client assets and a Cloudflare Worker through the Cloudflare Vite plugin. The root document loads shared CSS and route metadata; the site layout owns navigation, the skip link, the main landmark, and the footer.
+## Public content and visuals
 
-Public pages in this phase render without environment configuration, authentication, AI, or a database. Design tokens live in `src/styles.css`; shadcn/ui configuration lives in `components.json`, with components in `src/components/ui`.
+`src/content/site.ts` holds services, engagements, portfolio case studies, and profile links. Project descriptions come from `../interview-prep/search/portfolio.md`; identity, experience, and profile links come from `../interview-prep/utils/RESUME.md`. Case studies describe portfolio projects without claiming client outcomes, metrics, or sole authorship. Referenced repository URLs are supplied source links; public availability should be rechecked before release.
 
-## Convex boundary
+The hero uses semantic HTML and static Q artwork before lazy enhancement. A shared WebGL fluid field drives text distortion, morphing shapes, and gold cursor sparks. Font/bounds changes resynchronize text. Narrow/coarse-pointer layouts retain DOM text; graphics failure restores it. The renderer pauses offscreen or while hidden and adapts quality. The final conversation section lazily reuses the same scene runtime in effects-only mode with its own section-sized canvas, omitting shape loading and cycling. Motion types its emphasized title once on first entry; the fluid text takes over after typing finishes. Each section pauses its renderer independently, and reduced motion keeps the complete DOM heading. Service cards use original, labeled Blender renders loaded as static JPEGs.
 
-Connect Convex during Phase 4, not at startup in Phase 1. Keep initial published content in typed source modules as public pages are implemented. Add the Convex schema, generated API, server functions, and backend tests only when the admin needs them.
+## Conversation and inquiries
 
-- Future client provider and adapters belong in `src/integrations/convex`.
-- Backend schema and functions belong in `convex`; generated API types must come from Convex codegen.
-- `VITE_CONVEX_URL` is a public endpoint, optional for now. A configured URL alone must not enable admin or create network requests.
-- Content queries must return only published content. Protected mutations must enforce the owner identity on the server.
-- Chat/server adapters must keep credentials server-side and use validated tool inputs; no unrestricted client writes.
-- Add convex-test when backend behavior exists. Until then, avoid fake clients, placeholder schemas, or a provider that requires a deployment.
+The primary CTA and pinned header link open `/chat`, using chat-bubble icons. There is no standalone contact form and no booking integration. Vercel AI SDK streams through `/api/chat`; a configured AI Gateway key and model enable it. The assistant receives only curated public site content.
 
-## Configuration boundary
+A temporary HttpOnly cookie identifies the conversation. The assistant’s only intake tool prepares a validated, expiring draft in Convex. The visitor sees the exact draft and clicks confirmation. `/api/inquiries` checks same origin and the conversation cookie, then sends the draft ID and session hash to the secret-protected Convex HTTP bridge. The internal mutation checks ownership and expiry and saves the held snapshot once. Neither model text nor model tool execution can submit an inquiry.
 
-`src/env.ts` validates only explicitly named public configuration. All `VITE_*` values are visible to visitors and are fixed at build time. Server-only Cloudflare bindings and secrets are separate; add their validation at the consuming server boundary when those features are implemented.
+The application does not persist full chat transcripts. Drafts and rate-limit records have scheduled cleanup. Confirmed inquiries remain private in Convex. `/privacy` explains processing, storage, cookies, and contact for removal.
 
-## Release boundary
+## Owner inbox
 
-Phase 1 provides the shell and production deployment configuration. The interactive hero, selected work, booking CTA, and persistent chat control belong to Phase 2. No live publishing or domain change is needed for local review.
+Better Auth runs on Convex using its maintained component. Public signup is disabled. The owner is provisioned through an internal action and restricted to `ADMIN_OWNER_EMAIL`. Every inbox query and status mutation verifies a live session and the verified owner record on the backend. TanStack server functions forward the authenticated token; no unauthenticated caller can read inquiries or alter their status. `/admin` lists the newest 100 matching inquiries and supports `new`, `contacted`, and `closed` states.
+
+Content administration remains a later phase; the current admin is an inquiry inbox, not a CMS.
+
+## Configuration and release
+
+`VITE_SITE_URL`, `VITE_CONVEX_URL`, and `VITE_CONVEX_SITE_URL` are public build-time configuration. Only HTTPS backend endpoints and explicit loopback development URLs are accepted. Credentials belong in server bindings and the Convex environment. The intake bridge secret must match on both services. Authentication secrets never reach client assets.
+
+The local Convex deployment is separate from production. Live AI, production authentication, and production persistence require the configuration in [Inquiry setup](inquiry-setup.md). The supplied domain and portfolio content remove the previous domain/profile/content placeholders. Publishing and live end-to-end verification remain release steps.

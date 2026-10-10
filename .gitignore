@@ -12,3 +12,9 @@ playwright-report/
 test-results/
 .DS_Store
 .pnpm-state/
+
+# Intermediate illustration renders
+public/services/*.png
+
+# Local Convex backend state
+.convex/

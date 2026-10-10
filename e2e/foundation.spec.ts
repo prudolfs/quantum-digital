@@ -3,7 +3,11 @@ import { expect, test } from '@playwright/test'
 
 test('renders accessible navigation and supports the complete page round trip', async ({
   page,
+  isMobile,
 }) => {
+  // Keep navigation and accessibility checks independent of GPU throughput;
+  // the marketing suite exercises the full animated renderer separately.
+  await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/')
   await expect(page.getByRole('heading', { level: 1 })).toContainText(
     'Build better products.',
@@ -14,6 +18,7 @@ test('renders accessible navigation and supports the complete page round trip', 
   ).toBeFocused()
   await page.keyboard.press('Enter')
   await expect(page.getByRole('main')).toBeFocused()
+  if (isMobile) await page.getByRole('button', { name: 'Open menu' }).click()
   await page
     .getByRole('navigation')
     .getByRole('link', { name: 'About' })
@@ -22,13 +27,15 @@ test('renders accessible navigation and supports the complete page round trip', 
   await expect(page.getByRole('heading', { level: 1 })).toContainText(
     'working product.',
   )
+  if (isMobile) await page.getByRole('button', { name: 'Open menu' }).click()
   await expect(
     page.getByRole('navigation').getByRole('link', { name: 'About' }),
   ).toHaveAttribute('aria-current', 'page')
-  await page
-    .getByRole('navigation')
-    .getByRole('link', { name: 'Home', exact: true })
-    .click()
+  if (isMobile) {
+    await page.getByRole('button', { name: 'Close menu' }).click()
+    await expect(page.getByRole('dialog')).not.toBeVisible()
+  }
+  await page.getByRole('link', { name: 'Quantum Digital home' }).click()
   await expect(page).toHaveURL('/')
   const results = await new AxeBuilder({ page }).analyze()
   expect(results.violations).toEqual([])
@@ -54,6 +61,7 @@ test('returns a useful 404 with a working recovery link', async ({ page }) => {
 test('serves readable pages and navigation without JavaScript', async ({
   browser,
   baseURL,
+  isMobile,
 }) => {
   const context = await browser.newContext({
     javaScriptEnabled: false,
@@ -61,6 +69,8 @@ test('serves readable pages and navigation without JavaScript', async ({
   })
   const page = await context.newPage()
   await page.goto('/')
+  if (isMobile)
+    await page.locator('.mobile-navigation-fallback summary').click()
   await expect(page.getByRole('heading', { level: 1 })).toContainText(
     'Build better products.',
   )

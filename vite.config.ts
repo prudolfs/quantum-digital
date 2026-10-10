@@ -7,6 +7,7 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   server: { port: 3000, strictPort: true },
   resolve: { tsconfigPaths: true },
+  ssr: { noExternal: ['@convex-dev/better-auth'] },
   plugins: [
     cloudflare({ viteEnvironment: { name: 'ssr' } }),
     tailwindcss(),

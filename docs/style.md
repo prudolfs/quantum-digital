@@ -26,20 +26,22 @@ Keep positioning and website copy in [the plan](plan.md). This document defines 
 | `portal-amber`   | `#C47B35` | Fading cursor trail                            |
 | `portal-core`    | `#FFF0BD` | Bright cursor particle cores                   |
 
-Reserve gold for hero cursor effects. Keep highlighted heading text solid brand blue. Check contrast in the actual compositions, especially small text, borders, and focus states.
+Use gold for hero cursor effects and secondary tiles behind trailing CTA arrows. Keep highlighted heading text solid brand blue. Check contrast in the actual compositions, especially small text, borders, and focus states.
 
 ## Typography and layout
 
 - Use Inter for display, body, and interface text, with system sans-serif fallbacks. Use a system monospace stack sparingly for small labels.
 - Use medium-weight display headings, tight tracking, and responsive sizing. Balance compact heading line height with readable wrapping; keep body text comfortably spaced.
 - Use a centered content width of approximately 80rem, 20px mobile gutters, and 32px gutters on wider screens. Give sections generous vertical spacing.
-- Use a contained translucent navigation surface, subtle borders, rounded cards, and restrained glow. Keep case-study content quieter than the hero.
-- Stack the hero copy and visual on mobile; use two columns on wide screens. Keep navigation, reading, and booking usable at every width.
-- Keep a persistent chat icon in the bottom-right corner with an accessible “Open chat” label. It links to the dedicated `/chat` page. Respect mobile safe areas and keep it clear of content and other controls; provide visible keyboard focus.
+- Keep the header pinned to the top. Its navigation background is transparent at scroll zero and fades in on scrolling or pointer hover using Motion. At scroll zero with no header hover, the background fades out even if a link is focused. Use subtle borders, rounded cards, and restrained glow. Keep case-study content quieter than the hero.
+- Stack the hero copy and visual on mobile; use two columns on wide screens. Below 851px, use a hamburger menu with a full-viewport backdrop and a top navigation panel that leaves an outside dismissal area. Animate with Motion, trap focus, lock background scrolling, and close on outside tap, Escape, navigation, or resizing to desktop. Keep a native disclosure fallback when JavaScript is disabled.
+- Keep chat accessible through the pinned header and contextual CTAs. Links to `/chat` use a chat-bubble icon; do not add a floating chat launcher.
+- Center the footer’s middle description on desktop and stack its content centrally on mobile. Omit a separate footer “Let’s talk” button.
+- Keep the footer’s top border inside the standard width container, matching the hero’s inset bottom border. Keep the home page main container’s bottom padding at zero and place the 112px of space before the footer inside the final conversation section. This lets its canvas and cursor effects cover the space and fade directly into the footer.
 
 ## Hero treatment
 
-- Use a subtle pointy-top hexagon background with ice-colored strokes at roughly 2.5% opacity, fading toward the bottom.
+- Start the hero layout at page top zero and span the full viewport width. Let its background and cursor effects cover the whole hero without clipping them to the copy or artwork columns; retain content gutters for readable text and actions.
 - Preserve the particle shape cycle: Q symbol → robot → rocket → diamond → Q symbol. Use blue and ice lighting with sphere-shaded point sprites.
 - Keep the fluid simulation shared between shape displacement, localized text distortion, and gold cursor sparks. It must not intercept CTA clicks or scrolling.
 - Reveal the emphasized headline phrase once with a 0.05-second letter stagger. Recompute the phrase and layout alignment when website copy changes.
@@ -50,10 +52,21 @@ Reserve gold for hero cursor effects. Keep highlighted heading text solid brand 
 
 ## Components and content visuals
 
+- Center text in full-width mobile CTAs and align the trailing icon at the button’s right edge. Reserve equal space on the left so the icon does not shift the centered text.
 - Use shadcn/ui for familiar controls, with shared brand tokens and clear loading, empty, error, and focus states.
-- Primary buttons use brand blue with dark text; secondary buttons use dark surfaces, light text, and a subtle border.
+- Marketing CTAs use readable text with a gold trailing icon tile. Chat links use chat bubbles, and other links use directional arrows. Icon buttons keep their background unchanged on hover; Motion scales the gold icon tile instead. Use brand-blue filled buttons for submission controls and outlined buttons for secondary actions.
+- Use 16px navigation, buttons, links, and supporting text; 14px metadata; and a 20px desktop hero description (18px on mobile). Keep mobile navigation readable at 14px. Motion animations respect reduced-motion preferences.
 - Real work cards show verified project content. Conceptual service cards may use Blender renders but must be labeled as illustrations.
 - Keep admin screens compact and task-oriented, with minimal decoration and no continuous animation.
+
+## Section backgrounds
+
+- Keep pointy-top hexagons in the hero and reuse them in the final conversation section. Use triangles in Services and 45° rotated squares (diamonds) in Working together. Keep Selected work and The approach plain to give the page quieter intervals.
+- Show these patterns on desktop, tablet, and mobile. Patterned sections span the full viewport width, with an inner content container retaining the standard gutters and maximum width. Avoid viewport-width overflow tricks or clipping patterns to the content container.
+- Use repeating SVG tiles with ice-colored strokes at roughly 2.5% opacity. Fade the top and bottom edges of section patterns, and keep them behind content without intercepting pointer events. Patterns remain static and visible when motion is reduced.
+- Additional patterns should follow the same geometric line style, scale, and restrained contrast; add them selectively rather than decorating every section.
+- Fade the conversation section’s graphics to transparent over the bottom 96px so cursor trails blend into the footer. Keep the top edge at full opacity.
+- In the final conversation section, type “working towards?” once on its first appearance, reserving its full layout space throughout. Reuse the hero’s gold cursor sparks and localized fluid title distortion across the full section, without the particle shape cycle. Enable title distortion on wide layouts with a fine pointer; pause graphics offscreen or when the tab is hidden. Keep the full semantic heading readable without JavaScript, with reduced motion, and after graphics failure or context loss.
 
 ## Accessibility and acceptance
 

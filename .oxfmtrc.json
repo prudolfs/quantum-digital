@@ -7,6 +7,7 @@
     ".tanstack/**",
     "dist/**",
     "src/routeTree.gen.ts",
+    "convex/_generated/**",
     "pnpm-lock.yaml",
     "test-results/**",
     "playwright-report/**"

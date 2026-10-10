@@ -1,38 +1,49 @@
 # Quantum Digital
 
-A TanStack Start foundation for an independent Product Engineering & Applied AI practice. Phase 1 provides server-rendered routes, the shared responsive shell, design tokens, shadcn/ui configuration, route states, environment validation, and quality commands.
+A TanStack Start website for Rudolfs Pukitis’s independent Product Engineering & Applied AI practice, targeting Cloudflare Workers at https://quantum-digital.pukitis-rudolfs.workers.dev/.
 
-## Review status
+## Current scope
 
-Dependencies are installed. TypeScript, lint, formatting, all six unit tests, all eight desktop/mobile browser tests, the production build, and Cloudflare deployment packaging pass. The foundation is ready for review before Phase 2. No site has been published.
+The public site has the shared fluid/particle hero, original Blender service illustrations, portfolio case studies, engagement options, About, professional profile links, and SEO metadata. The primary CTA opens `/chat`.
 
-## Local setup
+The AI conversation collects project and contact details and prepares a temporary inquiry draft. Only the visitor’s explicit confirmation saves it in Convex. `/admin` provides an owner-only inbox with status filtering and updates. There is no public contact form or calendar booking. Content administration remains a later increment.
 
-Use Node.js 22.12+ (24 LTS recommended) and pnpm 10.18.3.
+A separate local Convex backend and the implementation are prepared. Production Convex, AI credentials/model, and an owner account still need configuration. No site has been published. See [Inquiry setup](docs/inquiry-setup.md) for exact setup steps and verification limits.
+
+## Development
+
+Use Node.js 22.12+ and pnpm 10.18.3.
 
 ```sh
-corepack enable
-corepack prepare pnpm@10.18.3 --activate
 pnpm install --frozen-lockfile
-cp .env.example .env.local
+pnpm convex:dev
+```
+
+In a second terminal:
+
+```sh
 pnpm dev
 ```
 
-Open http://localhost:3000. The app also runs without `.env.local`: no backend or credentials are required for Phase 1. Development uses the local Cloudflare Workers runtime.
+Open http://localhost:3000. Convex generates local deployment values in `.env.local`. Public pages render without a database or AI key; the conversation shows an honest availability state while its backend is unconfigured. To enable AI locally, configure the server-only values in `.dev.vars` described in `.dev.vars.example` and the inquiry setup guide.
 
 ## Configuration
 
-| Variable           | Purpose                                                 | Phase 1 requirement                                    |
-| ------------------ | ------------------------------------------------------- | ------------------------------------------------------ |
-| `VITE_SITE_URL`    | Public site origin; defaults to `http://localhost:3000` | Optional; set the real HTTPS origin for release        |
-| `VITE_BOOKING_URL` | Real HTTPS Proton booking link                          | Optional now; required before the first public release |
-| `VITE_CONVEX_URL`  | Public HTTPS Convex deployment URL                      | Optional until admin/chat implementation               |
+| Variable               | Location                              | Purpose                                                |
+| ---------------------- | ------------------------------------- | ------------------------------------------------------ |
+| `VITE_SITE_URL`        | Cloudflare build / `.env.local`       | Public origin; defaults to the supplied Workers domain |
+| `VITE_CONVEX_URL`      | Cloudflare build / `.env.local`       | Public Convex client endpoint                          |
+| `VITE_CONVEX_SITE_URL` | Cloudflare build / `.env.local`       | Public Convex HTTP-actions endpoint                    |
+| `INTAKE_BRIDGE_SECRET` | Worker binding and Convex environment | Matching server secret for the intake bridge           |
+| `AI_GATEWAY_API_KEY`   | Worker secret binding                 | AI Gateway credential                                  |
+| `AI_MODEL`             | Worker binding                        | Supported `provider/model` slug                        |
+| `SITE_URL`             | Convex environment                    | Exact website origin for authentication                |
+| `ADMIN_OWNER_EMAIL`    | Convex environment                    | Sole allowed owner account                             |
+| `BETTER_AUTH_SECRET`   | Convex environment                    | Server-side authentication secret                      |
 
-`src/env.ts` validates these values. Empty optional values are treated as unset; unsafe booking/backend URLs fail validation. `VITE_*` values are public and compiled into the build. Set them in the build environment and rebuild after changing them.
+`VITE_*` values are public and fixed at build time. Never put credentials in them. Backend URLs require HTTPS except explicit loopback development URLs. `.dev.vars`, `.env.local`, `.env.convex.local`, and `.convex/` are ignored.
 
-Future server-only bindings belong in a gitignored `.dev.vars` file locally and Cloudflare secret bindings in deployment. `.dev.vars.example` documents that boundary. Never put credentials in `VITE_*` variables or commit local environment files.
-
-## Checks
+## Quality checks
 
 ```sh
 pnpm format
@@ -43,38 +54,25 @@ pnpm test:e2e
 pnpm deploy:check
 ```
 
-`check` runs TypeScript, Oxlint, Oxfmt verification, and Vitest. Browser tests run against the production build through `vite preview`, covering desktop and mobile Chromium, navigation, keyboard focus, accessibility, 404 recovery, JavaScript-free rendering, and reduced motion. Run `build` before standalone browser tests. Use `pnpm test:launch` for checks, build, and browser tests together.
+`check` runs TypeScript for frontend/backend, Oxlint, Oxfmt, Vitest, and convex-test behavior checks. Browser tests use production preview on desktop and mobile Chromium and include keyboard/accessibility, JavaScript-free rendering, graphics fallback, responsive screenshots, metadata, case studies, streamed chat review/retry receipts, and private inbox access. Model streaming is mocked in browser tests; persistence and access controls are tested against Convex’s test runtime. Live AI-provider requests and production owner sign-in require configured credentials and deployment.
 
-`pnpm deploy:check` builds and asks Wrangler to package the Worker with `--dry-run`; it does not publish. `pnpm preview` serves the latest production build locally.
+Use `pnpm test:launch` for checks, production build, and browser tests together. `pnpm deploy:check` builds and packages the Worker with `--dry-run`; it does not publish.
 
-## Deployment
+## Cloudflare deployment
 
-Deployment targets Cloudflare Workers using `wrangler.jsonc`, with a separate Worker named `quantum-digital`. There are no custom-domain routes configured. Build output is written to `dist/client` and `dist/server`; the Cloudflare plugin generates the deployable Worker configuration.
+The Worker is named `quantum-digital`; no custom-domain routes are required for the supplied `workers.dev` URL. Set `PNPM_VERSION=10.18.3` in Cloudflare Workers Builds. Use `pnpm build` as the build command and `pnpm exec wrangler deploy` as the deploy command. Configure the production Convex endpoints and server bindings first, as described in [Inquiry setup](docs/inquiry-setup.md).
 
-For Cloudflare Workers Builds, set `PNPM_VERSION=10.18.3` in Settings → Build → Build Variables and Secrets to match the project's `packageManager` pin. Use `pnpm build` as the build command and `pnpm exec wrangler deploy` as the deploy command. The pnpm version controls dependency installation and builds; the deployed app runs on the Workers runtime. Cloudflare supports overriding pnpm through this [build variable](https://developers.cloudflare.com/workers/ci-cd/builds/build-image/).
+Publishing and live verification remain separate from local review. Confirm the complete chat → review → save → admin-inbox flow after deploying.
 
-The compatibility date is `2026-09-18`, supported by the installed local Workers runtime. When updating the date, verify local preview and browser tests with the installed runtime before deploying.
+## Content and visuals
 
-After reviewing the foundation, set the public build variables, authenticate your Cloudflare account, and deploy:
+`src/content/site.ts` holds public services, engagements, case studies, and profile links. The résumé reference is `../interview-prep/utils/RESUME.md`; the portfolio reference is `../interview-prep/search/portfolio.md`. Copy describes portfolio work without inventing client metrics, endorsements, or sole authorship. Supplied repository links need a final public-availability check before launch.
 
-```sh
-pnpm exec wrangler login
-pnpm deploy
-```
+The lazy hero reuses the owner’s `qd-ai-native-studio` renderer and optimized shape buffers. One WebGL fluid field drives Q → robot → rocket → diamond → Q, localized text distortion, and gold cursor sparks. Reduced-motion/graphics failure retain static artwork and readable HTML. Hidden/offscreen scenes pause; narrow/coarse-pointer layouts retain DOM text. The hero chunk is about 294 KB gzip; four target buffers total 144 KB. Inter is self-hosted as a single ~48 KB Latin variable font. Real-device GPU performance remains a release check.
 
-Verify the returned URL, both public routes, and the 404 response. Add the final domain only when preparing the public release. Publishing and domain changes are separate from this local review step.
+Service illustrations are original Blender scenes, exported as lazy-loaded JPEGs totaling about 200 KB. Rebuild them with `blender --background --python scripts/render-services.py`; they are conceptual illustrations, not client-product screenshots.
 
-The runtime configuration follows the [Cloudflare TanStack Start guide](https://developers.cloudflare.com/workers/framework-guides/web-apps/tanstack-start/). The component setup follows the [shadcn/ui manual installation guide](https://ui.shadcn.com/docs/installation/manual).
-
-## Project structure
-
-- `src/routes`: typed file-based pages and root document.
-- `src/components`: shared layout, route states, and shadcn/ui components.
-- `src/styles.css`: brand tokens, responsive shell, focus, and reduced motion.
-- `src/env.ts`: explicit public configuration boundary.
-- `e2e`: browser acceptance checks.
-- [Architecture](docs/architecture.md): runtime, configuration, and future Convex integration boundaries.
-- [Plan](docs/plan.md): phased scope and completion checklist.
-- [Style guide](docs/style.md): visual direction.
-
-The interactive hero, Selected Work, booking CTA, and chat icon are Phase 2. Admin, live chat, and inquiry capture remain later phases.
+- [Plan](docs/plan.md)
+- [Architecture](docs/architecture.md)
+- [Style guide](docs/style.md)
+- [Inquiry setup](docs/inquiry-setup.md)

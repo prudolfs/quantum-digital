@@ -1,2 +1,6 @@
-# Future server-only Cloudflare bindings go here.
-# No credentials or backend are required for Phase 1.
+# Server-only Cloudflare bindings. Copy to .dev.vars for local development.
+# Set matching INTAKE_BRIDGE_SECRET on the Convex deployment (at least 32 characters).
+INTAKE_BRIDGE_SECRET=
+# Vercel AI Gateway key and a supported provider/model slug.
+AI_GATEWAY_API_KEY=
+AI_MODEL=
