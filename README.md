@@ -75,4 +75,5 @@ Service illustrations are original Blender scenes, exported as lazy-loaded JPEGs
 - [Plan](docs/plan.md)
 - [Architecture](docs/architecture.md)
 - [Style guide](docs/style.md)
+- [Content decisions](docs/content-decisions.md)
 - [Inquiry setup](docs/inquiry-setup.md)

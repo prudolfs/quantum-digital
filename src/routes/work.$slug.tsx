@@ -29,7 +29,7 @@ function CaseStudyPage() {
     ['Challenge', study.challenge],
     ['Approach', study.approach],
     ['Delivery', study.delivery],
-    ['Evidence & lessons', study.evidence],
+    ['Engineering focus', study.evidence],
   ]
   return (
     <article className="case-study">
@@ -41,18 +41,20 @@ function CaseStudyPage() {
         <h1 className="display-title">{study.title}</h1>
         <p className="body-copy intro-copy">{study.summary}</p>
         <p className="case-role">My role: {study.role}</p>
-        <div className="action-row">
-          {study.repositoryUrl && (
-            <a className="text-link" href={study.repositoryUrl}>
-              Repository <ActionIcon icon={ArrowUpRight} />
-            </a>
-          )}
-          {study.demoUrl && (
-            <a className="text-link" href={study.demoUrl}>
-              Live demo <ActionIcon icon={ArrowUpRight} />
-            </a>
-          )}
-        </div>
+        {(study.repositoryUrl || study.demoUrl) && (
+          <div className="action-row">
+            {study.repositoryUrl && (
+              <a className="text-link" href={study.repositoryUrl}>
+                Repository <ActionIcon icon={ArrowUpRight} />
+              </a>
+            )}
+            {study.demoUrl && (
+              <a className="text-link" href={study.demoUrl}>
+                Live demo <ActionIcon icon={ArrowUpRight} />
+              </a>
+            )}
+          </div>
+        )}
       </header>
       {sections.map(
         ([title, content]) =>

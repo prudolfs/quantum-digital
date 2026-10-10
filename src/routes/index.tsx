@@ -3,9 +3,17 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { ArrowUpRight, ArrowRight } from 'lucide-react'
 import { ChatLink } from '@/components/chat-link'
 import { ConversationSection } from '@/components/conversation-section'
+import { HorizontalSection } from '@/components/horizontal-section'
+import { FaqItem } from '@/components/faq-item'
 import { Hero } from '@/components/hero'
 import { ServiceArt } from '@/components/service-art'
-import { caseStudies, services, engagements } from '@/content/site'
+import {
+  caseStudies,
+  services,
+  engagements,
+  positioning,
+  commonQuestions,
+} from '@/content/site'
 import { pageHead } from '@/lib/seo'
 
 export const Route = createFileRoute('/')({
@@ -22,11 +30,7 @@ function HomePage() {
   return (
     <>
       <Hero />
-      <section
-        id="work"
-        className="marketing-section"
-        aria-labelledby="work-heading"
-      >
+      <HorizontalSection id="work" heading="work-heading">
         <div className="section-shell">
           <div className="section-intro">
             <p className="eyebrow">01 / Selected work</p>
@@ -36,12 +40,18 @@ function HomePage() {
               the words.
             </h2>
             <p className="body-copy">
-              A closer look at the context, decisions, and delivery behind
-              completed projects.
+              Mobile products, business workflows, and practical AI. A closer
+              look at what each application needed and how the work came
+              together.
             </p>
           </div>
           {caseStudies.length ? (
-            <div className="work-grid">
+            <div
+              className="work-grid horizontal-track"
+              tabIndex={0}
+              role="region"
+              aria-label="Selected work cards"
+            >
               {caseStudies.map((study) => (
                 <Link
                   className="work-card"
@@ -77,7 +87,7 @@ function HomePage() {
             </div>
           )}
         </div>
-      </section>
+      </HorizontalSection>
       <section
         id="services"
         className="marketing-section section-pattern section-pattern--triangles"
@@ -136,10 +146,7 @@ function HomePage() {
             </h2>
           </div>
           <div className="approach-copy">
-            <p className="body-copy">
-              Good software takes more than a working feature. The product, the
-              systems behind it, and the way people use it need to fit together.
-            </p>
+            <p className="body-copy">{positioning.approach}</p>
             <p className="body-copy">
               I work directly with founders and product teams, taking ownership
               across the stack. We start with the problem, make the tradeoffs
@@ -174,6 +181,26 @@ function HomePage() {
                 <h3>{engagement.title}</h3>
                 <p className="body-copy">{engagement.description}</p>
               </article>
+            ))}
+          </div>
+        </div>
+      </section>
+      <section
+        className="marketing-section"
+        aria-labelledby="questions-heading"
+      >
+        <div className="section-shell">
+          <p className="eyebrow">Before we begin</p>
+          <h2 id="questions-heading" className="marketing-title">
+            A few useful answers.
+          </h2>
+          <div className="faq-list">
+            {commonQuestions.map((entry) => (
+              <FaqItem
+                key={entry.question}
+                question={entry.question}
+                answer={entry.answer}
+              />
             ))}
           </div>
         </div>

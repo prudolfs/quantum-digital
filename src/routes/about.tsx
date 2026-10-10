@@ -1,4 +1,7 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { experience, caseStudies } from '@/content/site'
+import { ActionIcon } from '@/components/action-icon'
+import { ArrowRight } from 'lucide-react'
 import { ChatLink } from '@/components/chat-link'
 import { pageHead } from '@/lib/seo'
 
@@ -49,6 +52,53 @@ function AboutPage() {
           Deployment, documentation, and ongoing operation are part of the work.
           The goal is software your team can understand, use, and build on.
         </p>
+      </div>
+      <div className="about-conversation">
+        <section aria-labelledby="experience-heading">
+          <p className="eyebrow">Experience behind the work</p>
+          <h2 id="experience-heading" className="section-title">
+            Different industries. Connected engineering.
+          </h2>
+          <p className="body-copy intro-copy">
+            My experience includes individual contributions, independent
+            projects, and leading teams. That range helps me connect product
+            decisions with how software is built, operated, and used.
+          </p>
+          <div className="experience-grid">
+            {experience.map((entry) => (
+              <article className="detail-panel" key={entry.title}>
+                <h3 className="section-title">{entry.title}</h3>
+                <p className="body-copy">{entry.description}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+        <section
+          className="about-conversation"
+          aria-labelledby="explorations-heading"
+        >
+          <h2 id="explorations-heading" className="section-title">
+            More engineering work.
+          </h2>
+          <p className="body-copy intro-copy">
+            These portfolio projects explore service operations across web and
+            mobile, and interactive robotics tools in the browser.
+          </p>
+          <div className="action-row">
+            {caseStudies
+              .filter((study) => study.featured === false)
+              .map((study) => (
+                <Link
+                  className="text-link"
+                  to="/work/$slug"
+                  params={{ slug: study.slug }}
+                  key={study.slug}
+                >
+                  {study.title} <ActionIcon icon={ArrowRight} />
+                </Link>
+              ))}
+          </div>
+        </section>
       </div>
       <div className="about-conversation">
         <ChatLink />

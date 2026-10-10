@@ -12,6 +12,7 @@ import { ArrowDown } from 'lucide-react'
 import { ChatLink } from '@/components/chat-link'
 import { HeroFallback } from '@/components/hero-fallback'
 import { Button } from '@/components/ui/button'
+import { positioning } from '@/content/site'
 
 const HeroExperience = lazy(() => import('@/components/hero-experience'))
 const phrase = 'Put AI to work.'
@@ -106,9 +107,7 @@ export function Hero() {
             </span>
           </h1>
           <p className="hero-fluid-copy__description body-copy">
-            I help founders and product teams build software and put AI to work
-            in their business. From new products to smarter workflows and
-            integrations, I take ownership from architecture to deployment.
+            {positioning.description}
           </p>
           <div className="action-row hero-actions">
             <ChatLink />

@@ -99,14 +99,16 @@ Guardrails:
 
 ## Phase 3: Content population
 
-- [ ] Write and review the final positioning, homepage copy, and service descriptions.
-- [ ] Add a small number of strong, real case studies rather than a long project catalogue.
-- [ ] Consider the accounting app, Code Chat, Service Operations Copilot, and other portfolio work where disclosure is safe.
-- [ ] For each case study, record only verified facts and clearly distinguish personal work from team/client work.
-- [ ] Add demo/repository links only when public and safe to share.
-- [ ] Keep private tools, private data, and NDA-sensitive client details out of public content.
-- [ ] Write short, useful answers for likely founder and product-team questions.
-- [ ] Review all content for clarity to nontechnical visitors.
+- [x] Write and review the positioning, homepage copy, and service descriptions.
+- [x] Add a small number of strong, real case studies rather than a long project catalogue.
+- [x] Feature abstract care-coordination, accounting, and research-workflow examples alongside Finance Document Assistant; retain the other published portfolio routes.
+- [x] For each case study, record only verified facts and clearly distinguish portfolio work from team/client work.
+- [x] Keep supplied public portfolio links; omit project/demo/repository links for the three abstract examples.
+- [x] Keep private data and NDA-sensitive client details out of public content.
+- [x] Write short, useful answers for likely founder and product-team questions.
+- [x] Review all content for clarity to nontechnical visitors.
+
+**Implementation status:** Content is populated from the supplied resume/portfolio and the implemented research project. The owner authorized abstract descriptions of Seniory, its accounting app, the research application, and broader experience. Six examples appear in the homepage’s horizontal row. Selected work pins on suitable viewports and uses vertical scrolling to traverse its cards; Services stays in a normal responsive grid; reduced-motion, short-screen, and JavaScript-free layouts keep native horizontal scrolling. About describes the broader experience and links to the remaining portfolio examples. Published content also grounds the assistant. Source and disclosure decisions are recorded in [Content decisions](content-decisions.md). No site has been published.
 
 **Exit criteria:** All public claims are accurate, useful, and safe to disclose.
 

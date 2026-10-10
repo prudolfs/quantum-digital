@@ -58,6 +58,11 @@ Use gold for hero cursor effects and secondary tiles behind trailing CTA arrows.
 - Use 16px navigation, buttons, links, and supporting text; 14px metadata; and a 20px desktop hero description (18px on mobile). Keep mobile navigation readable at 14px. Motion animations respect reduced-motion preferences.
 - Real work cards show verified project content. Conceptual service cards may use Blender renders but must be labeled as illustrations.
 - Keep admin screens compact and task-oriented, with minimal decoration and no continuous animation.
+- Keep common client questions in a plain section with native disclosure controls. Use gold chevrons with 20px of space before the question. Animate answer height, opacity, and position on opening and closing using Motion; skip that animation for reduced motion. Answers remain available without JavaScript.
+- Present Selected work as a single horizontal row; keep Services in a normal responsive grid so consecutive sections do not both pin. Pin the full section content below the header when it fits the viewport, and move through the cards with vertical page scrolling before releasing the section. Fit three whole cards across wide screens, two on tablets, and one on mobile. Use native horizontal scrolling on short screens, with reduced motion, or without JavaScript. Keep every card accessible to the keyboard and retain page scrolling without intercepting wheel events.
+- Keep work cards equal in height, reserve two lines for both category and title, align descriptions from the same position, and anchor “Read the case study” to the bottom. Allow full text to wrap rather than truncating it.
+- Stack the Selected work category, heading, and introductory paragraph above the card row. Align them with the cards’ left edge and constrain the paragraph to 48rem so it stays connected to the section on every screen size.
+- Blend the work row into the page background with subtle gradients at its left and right edges while more cards remain in that direction. Clear the left fade at the start and the right fade at the end so the outermost cards stay readable. Scale fade widths from 24px to 48px with the viewport.
 
 ## Section backgrounds
 
