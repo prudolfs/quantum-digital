@@ -19,6 +19,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ApiChatRouteImport } from './routes/api.chat'
 import { Route as ApiChatSessionRouteImport } from './routes/api.chat-session'
 import { Route as ApiInquiriesRouteImport } from './routes/api.inquiries'
+import { Route as ApiInquiryDraftsRouteImport } from './routes/api.inquiry-drafts'
 import { Route as WorkSlugRouteImport } from './routes/work.$slug'
 import { Route as ApiAuthSplatRouteImport } from './routes/api.auth.$'
 
@@ -72,6 +73,11 @@ const ApiInquiriesRoute = ApiInquiriesRouteImport.update({
   path: '/api/inquiries',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiInquiryDraftsRoute = ApiInquiryDraftsRouteImport.update({
+  id: '/api/inquiry-drafts',
+  path: '/api/inquiry-drafts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WorkSlugRoute = WorkSlugRouteImport.update({
   id: '/work/$slug',
   path: '/work/$slug',
@@ -94,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/api/chat': typeof ApiChatRoute
   '/api/chat-session': typeof ApiChatSessionRoute
   '/api/inquiries': typeof ApiInquiriesRoute
+  '/api/inquiry-drafts': typeof ApiInquiryDraftsRoute
   '/work/$slug': typeof WorkSlugRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
@@ -108,6 +115,7 @@ export interface FileRoutesByTo {
   '/api/chat': typeof ApiChatRoute
   '/api/chat-session': typeof ApiChatSessionRoute
   '/api/inquiries': typeof ApiInquiriesRoute
+  '/api/inquiry-drafts': typeof ApiInquiryDraftsRoute
   '/work/$slug': typeof WorkSlugRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
@@ -123,6 +131,7 @@ export interface FileRoutesById {
   '/api/chat': typeof ApiChatRoute
   '/api/chat-session': typeof ApiChatSessionRoute
   '/api/inquiries': typeof ApiInquiriesRoute
+  '/api/inquiry-drafts': typeof ApiInquiryDraftsRoute
   '/work/$slug': typeof WorkSlugRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
@@ -139,6 +148,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/api/chat-session'
     | '/api/inquiries'
+    | '/api/inquiry-drafts'
     | '/work/$slug'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
@@ -153,6 +163,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/api/chat-session'
     | '/api/inquiries'
+    | '/api/inquiry-drafts'
     | '/work/$slug'
     | '/api/auth/$'
   id:
@@ -167,6 +178,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/api/chat-session'
     | '/api/inquiries'
+    | '/api/inquiry-drafts'
     | '/work/$slug'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
@@ -182,6 +194,7 @@ export interface RootRouteChildren {
   ApiChatRoute: typeof ApiChatRoute
   ApiChatSessionRoute: typeof ApiChatSessionRoute
   ApiInquiriesRoute: typeof ApiInquiriesRoute
+  ApiInquiryDraftsRoute: typeof ApiInquiryDraftsRoute
   WorkSlugRoute: typeof WorkSlugRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
@@ -258,6 +271,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiInquiriesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/inquiry-drafts': {
+      id: '/api/inquiry-drafts'
+      path: '/api/inquiry-drafts'
+      fullPath: '/api/inquiry-drafts'
+      preLoaderRoute: typeof ApiInquiryDraftsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/work/$slug': {
       id: '/work/$slug'
       path: '/work/$slug'
@@ -286,6 +306,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiChatRoute: ApiChatRoute,
   ApiChatSessionRoute: ApiChatSessionRoute,
   ApiInquiriesRoute: ApiInquiriesRoute,
+  ApiInquiryDraftsRoute: ApiInquiryDraftsRoute,
   WorkSlugRoute: WorkSlugRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }

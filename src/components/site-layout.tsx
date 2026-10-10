@@ -11,7 +11,8 @@ import { profileLinks } from '@/content/site'
 
 export function SiteLayout({ children }: { children: ReactNode }) {
   const isAdmin = useLocation({
-    select: (location) => location.pathname === '/admin',
+    select: (location) =>
+      location.pathname === '/admin' || location.pathname === '/chat',
   })
   const isHome = useLocation({
     select: (location) => location.pathname === '/',

@@ -33,10 +33,13 @@ function PrivacyPage() {
         <h2 className="section-title">While you chat</h2>
         <p className="body-copy">
           Your messages are sent to the configured AI service through Vercel AI
-          Gateway so the assistant can respond. The conversation stays in your
-          current browser session; this website does not keep full chat
-          transcripts in its database. Please avoid sharing secrets, sensitive
-          personal information, or confidential client material.
+          Gateway so the assistant can respond. Chat conversations and messages
+          are stored in Convex so you can continue when you return using the
+          same browser. Conversations expire after 30 days of inactivity and are
+          removed by an hourly cleanup job. Restart chat deletes the current
+          conversation’s messages; confirmed inquiries remain separate. Please
+          avoid sharing secrets, sensitive personal information, or confidential
+          client material.
         </p>
       </section>
       <section>
@@ -55,11 +58,14 @@ function PrivacyPage() {
       <section>
         <h2 className="section-title">Cookies and abuse prevention</h2>
         <p className="body-copy">
-          Chat uses an essential, temporary session cookie to connect a draft to
-          the visitor confirming it. Abuse prevention stores a salted hash of
-          the network address and request counts for up to 24 hours, plus the
-          cleanup interval. Admin authentication uses essential session cookies.
-          The site does not add advertising trackers.
+          Chat uses an essential HttpOnly cookie, renewed for 30 days, to
+          restore your conversation and connect drafts to the visitor confirming
+          them. Cloudflare Turnstile checks requests to help prevent automated
+          abuse; its verification token is checked on the server before AI
+          generation. Abuse prevention stores a salted hash of the network
+          address and request counts for up to 24 hours, plus the cleanup
+          interval. Admin authentication uses essential session cookies. The
+          site does not add advertising trackers.
         </p>
       </section>
     </article>

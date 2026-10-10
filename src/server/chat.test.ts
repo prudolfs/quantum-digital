@@ -30,11 +30,17 @@ function request(messages: unknown, extra: Record<string, string> = {}) {
       Cookie: `qd-intake=${'a'.repeat(64)}`,
       ...extra,
     },
-    body: JSON.stringify({ messages }),
+    body: JSON.stringify({ messages, revision: 0 }),
   })
 }
 beforeEach(() => vi.clearAllMocks())
 describe('chat request validation before provider or storage calls', () => {
+  it('blocks unverified visitors before saving messages or requesting a model response', async () => {
+    const response = await handleChat(request([message]))
+    expect(response.status).toBe(403)
+    expect(await response.json()).toEqual({ error: 'VERIFICATION_FAILED' })
+    expect(intakeRequest).not.toHaveBeenCalled()
+  })
   it('rejects cross-origin requests and expired sessions', async () => {
     expect(
       (

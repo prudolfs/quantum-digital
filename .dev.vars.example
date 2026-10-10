@@ -4,3 +4,4 @@ INTAKE_BRIDGE_SECRET=
 # Vercel AI Gateway key and a supported provider/model slug.
 AI_GATEWAY_API_KEY=
 AI_MODEL=
+TURNSTILE_SECRET_KEY=

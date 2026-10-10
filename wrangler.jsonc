@@ -7,5 +7,6 @@
   "observability": { "enabled": true },
   "vars": {
     "AI_MODEL": "google/gemini-2.5-flash",
+    "VITE_TURNSTILE_SITE_KEY": "0x4AAAAAAB6aIcdXW2s0-u5y"
   },
 }

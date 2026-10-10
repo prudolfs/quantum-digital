@@ -7,6 +7,7 @@ import {
 } from './_generated/server'
 import { requireOwner } from './owner'
 import { inquirySchema } from '../shared/inquiry'
+import type { UIMessage } from 'ai'
 
 const detailFields = {
   name: v.string(),
@@ -47,17 +48,46 @@ export const checkChatRate = internalMutation({
 })
 
 export const prepare = internalMutation({
-  args: { sessionHash: v.string(), details: v.object(detailFields) },
-  handler: async (ctx, { sessionHash, details }) => {
+  args: {
+    sessionHash: v.string(),
+    details: v.object(detailFields),
+    contactFormId: v.optional(v.string()),
+  },
+  handler: async (ctx, { sessionHash, details, contactFormId }) => {
     const parsed = inquirySchema.safeParse(details)
     if (!parsed.success)
       throw new ConvexError('Please check the inquiry details.')
+    if (contactFormId) {
+      const thread = await ctx.db
+        .query('chatThreads')
+        .withIndex('by_session', (q) => q.eq('sessionHash', sessionHash))
+        .unique()
+      const messages = thread
+        ? await ctx.db
+            .query('chatMessages')
+            .withIndex('by_thread', (q) => q.eq('threadId', thread._id))
+            .collect()
+        : []
+      const exists = messages.some((row) =>
+        (JSON.parse(row.message) as UIMessage).parts.some(
+          (part) =>
+            part.type === 'tool-requestContactDetails' &&
+            part.state === 'output-available' &&
+            (part.output as { formId?: string })?.formId === contactFormId,
+        ),
+      )
+      if (!thread || thread.expiresAt <= Date.now() || !exists)
+        throw new ConvexError(
+          'Contact form unavailable. Please reopen it in chat.',
+        )
+    }
     await consumeRate(ctx, `draft:${sessionHash}`, 10, 3_600_000)
     const expiresAt = Date.now() + 3_600_000
     const draftId = await ctx.db.insert('inquiryDrafts', {
       ...parsed.data,
       sessionHash,
       expiresAt,
+      ...(contactFormId ? { contactFormId } : {}),
     })
     return { draftId, details: parsed.data, expiresAt }
   },
@@ -85,7 +115,10 @@ export const confirm = internalMutation({
       status: 'new',
       updatedAt: Date.now(),
     })
-    await ctx.db.patch(draftId, { inquiryId })
+    await ctx.db.patch(draftId, {
+      inquiryId,
+      expiresAt: Date.now() + 30 * 86_400_000,
+    })
     return { inquiryId }
   },
 })
@@ -132,7 +165,19 @@ export const prune = internalMutation({
       .query('inquiryDrafts')
       .withIndex('by_expiresAt', (index) => index.lt('expiresAt', Date.now()))
       .take(200)
-    for (const draft of drafts) await ctx.db.delete(draft._id)
+    for (const draft of drafts) {
+      const thread = draft.inquiryId
+        ? await ctx.db
+            .query('chatThreads')
+            .withIndex('by_session', (q) =>
+              q.eq('sessionHash', draft.sessionHash),
+            )
+            .unique()
+        : null
+      if (thread && thread.expiresAt > Date.now())
+        await ctx.db.patch(draft._id, { expiresAt: thread.expiresAt })
+      else await ctx.db.delete(draft._id)
+    }
     const rates = await ctx.db
       .query('rateLimits')
       .withIndex('by_windowStart', (index) =>

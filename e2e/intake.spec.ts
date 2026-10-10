@@ -111,7 +111,7 @@ test('chat requires explicit confirmation, retains the draft on failure, and sho
   ).toBeVisible()
   expect(submissions).toBe(2)
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
-  await page.getByRole('button', { name: 'Clear conversation' }).click()
+  await page.getByRole('button', { name: 'Restart chat' }).click()
   await expect(
     page.getByRole('heading', { name: 'Review your inquiry' }),
   ).toHaveCount(0)

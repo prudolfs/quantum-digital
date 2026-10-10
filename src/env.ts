@@ -25,6 +25,10 @@ const publicEnvironmentSchema = z.object({
     .default('https://quantum-digital.pukitis-rudolfs.workers.dev'),
   VITE_CONVEX_URL: optionalBackendUrl,
   VITE_CONVEX_SITE_URL: optionalBackendUrl,
+  VITE_TURNSTILE_SITE_KEY: z.preprocess(
+    (value) => (value === '' ? undefined : value),
+    z.string().min(1).optional(),
+  ),
 })
 
 export function parsePublicEnvironment(values: Record<string, unknown>) {

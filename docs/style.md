@@ -79,3 +79,14 @@ Use gold for hero cursor effects and secondary tiles behind trailing CTA arrows.
 - Respect reduced motion and retain one accessible heading when letters or shader overlays are used.
 - Check narrow, medium, and wide layouts, font loading, slow assets, unavailable graphics, context loss, and reduced motion.
 - Review screenshots for heading wrapping, overlay alignment, CTA visibility, and layout stability. Measure hero performance on desktop and a lower-capability/mobile device before launch.
+
+## Chat workspace
+
+- `/chat` omits the marketing header and footer. Position the home-linked Quantum Digital logo with the same shell/gutters as the website header.
+- Style Restart chat like the header’s Let’s talk action: text followed by a gold Motion-scaled icon, without a hover background.
+- Reuse the static full-width homepage hexagon pattern; keep it subtle behind readable messages on every screen.
+- Let messages scroll within the viewport. Keep a compact, auto-growing textarea docked at the bottom, with accessible icon-only Send/Stop controls.
+- Show one active conversation, with no recent-chats sidebar. A direct Contact Rudolfs header action and tool-rendered form provide an optional quick inquiry path inside chat.
+- Keep Turnstile interaction close to the composer; verification must not obscure messages or the confirmation card.
+
+- Keep chat top-bar and composer backgrounds transparent so the hexagon pattern remains visible. Put Contact Rudolfs beside Restart chat in the top bar; use accessible icon-only controls on narrow screens.

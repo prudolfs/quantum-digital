@@ -11,6 +11,20 @@ const fields = {
 }
 
 export default defineSchema({
+  chatThreads: defineTable({
+    sessionHash: v.string(),
+    revision: v.number(),
+    updatedAt: v.number(),
+    expiresAt: v.number(),
+    generatingUntil: v.optional(v.number()),
+  })
+    .index('by_session', ['sessionHash'])
+    .index('by_expiresAt', ['expiresAt']),
+  chatMessages: defineTable({
+    threadId: v.id('chatThreads'),
+    position: v.number(),
+    message: v.string(),
+  }).index('by_thread', ['threadId', 'position']),
   ownerSetup: defineTable({
     key: v.literal('owner'),
     email: v.string(),
@@ -53,7 +67,10 @@ export default defineSchema({
     sessionHash: v.string(),
     expiresAt: v.number(),
     inquiryId: v.optional(v.id('inquiries')),
-  }).index('by_expiresAt', ['expiresAt']),
+    contactFormId: v.optional(v.string()),
+  })
+    .index('by_expiresAt', ['expiresAt'])
+    .index('by_session_form', ['sessionHash', 'contactFormId']),
   inquiries: defineTable({
     ...fields,
     source: v.literal('chat'),

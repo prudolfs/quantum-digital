@@ -7,7 +7,7 @@ Build Quantum Digital as an independent product-engineering practice, not a gene
 - **Positioning:** Product Engineering & Applied AI
 - **Core message:** Build better products. Put AI to work.
 - **Supporting message:** I help founders and product teams build software and put AI to work in their business. From new products to smarter workflows and integrations, I take ownership from architecture to deployment.
-- **Conversion path:** A dedicated AI conversation on `/chat` gathers project and contact details. The visitor reviews and confirms an inquiry before it is stored in Convex for the private admin inbox. No conventional contact form or appointment booking.
+- **Conversion path:** A dedicated AI conversation on `/chat` gathers project and contact details. The visitor reviews and confirms an inquiry before it is stored in Convex for the private admin inbox. No standalone contact form or appointment booking. An optional tool-rendered contact form lives inside chat.
 - **Public domain:** https://quantum-digital.pukitis-rudolfs.workers.dev/
 - **Chat entry:** The pinned header and contextual CTAs open `/chat` as a full page, with chat-bubble icons.
 - **Visual direction:** Follow [the style guide](style.md) for the hero, palette, typography, layout, and motion.
@@ -44,7 +44,7 @@ Guardrails:
 - Respect NDAs and keep private project data private.
 - Blender renders on service cards are conceptual illustrations, not depictions of shipped client products.
 - Use the shared WebGL fluid/particle hero with static/lightweight fallbacks. Limit additional 3D effects to selected visuals.
-- No conventional contact form. Gather details conversationally, prepare a draft, and save only after the visitor clicks confirmation.
+- Gather details conversationally or through an optional contact form rendered by a chat tool. Prepare a draft and save only after explicit visitor confirmation. Offer Contact Rudolfs in the chat header; follow-up is by email, not live handoff.
 - Keep layout, design, and hero tuning in code; use the admin only for structured content that is useful to edit.
 - The first inquiry-enabled release requires the public offer, real portfolio work, live AI chat, confirmed inquiry capture, and the private owner inbox. Content editing can follow later. Keep public content in typed source files until content administration is needed.
 
@@ -170,6 +170,21 @@ Provide a private owner workspace for inquiries, work, services, and a small set
 
 **Exit criteria:** The assistant can explain the offer, reference real portfolio work, and gather project/contact details conversationally. It prepares a draft but never submits an inquiry or claims it was saved. Live streaming and failure/retry behavior must be verified with production AI credentials.
 
+## Chat refinement after Phase 5
+
+- [x] Give `/chat` a dedicated full-height layout without the marketing header/footer.
+- [x] Reuse the header-positioned logo for returning home and a trailing gold-icon Restart chat control.
+- [x] Use the homepage hexagon pattern and a compact bottom composer with icon-only send/stop.
+- [x] Include public résumé roles, sectors, skills, contributions, education, and all seven portfolio references.
+- [x] Persist one anonymous active conversation in Convex, restore on return/refresh, and delete messages on restart.
+- [x] Restore confirmed/expired inquiry receipts and guard against stale tabs and late generation writes.
+- [x] Add a contact-form tool and direct Contact Rudolfs header action; keep explicit confirmation.
+- [x] Integrate mandatory Cloudflare Turnstile verification for AI requests and contact-form draft preparation.
+- [x] Update privacy/storage/configuration documentation.
+- [ ] Configure real Turnstile keys and verify the deployed hostname before release.
+
+No recent-chats list, public login, or vector RAG is needed for this pass. Conversations expire after 30 days of inactivity. Validation passed: production build, 53 unit/backend checks, 20 desktop/mobile browser checks including exact logo alignment, and one live Gemini/Convex/Turnstile test covering restoration, restart, and inline-form drafts. No real inquiry was submitted. Real Turnstile keys and deployed-domain verification remain release steps.
+
 ## Phase 6: Confirmed chat inquiries
 
 - [x] Gather name, email, and project summary conversationally; timing and budget are optional.
@@ -179,11 +194,11 @@ Provide a private owner workspace for inquiries, work, services, and a small set
 - [x] Validate inputs server-side and enforce persistent request limits.
 - [x] Reject cross-origin submissions, foreign-session drafts, and expired drafts.
 - [x] Make confirmation retries idempotent; display success only after persistence succeeds.
-- [x] Keep drafts temporary and do not store full chat transcripts in the website database.
+- [x] Keep unconfirmed drafts temporary; persist chat threads/messages in Convex and restore one active conversation per browser.
 - [x] Add a privacy notice describing chat processing, draft/inquiry storage, and essential cookies.
 - [ ] Verify a real AI conversation through confirmation and the production owner inbox on desktop and mobile.
 
-**Exit criteria:** A visitor can describe a project through chat, review and confirm an inquiry, and receive a truthful saved receipt. The owner can see it in the private inbox. No public contact form or calendar is required.
+**Exit criteria:** A visitor can describe a project through chat, review and confirm an inquiry, and receive a truthful saved receipt. The owner can see it in the private inbox. No standalone public contact form or calendar is required; the optional form is inside chat.
 
 ## Phase 7: Quality, security, and launch
 
@@ -212,7 +227,7 @@ Run the relevant launch checks for each release. The first public release requir
 - [ ] Improve the chat's curated context and answers based on real failure cases.
 - [ ] Add lightweight privacy-respecting analytics only if they will inform a decision.
 - [ ] Add content search only if the number of published case studies makes it necessary.
-- [ ] Consider chat/inquiry persistence improvements only when there is a concrete need.
+- [ ] Review conversation retention and recovery from actual visitor use; keep one active conversation unless a history list proves useful.
 - [ ] Revisit 3D/WebGPU effects after the core site is working and performance is measured.
 
 **Exit criteria:** Improvements are driven by actual visitor questions and conversion friction, not speculative infrastructure.
@@ -252,4 +267,4 @@ These commands are configured in the project. Install dependencies before runnin
 7. Add content-editing administration only when needed; keep the inquiry inbox small.
 8. Iterate from real questions and inquiries.
 
-The user's October 10 scope correction supersedes the earlier calendar plan: inquiry details are gathered through chat, with no contact form on public pages.
+The user's October 10 scope correction supersedes the earlier calendar plan: inquiry details are gathered through chat. The later refinement permits a tool-rendered form inside chat, while retaining explicit confirmation and no standalone public contact form.

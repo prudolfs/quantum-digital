@@ -204,7 +204,7 @@ test('stopping preserves partial text and clearing an active response starts a c
   await expect(
     page.getByRole('button', { name: 'Stop', exact: true }),
   ).toBeVisible()
-  await page.getByRole('button', { name: 'Clear conversation' }).click()
+  await page.getByRole('button', { name: 'Restart chat' }).click()
   await expect(page.locator('.chat-message')).toHaveCount(0)
   await expect(input).toHaveValue('')
   await expect(page.locator('.starter-prompts button')).toHaveCount(4)
@@ -274,7 +274,7 @@ test('failed responses can be retried and length-limit errors point to a new con
   await expect(
     page.getByRole('button', { name: 'Retry response' }),
   ).toHaveCount(0)
-  await page.getByRole('button', { name: 'Clear conversation' }).click()
+  await page.getByRole('button', { name: 'Restart chat' }).click()
   await expect(page.getByRole('alert')).toHaveCount(0)
   await expect(page.locator('.starter-prompts button')).toHaveCount(4)
 })
@@ -356,7 +356,200 @@ test('long conversations reach a readable limit and clear back to the starter pr
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true)
-  await page.getByRole('button', { name: 'Clear conversation' }).click()
+  await page.getByRole('button', { name: 'Restart chat' }).click()
   await expect(input).toBeEnabled()
   await expect(page.locator('.chat-message')).toHaveCount(0)
+})
+
+test('conversation restores after navigation and reload, with a bottom composer and server-backed restart', async ({
+  page,
+}, testInfo) => {
+  let messages: unknown[] = []
+  let revision = 0
+  let rejectRestart = false
+  await page.route('**/api/chat-session', (route) => {
+    if (route.request().method() === 'POST') {
+      if (rejectRestart)
+        return route.fulfill({ status: 503, json: { error: 'unavailable' } })
+      messages = []
+      revision++
+      return route.fulfill({ json: { revision } })
+    }
+    return route.fulfill({ json: { available: true, revision, messages } })
+  })
+  await page.route('**/api/chat', (route) => {
+    const body = route.request().postDataJSON()
+    expect(body.revision).toBe(revision)
+    revision++
+    messages = [
+      ...body.messages,
+      {
+        id: 'restored-answer',
+        role: 'assistant',
+        parts: [{ type: 'text', text: 'Your conversation is saved.' }],
+      },
+    ]
+    return route.fulfill({
+      headers: { ...headers, 'X-QD-Revision': String(revision) },
+      body: stream([
+        { type: 'start', messageId: 'restored-answer' },
+        { type: 'text-start', id: 'answer' },
+        {
+          type: 'text-delta',
+          id: 'answer',
+          delta: 'Your conversation is saved.',
+        },
+        { type: 'text-end', id: 'answer' },
+        { type: 'finish', finishReason: 'stop' },
+      ]),
+    })
+  })
+  await page.goto('/')
+  const homeLogo = await page
+    .getByRole('link', { name: 'Quantum Digital home' })
+    .boundingBox()
+  await page.goto('/chat')
+  const chatLogo = await page
+    .getByRole('link', { name: 'Quantum Digital home' })
+    .boundingBox()
+  expect(Math.abs(homeLogo!.x - chatLogo!.x)).toBeLessThan(1)
+  expect(Math.abs(homeLogo!.y - chatLogo!.y)).toBeLessThan(1)
+  await expect(page.locator('.site-header, .site-footer')).toHaveCount(0)
+  const input = page.getByRole('textbox', { name: 'Message the assistant' })
+  await input.fill('Explain relevant experience')
+  await input.press('Enter')
+  await expect(
+    page.getByText('Your conversation is saved.', { exact: true }),
+  ).toBeVisible()
+  await page.getByRole('link', { name: 'Quantum Digital home' }).click()
+  await page.goto('/chat')
+  await expect(page.locator('.chat-message')).toHaveCount(2)
+  await page.reload()
+  await expect(
+    page.getByText('Your conversation is saved.', { exact: true }),
+  ).toBeVisible()
+  const composer = await page.locator('.chat-composer').boundingBox()
+  expect(composer!.y + composer!.height).toBeGreaterThan(
+    page.viewportSize()!.height - 80,
+  )
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
+  await page.screenshot({
+    path: `test-results/chat-workspace-${testInfo.project.name}.png`,
+  })
+  rejectRestart = true
+  await page.getByRole('button', { name: 'Restart chat' }).click()
+  await expect(page.getByRole('alert')).toContainText('couldn’t be restarted')
+  await expect(page.locator('.chat-message')).toHaveCount(2)
+  rejectRestart = false
+  await page.getByRole('button', { name: 'Restart chat' }).click()
+  await expect(page.locator('.chat-message')).toHaveCount(0)
+  await page.reload()
+  await expect(page.locator('.chat-message')).toHaveCount(0)
+})
+
+test('header contact action opens an editable tool form and requires review plus explicit confirmation', async ({
+  page,
+}) => {
+  let messages: unknown[] = []
+  let confirmed = false
+  let submissions = 0
+  const details = {
+    name: 'Alex Founder',
+    email: 'alex@example.com',
+    summary: 'Build a coordination product with practical AI.',
+  }
+  const draft = {
+    draftId: 'inline-draft',
+    details,
+    expiresAt: Date.now() + 3_600_000,
+  }
+  await page.route('**/api/chat-session', (route) =>
+    route.fulfill({
+      json: {
+        available: true,
+        messages,
+        contactDrafts: confirmed
+          ? { 'contact-form': { ...draft, receipt: 'saved' } }
+          : {},
+      },
+    }),
+  )
+  await page.route('**/api/chat', (route) => {
+    const body = route.request().postDataJSON()
+    const output = {
+      formId: 'contact-form',
+      details: { summary: details.summary },
+    }
+    messages = [
+      ...body.messages,
+      {
+        id: 'contact-answer',
+        role: 'assistant',
+        parts: [
+          {
+            type: 'tool-requestContactDetails',
+            toolCallId: 'contact-call',
+            state: 'output-available',
+            input: output.details,
+            output,
+          },
+        ],
+      },
+    ]
+    return route.fulfill({
+      headers,
+      body: stream([
+        { type: 'start', messageId: 'contact-answer' },
+        {
+          type: 'tool-input-available',
+          toolCallId: 'contact-call',
+          toolName: 'requestContactDetails',
+          input: output.details,
+        },
+        { type: 'tool-output-available', toolCallId: 'contact-call', output },
+        { type: 'finish', finishReason: 'stop' },
+      ]),
+    })
+  })
+  await page.route('**/api/inquiry-drafts', (route) => {
+    expect(route.request().postDataJSON()).toMatchObject({
+      contactFormId: 'contact-form',
+      details,
+    })
+    return route.fulfill({ json: draft })
+  })
+  await page.route('**/api/inquiries', (route) => {
+    submissions++
+    confirmed = true
+    return route.fulfill({
+      json: { saved: true, inquiryId: 'confirmed-inline-inquiry' },
+    })
+  })
+  await page.goto('/chat')
+  await page
+    .getByRole('button', { name: 'Contact Rudolfs', exact: true })
+    .click()
+  await expect(
+    page.getByRole('textbox', { name: 'What would you like to discuss?' }),
+  ).toHaveValue(details.summary)
+  await page
+    .getByRole('textbox', { name: 'Name', exact: true })
+    .fill(details.name)
+  await page
+    .getByRole('textbox', { name: 'Email', exact: true })
+    .fill(details.email)
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
+  await page.getByRole('button', { name: 'Review inquiry' }).click()
+  await expect(
+    page.getByRole('heading', { name: 'Review your inquiry' }),
+  ).toBeVisible()
+  expect(submissions).toBe(0)
+  await page.getByRole('button', { name: 'Confirm and submit inquiry' }).click()
+  await expect(page.getByRole('status')).toContainText('Your inquiry is saved')
+  expect(submissions).toBe(1)
+  await page.reload()
+  await expect(page.getByRole('status')).toContainText('Your inquiry is saved')
+  await expect(
+    page.getByRole('button', { name: 'Confirm and submit inquiry' }),
+  ).toHaveCount(0)
 })

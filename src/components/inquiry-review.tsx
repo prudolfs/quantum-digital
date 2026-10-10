@@ -12,16 +12,18 @@ export function InquiryReview({
   active = true,
   busy = false,
   canEdit = true,
+  receipt,
 }: {
   draft: PreparedInquiry
   onEdit: () => void
   active?: boolean
   busy?: boolean
   canEdit?: boolean
+  receipt?: 'saved' | 'expired'
 }) {
   const [status, setStatus] = useState<
     'review' | 'saving' | 'saved' | 'editing'
-  >('review')
+  >(receipt === 'saved' ? 'saved' : 'review')
   const [error, setError] = useState('')
   async function confirm() {
     setStatus('saving')
@@ -74,10 +76,15 @@ export function InquiryReview({
           </>
         )}
       </dl>
-      {status === 'saved' ? (
+      {status === 'saved' || receipt === 'saved' ? (
         <p className="feedback-success" role="status">
           Your inquiry is saved. Rudolfs can review it and reply to the email
           above.
+        </p>
+      ) : receipt === 'expired' ? (
+        <p className="chat-note">
+          This draft expired. Ask the assistant to prepare a fresh draft before
+          submitting.
         </p>
       ) : !active ? (
         <p className="chat-note">

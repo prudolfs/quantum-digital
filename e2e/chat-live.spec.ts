@@ -22,6 +22,9 @@ test('live Gateway streams published work, engagement tools, and an unsubmitted 
   await input.fill(
     'Please take a closer look at the Care Coordination case study. Look it up by slug care-coordination and explain the engineering briefly.',
   )
+  await expect(
+    page.getByRole('button', { name: 'Send', exact: true }),
+  ).toBeEnabled({ timeout: 30_000 })
   await input.press('Enter')
   await expect(
     page.getByRole('complementary', { name: 'Referenced case study' }),
@@ -36,6 +39,9 @@ test('live Gateway streams published work, engagement tools, and an unsubmitted 
   await input.fill(
     'What are the options for working together? Please explain the published engagement options.',
   )
+  await expect(
+    page.getByRole('button', { name: 'Send', exact: true }),
+  ).toBeEnabled({ timeout: 30_000 })
   await input.press('Enter')
   await expect(
     page.getByRole('complementary', { name: 'Working together options' }),
@@ -46,6 +52,9 @@ test('live Gateway streams published work, engagement tools, and an unsubmitted 
   await input.fill(
     'I would like to prepare an inquiry for review. My name is Phase Five Test and my email is phase-five-test@example.com. The project is a test prototype for service coordination with practical AI summaries and human review. Timing and budget should be left out. Please prepare the draft now; I will review it before choosing whether to submit.',
   )
+  await expect(
+    page.getByRole('button', { name: 'Send', exact: true }),
+  ).toBeEnabled({ timeout: 30_000 })
   await input.press('Enter')
   await expect(
     page.getByRole('heading', { name: 'Review your inquiry' }),
@@ -64,12 +73,54 @@ test('live Gateway streams published work, engagement tools, and an unsubmitted 
   ).toHaveCount(0)
   await expect(page.getByRole('alert')).toHaveCount(0)
   expect(submissions).toEqual([])
+  await page.reload()
+  await expect(
+    page.getByRole('heading', { name: 'Review your inquiry' }),
+  ).toBeVisible()
+  await expect(page.locator('.chat-message')).toHaveCount(6)
+  await page.getByRole('button', { name: 'Restart chat' }).click()
+  await expect(page.locator('.chat-message')).toHaveCount(0)
+  await expect(
+    page.getByRole('button', { name: 'Contact Rudolfs', exact: true }),
+  ).toBeEnabled({ timeout: 30_000 })
+  await page
+    .getByRole('button', { name: 'Contact Rudolfs', exact: true })
+    .click()
+  await expect(
+    page.getByRole('textbox', { name: 'Name', exact: true }),
+  ).toBeVisible({ timeout: 60_000 })
+  await expect(
+    page.getByRole('button', { name: 'Stop', exact: true }),
+  ).toHaveCount(0, { timeout: 60_000 })
+  await page
+    .getByRole('textbox', { name: 'Name', exact: true })
+    .fill('Chat Refinement Test')
+  await page
+    .getByRole('textbox', { name: 'Email', exact: true })
+    .fill('chat-refinement-test@example.com')
+  await page
+    .getByRole('textbox', { name: 'What would you like to discuss?' })
+    .fill('Build a test coordination app with human-reviewed AI summaries.')
+  await expect(
+    page.getByRole('button', { name: 'Review inquiry' }),
+  ).toBeEnabled({ timeout: 30_000 })
+  await page.getByRole('button', { name: 'Review inquiry' }).click()
+  await expect(
+    page.getByRole('heading', { name: 'Review your inquiry' }),
+  ).toBeVisible()
+  await page.reload()
+  await expect(
+    page.getByText('chat-refinement-test@example.com', { exact: true }),
+  ).toBeVisible()
+  expect(submissions).toEqual([])
   await page.screenshot({
     path: 'test-results/chat-live-review.png',
     fullPage: true,
   })
+  await page.getByRole('button', { name: 'Restart chat' }).click()
+  await expect(page.locator('.chat-message')).toHaveCount(0)
   await testInfo.attach('live-chat-check', {
     contentType: 'text/plain',
-    body: 'Live streamed case-study lookup and engagement explanations passed. A session-bound draft was prepared with synthetic details. No submission endpoint was called.',
+    body: 'Live Turnstile verification, Gateway streaming, case-study/engagement tools, Convex restoration after reload, restart, and tool-rendered contact form draft preparation passed. Synthetic drafts only; no submission endpoint was called.',
   })
 })

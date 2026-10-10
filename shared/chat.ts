@@ -18,6 +18,16 @@ export const preparedInquirySchema = z.object({
   details: inquirySchema,
   expiresAt: z.number(),
 })
+export const contactFormSchema = z.object({
+  formId: z.string().min(1),
+  details: z.object({
+    name: z.string().optional(),
+    email: z.string().optional(),
+    summary: z.string().optional(),
+    timing: z.string().optional(),
+    budget: z.string().optional(),
+  }),
+})
 export const caseStudyResultSchema = z.discriminatedUnion('available', [
   z.object({
     available: z.literal(true),
@@ -39,6 +49,19 @@ export const engagementResultSchema = z.object({
 })
 
 export function chatErrorNotice(message: string) {
+  if (message.includes('VERIFICATION_FAILED'))
+    return {
+      text: 'Please complete the security check, then retry your message.',
+      retry: true,
+    }
+  if (
+    message.includes('CONVERSATION_CHANGED') ||
+    message.includes('CONVERSATION_BUSY')
+  )
+    return {
+      text: 'This conversation was updated in another tab or is still receiving a response. Reload the chat to continue.',
+      retry: false,
+    }
   if (message.includes('CONVERSATION_LIMIT'))
     return {
       text: 'This conversation has reached its length limit. Clear it to start a new conversation.',

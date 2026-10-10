@@ -80,6 +80,19 @@ export async function intakeRequest<T>(
   if (!response.ok) {
     if (response.status === 429)
       throw new Error('Too many requests. Please try again later.')
+    const result = (await response.json().catch(() => null)) as {
+      error?: string
+    } | null
+    if (
+      result?.error &&
+      [
+        'CONVERSATION_CHANGED',
+        'CONVERSATION_BUSY',
+        'CONVERSATION_LIMIT',
+        'INVALID_CONVERSATION',
+      ].includes(result.error)
+    )
+      throw new Error(result.error)
     throw new Error('The inquiry could not be processed. Please retry.')
   }
   return response.json() as Promise<T>

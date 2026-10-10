@@ -22,6 +22,30 @@ http.route({
       const body = await request.json()
       let result
       switch (body.operation) {
+        case 'conversation-load':
+          result = await ctx.runMutation(internal.conversations.load, {
+            sessionHash: body.sessionHash,
+          })
+          break
+        case 'conversation-restart':
+          result = await ctx.runMutation(internal.conversations.restart, {
+            sessionHash: body.sessionHash,
+          })
+          break
+        case 'conversation-begin':
+          result = await ctx.runMutation(internal.conversations.begin, {
+            sessionHash: body.sessionHash,
+            revision: body.revision,
+            messages: body.messages,
+          })
+          break
+        case 'conversation-finish':
+          result = await ctx.runMutation(internal.conversations.finish, {
+            sessionHash: body.sessionHash,
+            revision: body.revision,
+            ...(body.message ? { message: body.message } : {}),
+          })
+          break
         case 'rate':
           result = await ctx.runMutation(internal.inquiries.checkChatRate, {
             ipHash: body.ipHash,
@@ -31,6 +55,9 @@ http.route({
           result = await ctx.runMutation(internal.inquiries.prepare, {
             sessionHash: body.sessionHash,
             details: body.details,
+            ...(body.contactFormId
+              ? { contactFormId: body.contactFormId }
+              : {}),
           })
           break
         case 'confirm':
@@ -48,11 +75,19 @@ http.route({
     } catch (error) {
       const message = error instanceof Error ? error.message : ''
       const limited = message.includes('Too many requests')
+      const conversationError = [
+        'CONVERSATION_CHANGED',
+        'CONVERSATION_BUSY',
+        'CONVERSATION_LIMIT',
+        'INVALID_CONVERSATION',
+      ].find((code) => message.includes(code))
       return Response.json(
         {
-          error: limited
-            ? 'Too many requests. Please try again later.'
-            : 'The inquiry could not be processed. Please retry.',
+          error:
+            conversationError ??
+            (limited
+              ? 'Too many requests. Please try again later.'
+              : 'The inquiry could not be processed. Please retry.'),
         },
         { status: limited ? 429 : 400 },
       )

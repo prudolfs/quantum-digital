@@ -24,6 +24,14 @@ function tools() {
 }
 
 describe('published chat tools', () => {
+  it('opens a contact form without preparing or submitting an inquiry', async () => {
+    const fixture = tools()
+    const details = { summary: 'A coordination app with practical AI.' }
+    expect(
+      await fixture.tools.requestContactDetails.execute!(details, options),
+    ).toMatchObject({ details, formId: expect.any(String) })
+    expect(fixture.prepare).not.toHaveBeenCalled()
+  })
   it('looks up published work, handles missing work, and rechecks publication on each call', async () => {
     const fixture = tools()
     const result = await fixture.tools.getCaseStudy.execute!(
@@ -63,6 +71,7 @@ describe('published chat tools', () => {
     })
     expect(fixture.prepare).not.toHaveBeenCalled()
     expect(Object.keys(fixture.tools)).toEqual([
+      'requestContactDetails',
       'getCaseStudy',
       'explainEngagements',
       'prepareInquiry',
