@@ -12,7 +12,7 @@ The hero uses semantic HTML and static Q artwork before lazy enhancement. A shar
 
 ## Conversation and inquiries
 
-The primary CTA and pinned header link open `/chat`, using chat-bubble icons. There is no standalone contact form and no booking integration. Vercel AI SDK streams through `/api/chat`; a configured AI Gateway key and model enable it. The assistant receives only curated public site content.
+The primary CTA and pinned header link open `/chat`, using chat-bubble icons. There is no standalone contact form and no booking integration. Vercel AI SDK streams through `/api/chat`; a configured AI Gateway key and model enable it. The assistant receives only curated public site content, with a compact work index and on-demand `getCaseStudy` lookups. `explainEngagements` returns the approved collaboration options. Safe inline links and structured reference cards let visitors move to the relevant work and service/engagement sections. See [Chat behavior](chat-behavior.md) for streaming limits and recovery.
 
 A temporary HttpOnly cookie identifies the conversation. The assistant’s only intake tool prepares a validated, expiring draft in Convex. The visitor sees the exact draft and clicks confirmation. `/api/inquiries` checks same origin and the conversation cookie, then sends the draft ID and session hash to the secret-protected Convex HTTP bridge. The internal mutation checks ownership and expiry and saves the held snapshot once. Neither model text nor model tool execution can submit an inquiry.
 

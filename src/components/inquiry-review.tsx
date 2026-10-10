@@ -1,21 +1,23 @@
 import { useState } from 'react'
-import { z } from 'zod'
-import { inquirySchema } from '../../shared/inquiry'
+import type { z } from 'zod'
+import { preparedInquirySchema } from '../../shared/chat'
+export { preparedInquirySchema } from '../../shared/chat'
 import { Button } from '@/components/ui/button'
 
-export const preparedInquirySchema = z.object({
-  draftId: z.string(),
-  details: inquirySchema,
-  expiresAt: z.number(),
-})
 type PreparedInquiry = z.infer<typeof preparedInquirySchema>
 
 export function InquiryReview({
   draft,
   onEdit,
+  active = true,
+  busy = false,
+  canEdit = true,
 }: {
   draft: PreparedInquiry
   onEdit: () => void
+  active?: boolean
+  busy?: boolean
+  canEdit?: boolean
 }) {
   const [status, setStatus] = useState<
     'review' | 'saving' | 'saved' | 'editing'
@@ -77,6 +79,11 @@ export function InquiryReview({
           Your inquiry is saved. Rudolfs can review it and reply to the email
           above.
         </p>
+      ) : !active ? (
+        <p className="chat-note">
+          An updated draft is shown below. Review the latest details before
+          confirming.
+        </p>
       ) : status === 'editing' ? (
         <p className="chat-note">
           This draft wasn’t submitted. Continue the conversation to make
@@ -95,7 +102,7 @@ export function InquiryReview({
           )}
           <div className="action-row">
             <Button
-              disabled={status === 'saving'}
+              disabled={status === 'saving' || busy}
               onClick={() => void confirm()}
             >
               {status === 'saving'
@@ -104,7 +111,7 @@ export function InquiryReview({
             </Button>
             <Button
               variant="outline"
-              disabled={status === 'saving'}
+              disabled={status === 'saving' || busy || !canEdit}
               onClick={() => {
                 setStatus('editing')
                 onEdit()
@@ -113,6 +120,12 @@ export function InquiryReview({
               Make changes
             </Button>
           </div>
+          {!canEdit && (
+            <p className="chat-note">
+              To change these details, clear the conversation and prepare a new
+              draft.
+            </p>
+          )}
         </>
       )}
     </section>

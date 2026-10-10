@@ -8,7 +8,7 @@ The public site has the shared fluid/particle hero, original Blender service ill
 
 The AI conversation collects project and contact details and prepares a temporary inquiry draft. Only the visitor’s explicit confirmation saves it in Convex. `/admin` provides an owner-only inbox with status filtering and updates. There is no public contact form or calendar booking. The same workspace manages case studies, services, site settings, and FAQs with explicit draft/publish controls.
 
-The Quantum Digital cloud development backend is connected and configured for owner setup. Production Convex, AI credentials/model, and the real owner account still need configuration. No site has been published. See [Inquiry setup](docs/inquiry-setup.md) for exact setup steps and verification limits.
+The Quantum Digital cloud development backend is connected and configured for owner setup. The owner has configured local AI Gateway credentials and Gemini 2.5 Flash; live streaming and inquiry draft preparation are verified. Production Convex and the real owner account still need release verification. No site has been published. See [Inquiry setup](docs/inquiry-setup.md) for exact setup steps and verification limits.
 
 ## Development
 
@@ -55,7 +55,7 @@ pnpm test:e2e
 pnpm deploy:check
 ```
 
-`check` runs TypeScript for frontend/backend, Oxlint, Oxfmt, Vitest, and convex-test behavior checks. Browser tests use production preview on desktop and mobile Chromium and include keyboard/accessibility, JavaScript-free rendering, graphics fallback, responsive screenshots, metadata, case studies, streamed chat review/retry receipts, and private inbox access. Model streaming is mocked in browser tests; persistence and access controls are tested against Convex’s test runtime. Live AI-provider requests and production owner sign-in require configured credentials and deployment.
+`check` runs TypeScript for frontend/backend, Oxlint, Oxfmt, Vitest, and convex-test behavior checks. Browser tests use production preview on desktop and mobile Chromium and include keyboard/accessibility, JavaScript-free rendering, graphics fallback, responsive screenshots, metadata, case studies, streamed chat review/retry receipts, and private inbox access. Model streaming is mocked in browser tests; persistence and access controls are tested against Convex’s test runtime. The separate opt-in live chat check verified real Gateway streaming, published tools, and an unsubmitted draft. Production owner sign-in and deployed-domain confirmation still require release verification.
 
 Use `pnpm test:launch` for checks, production build, and browser tests together. `pnpm deploy:check` builds and packages the Worker with `--dry-run`; it does not publish.
 
@@ -79,3 +79,4 @@ Service illustrations are original Blender scenes, exported as lazy-loaded JPEGs
 - [Content decisions](docs/content-decisions.md)
 - [Inquiry setup](docs/inquiry-setup.md)
 - [Admin workflow](docs/admin-workflow.md)
+- [Chat behavior](docs/chat-behavior.md)

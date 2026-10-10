@@ -142,29 +142,31 @@ Provide a private owner workspace for inquiries, work, services, and a small set
 
 ## Phase 5: AI chat experience
 
-- [x] Build the full-page conversation UI with the Vercel AI SDK and a server-only AI Gateway integration. Live provider verification requires credentials.
+- [x] Build the full-page conversation UI with the Vercel AI SDK and a server-only AI Gateway integration. Live provider verification passed with the configured Gateway credentials.
 - [x] Keep the header chat link and contextual CTAs pointing to `/chat`; provide a clear way back to the website.
 - [x] Use “Tell me about your project” as the primary CTA; keep all public content accessible without chat.
 - [x] Support streaming, loading states, retry/error handling, and mobile layouts.
-- [ ] Add starter prompts:
-  - [ ] “I have an idea for a product”
-  - [ ] “I want to use AI or automate a workflow”
-  - [ ] “Show me relevant work”
-  - [ ] “Let’s discuss working together”
+- [x] Add starter prompts:
+  - [x] “I have an idea for a product”
+  - [x] “I want to use AI or automate a workflow”
+  - [x] “Show me relevant work”
+  - [x] “Let’s discuss working together”
 - [x] Provide concise, curated context from published site content.
 - [x] Ground responses in available content; do not fabricate experience, capabilities, or outcomes.
-- [ ] Link to relevant case studies and service sections instead of repeating entire pages.
+- [x] Link to relevant case studies and service sections instead of repeating entire pages.
 - [x] Make chat optional for browsing. Inquiry collection happens through the conversation, with email as an availability fallback.
 - [x] Add a clear way to restart or clear a conversation.
-- [ ] Test empty, long, interrupted, and failed conversations.
+- [x] Test empty, long, interrupted, and failed conversations.
 
 ### Initial tool set
 
-- [ ] `getCaseStudy`: return a published case study by slug.
-- [ ] `explainEngagements`: explain project-based and ongoing engagement options.
+- [x] `getCaseStudy`: return a published case study by slug.
+- [x] `explainEngagements`: explain project-based and ongoing engagement options.
 - [x] `prepareInquiry`: prepare a validated, temporary server-held draft for on-screen review. This tool cannot submit an inquiry.
 - [x] Server confirmation action: save the held draft only after the visitor clicks the explicit confirmation button; bind it to the conversation and handle retries idempotently.
-- [ ] Add `searchSelectedWork` only if a simple published-content lookup is insufficient.
+- [x] Use the compact published case-study index for selection; `searchSelectedWork` is unnecessary for the current catalogue and remains an optional later addition.
+
+**Implementation status:** All four starter prompts, published-only `getCaseStudy` and `explainEngagements`, safe clickable references, and inquiry preparation are implemented. Context includes a compact work index; full case details are fetched on demand. Gemini 2.5 Flash streams with thinking disabled, a 1,000-token output cap per step, at most four steps, one transport retry, and a 45-second generation timeout. Browser tests cover empty, long, failed/retried, and interrupted conversations on desktop/mobile, including clearing an active stream. A live Gateway browser check passed for case lookup, engagement explanations, and an unsubmitted synthetic inquiry draft. No confirmation/submission call was made. Deployed-domain and real owner-inbox verification remain Phase 6/7 release steps. See [Chat behavior](chat-behavior.md).
 
 **Exit criteria:** The assistant can explain the offer, reference real portfolio work, and gather project/contact details conversationally. It prepares a draft but never submits an inquiry or claims it was saved. Live streaming and failure/retry behavior must be verified with production AI credentials.
 

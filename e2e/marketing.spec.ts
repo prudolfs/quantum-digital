@@ -52,6 +52,9 @@ test('work, services and full-page chat remain usable with reduced motion', asyn
   page,
   isMobile,
 }) => {
+  await page.route('**/api/chat-session', (route) =>
+    route.fulfill({ json: { available: false } }),
+  )
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/')
   await expect(page.locator('[data-hero-fallback]').first()).toBeVisible()
@@ -91,6 +94,9 @@ test('work, services and full-page chat remain usable with reduced motion', asyn
 test('graphics failure preserves readable copy and working actions', async ({
   page,
 }) => {
+  await page.route('**/api/chat-session', (route) =>
+    route.fulfill({ json: { available: false } }),
+  )
   await page.addInitScript(() => {
     const original = HTMLCanvasElement.prototype.getContext
     HTMLCanvasElement.prototype.getContext = function (
