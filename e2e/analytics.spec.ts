@@ -116,12 +116,30 @@ test('tracks public navigation and inquiry outcomes without contact data or rest
   const count = (name: string) =>
     events.filter((event) => event.event === name).length
   await page.goto('/about?email=private@example.com#private-fragment')
+  await expect(
+    page.getByRole('dialog', { name: 'Analytics cookies' }),
+  ).toBeVisible()
+  expect(events).toEqual([])
+  expect(
+    (await page.context().cookies()).filter((cookie) =>
+      cookie.name.startsWith('ph_'),
+    ),
+  ).toEqual([])
+  await page
+    .getByRole('button', { name: 'Accept analytics', exact: true })
+    .click()
   await expect.poll(() => count('$pageview'), { timeout: 10_000 }).toBe(1)
   expect(events[0]!.properties.page_path).toBe('/about')
   expect(events[0]!.properties.$pathname).toBe('/about')
   expect(events[0]!.properties.$host).toBe(new URL(baseURL!).hostname)
   expect(events[0]!.properties.$raw_user_agent).toContain('Mozilla/5.0')
-  expect(events[0]!.properties.$cookieless_mode).toBe(true)
+  expect(events[0]!.properties.$cookieless_mode).toBeUndefined()
+  const visitor = events[0]!.properties.distinct_id
+  const session = events[0]!.properties.$session_id
+  expect(visitor).not.toContain('cookieless')
+  expect(session).toMatch(
+    /^[\da-f]{8}-[\da-f]{4}-7[\da-f]{3}-[89ab][\da-f]{3}-[\da-f]{12}$/i,
+  )
   // Use the real client router, not a full document reload.
   await page
     .getByRole('link', { name: 'Let’s talk', exact: true })
@@ -171,6 +189,9 @@ test('tracks public navigation and inquiry outcomes without contact data or rest
     )
     expect(event.properties.$host).toBe(new URL(baseURL!).hostname)
     expect(event.properties.$raw_user_agent).toContain('Mozilla/5.0')
+    expect(event.properties.distinct_id).toBe(visitor)
+    expect(event.properties.$session_id).toBe(session)
+    expect(event.properties.$cookieless_mode).toBeUndefined()
   }
   expect(count('inquiry_requested')).toBe(1)
   expect(count('inquiry_reviewed')).toBe(1)
@@ -187,7 +208,7 @@ test('tracks public navigation and inquiry outcomes without contact data or rest
     (await page.context().cookies()).filter((cookie) =>
       cookie.name.startsWith('ph_'),
     ),
-  ).toEqual([])
+  ).not.toEqual([])
   expect(
     await page.evaluate(() =>
       Object.keys(localStorage).filter((key) => key.startsWith('ph_')),
@@ -266,6 +287,14 @@ test('tracks inline contact request, draft review and confirmed submission', asy
   const count = (name: string) =>
     events.filter((event) => event.event === name).length
   await page.goto('/chat')
+  const banner = page.getByRole('dialog', { name: 'Analytics cookies' })
+  await expect(banner).toBeVisible()
+  const bannerBounds = (await banner.boundingBox())!
+  const composerBounds = (await page.locator('.chat-composer').boundingBox())!
+  expect(bannerBounds.y + bannerBounds.height).toBeLessThan(composerBounds.y)
+  await page
+    .getByRole('button', { name: 'Accept analytics', exact: true })
+    .click()
   await page
     .getByRole('button', { name: 'Contact Rudolfs', exact: true })
     .click()
@@ -297,8 +326,73 @@ test('tracks inline contact request, draft review and confirmed submission', asy
   for (const value of Object.values(details))
     expect(JSON.stringify(events)).not.toContain(value)
   expect(
-    await page.evaluate(() =>
-      Object.keys(sessionStorage).filter((key) => key.startsWith('ph_')),
+    (await page.context().cookies()).some((cookie) =>
+      cookie.name.startsWith('ph_'),
+    ),
+  ).toBe(true)
+})
+
+test('rejects tracking, remembers consent, and clears cookies when consent is withdrawn', async ({
+  page,
+}) => {
+  test.setTimeout(60_000)
+  const events = await interceptAnalytics(page)
+  await page.goto('/about')
+  await page
+    .getByRole('button', { name: 'Reject analytics', exact: true })
+    .click()
+  await page.waitForTimeout(3500)
+  expect(events).toEqual([])
+  expect(
+    (await page.context().cookies()).filter((cookie) =>
+      cookie.name.startsWith('ph_'),
     ),
   ).toEqual([])
+  await page.reload()
+  await expect(
+    page.getByRole('dialog', { name: 'Analytics cookies' }),
+  ).toHaveCount(0)
+  await page
+    .getByRole('button', { name: 'Cookie preferences', exact: true })
+    .click()
+  await page
+    .getByRole('button', { name: 'Accept analytics', exact: true })
+    .click()
+  await expect
+    .poll(() => events.filter((event) => event.event === '$pageview').length, {
+      timeout: 10_000,
+    })
+    .toBe(1)
+  expect(
+    (await page.context().cookies()).some((cookie) =>
+      cookie.name.startsWith('ph_'),
+    ),
+  ).toBe(true)
+  await page.goto('/privacy')
+  await expect
+    .poll(() => events.filter((event) => event.event === '$pageview').length, {
+      timeout: 10_000,
+    })
+    .toBe(2)
+  await page
+    .getByRole('button', { name: 'Cookie preferences', exact: true })
+    .first()
+    .click()
+  await page
+    .getByRole('button', { name: 'Reject analytics', exact: true })
+    .click()
+  await expect
+    .poll(
+      async () =>
+        (await page.context().cookies()).filter((cookie) =>
+          cookie.name.startsWith('ph_'),
+        ).length,
+    )
+    .toBe(0)
+  await page.goto('/about')
+  await page.waitForTimeout(3500)
+  expect(events.filter((event) => event.event === '$pageview')).toHaveLength(2)
+  await expect(
+    page.getByRole('dialog', { name: 'Analytics cookies' }),
+  ).toHaveCount(0)
 })

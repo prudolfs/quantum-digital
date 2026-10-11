@@ -1,5 +1,13 @@
 import type { CaptureResult, PostHog } from 'posthog-js/dist/module.slim'
 import { publicEnv } from '@/env'
+import {
+  getAnalyticsConsent,
+  subscribeAnalyticsConsent,
+} from '@/lib/analytics-consent'
+
+export const analyticsConfigured = Boolean(
+  publicEnv.VITE_POSTHOG_PROJECT_TOKEN && publicEnv.VITE_POSTHOG_HOST,
+)
 
 export type AnalyticsEvent =
   | '$pageview'
@@ -51,24 +59,31 @@ export function sanitizeAnalyticsEvent(event: CaptureResult | null) {
     $pathname: pagePath,
     $process_person_profile: false,
     $geoip_disable: true,
-    $cookieless_mode: true,
   }
-  // Cookieless ingestion needs the real browser User-Agent to derive its
-  // server-side visitor/session hash. Removing it can drop otherwise valid
-  // pageviews. Take it from the browser, never from custom event properties.
+  // Browser metadata supports traffic classification. Never accept custom text.
   if (typeof navigator !== 'undefined' && navigator.userAgent)
     properties.$raw_user_agent = navigator.userAgent
   for (const key of ['token', 'distinct_id', '$lib', '$lib_version']) {
     if (typeof event.properties[key] === 'string')
       properties[key] = event.properties[key]
   }
+  // Web Analytics needs the SDK's session UUID to aggregate cookie-mode visits.
+  const session = event.properties.$session_id
+  if (
+    typeof session === 'string' &&
+    /^[\da-f]{8}-[\da-f]{4}-7[\da-f]{3}-[89ab][\da-f]{3}-[\da-f]{12}$/i.test(
+      session,
+    )
+  )
+    properties.$session_id = session
   if (['contact_form', 'conversation'].includes(event.properties.source))
     properties.source = event.properties.source
   return { ...event, properties }
 }
 
 let client: Promise<PostHog | undefined> | undefined
-function allowed() {
+let initialized: PostHog | undefined
+export function analyticsAllowed() {
   if (typeof window === 'undefined') return false
   const privacy = navigator as Navigator & { globalPrivacyControl?: boolean }
   if (privacy.doNotTrack === '1' || privacy.globalPrivacyControl) return false
@@ -80,6 +95,9 @@ function allowed() {
     !loopback || new URL(publicEnv.VITE_SITE_URL).origin === location.origin
   )
 }
+function allowed() {
+  return analyticsAllowed() && getAnalyticsConsent() === 'accepted'
+}
 function getClient() {
   if (
     !allowed() ||
@@ -89,10 +107,17 @@ function getClient() {
     return Promise.resolve(undefined)
   client ??= import('posthog-js/dist/module.slim')
     .then(({ default: posthog }) => {
+      // Consent can be withdrawn while the SDK is being imported.
+      if (!allowed()) return undefined
       posthog.init(publicEnv.VITE_POSTHOG_PROJECT_TOKEN!, {
         api_host: publicEnv.VITE_POSTHOG_HOST,
-        cookieless_mode: 'always',
-        persistence: 'memory',
+        persistence: 'cookie',
+        cookie_expiration: 180,
+        cross_subdomain_cookie: false,
+        secure_cookie: location.protocol === 'https:',
+        opt_out_capturing_by_default: true,
+        opt_out_persistence_by_default: true,
+        opt_out_capturing_persistence_type: 'cookie',
         person_profiles: 'never',
         autocapture: false,
         capture_pageview: false,
@@ -114,9 +139,18 @@ function getClient() {
         ip: false,
         before_send: sanitizeAnalyticsEvent,
       })
+      initialized = posthog
+      posthog.opt_in_capturing({ captureEventName: false })
+      subscribeAnalyticsConsent(() => {
+        if (allowed()) posthog.opt_in_capturing({ captureEventName: false })
+        else posthog.opt_out_capturing()
+      })
       return posthog
     })
     .catch(() => undefined)
+    .finally(() => {
+      if (!initialized) client = undefined
+    })
   return client
 }
 export function captureAnalytics(
@@ -129,6 +163,7 @@ export function captureAnalytics(
   // Take the route at the interaction time, even if SDK import finishes later.
   void getClient().then((posthog) => {
     try {
+      if (!allowed()) return
       posthog?.capture(event, {
         page_path: path,
         ...(source ? { source } : {}),
@@ -144,6 +179,7 @@ export function captureAnalyticsOnce(
   localId: string,
   source?: AnalyticsSource,
 ) {
+  if (!allowed()) return
   const key = `${event}:${localId}`
   if (captured.has(key)) return
   captured.add(key)

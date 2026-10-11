@@ -101,3 +101,7 @@ Use gold for hero cursor effects and secondary tiles behind trailing CTA arrows.
 - Keep Turnstile interaction close to the composer; verification must not obscure messages or the confirmation card.
 
 - Keep chat top-bar and composer backgrounds transparent so the hexagon pattern remains visible. Put Contact Rudolfs beside Restart chat in the top bar; use accessible icon-only controls on narrow screens.
+
+## Analytics consent
+
+Use a compact, nonmodal analytics-cookie banner with equally visible accept/reject actions and a Privacy link. Match the dark surface, ice text, and existing button styles. On chat, position it below the header so it does not cover the bottom composer. Keep Cookie preferences available in the footer and Privacy page. Essential chat/admin cookies are independent of the analytics choice.

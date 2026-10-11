@@ -1,4 +1,5 @@
 import { BrandLink } from '@/components/brand-link'
+import { AnalyticsPreferencesButton } from '@/components/site-analytics'
 import { HeaderNavigation } from '@/components/header-navigation'
 import { Link, useLocation } from '@tanstack/react-router'
 import { useEffect, useState, type ReactNode } from 'react'
@@ -81,6 +82,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
               </a>
             ))}
             <Link to="/privacy">Privacy</Link>
+            <AnalyticsPreferencesButton />
           </div>
         </div>
       </footer>

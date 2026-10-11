@@ -93,4 +93,4 @@ About uses the approved résumé-grounded career journey in `src/content/about.t
 
 Project context and delivery uses the same gold-chevron FAQ rows and Motion transitions as the homepage, with keyboard and JavaScript-free support. See [Release checks](docs/work-release.md) for verification and rollback guidance.
 
-Public cookieless PostHog analytics tracks page views and the chat/inquiry funnel. The EU project token and host are public Wrangler build defaults; optional Cloudflare build variables can override them. Enable cookieless analytics in the PostHog project. See [Analytics setup and events](docs/analytics.md).
+Consent-gated cookie-based PostHog analytics tracks page views and the chat/inquiry funnel. The EU project token and host are public Wrangler build defaults; optional Cloudflare build variables can override them. Visitors choose whether to accept analytics cookies; rejected or pending consent sends no analytics. See [Analytics setup and events](docs/analytics.md).

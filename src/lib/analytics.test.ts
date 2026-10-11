@@ -1,6 +1,11 @@
 import { beforeEach, afterEach, expect, it, vi } from 'vitest'
 import type { CaptureResult } from 'posthog-js/dist/module.slim'
-const sdk = vi.hoisted(() => ({ init: vi.fn(), capture: vi.fn() }))
+const sdk = vi.hoisted(() => ({
+  init: vi.fn(),
+  capture: vi.fn(),
+  opt_in_capturing: vi.fn(),
+  opt_out_capturing: vi.fn(),
+}))
 vi.mock('posthog-js/dist/module.slim', () => ({ default: sdk }))
 vi.mock('@/env', () => ({
   publicEnv: {
@@ -12,10 +17,21 @@ vi.mock('@/env', () => ({
 beforeEach(() => {
   vi.resetModules()
   vi.clearAllMocks()
-  vi.stubGlobal('window', {})
+  const values = new Map<string, string>([
+    ['qd-analytics-consent:v1', 'accepted'],
+  ])
+  vi.stubGlobal('window', {
+    localStorage: {
+      getItem: (key: string) => values.get(key) ?? null,
+      setItem: (key: string, value: string) => values.set(key, value),
+    },
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  })
   vi.stubGlobal('location', {
     pathname: '/chat',
     origin: 'https://example.com',
+    protocol: 'https:',
     hostname: 'example.com',
   })
   vi.stubGlobal('navigator', {
@@ -33,7 +49,7 @@ it('drops unknown events and removes personal data, query strings, and SDK enric
       page_path: '/chat',
       source: 'contact_form',
       token: 'phc_test',
-      distinct_id: '$posthog_cookieless',
+      distinct_id: 'anonymous-visitor',
       email: 'private@example.com',
       name: 'Private name',
       summary: 'Confidential project',
@@ -43,6 +59,8 @@ it('drops unknown events and removes personal data, query strings, and SDK enric
       $initial_referrer: 'private',
       $set: { email: 'private@example.com' },
       $device_id: 'persistent-id',
+      $session_id: '01960000-0000-7000-8000-000000000001',
+      $cookieless_mode: true,
       $host: 'private.example.com',
       $pathname: '/chat?email=private@example.com',
       $raw_user_agent: 'private custom text',
@@ -53,14 +71,14 @@ it('drops unknown events and removes personal data, query strings, and SDK enric
     page_path: '/chat',
     source: 'contact_form',
     token: 'phc_test',
-    distinct_id: '$posthog_cookieless',
+    distinct_id: 'anonymous-visitor',
     $current_url: 'https://example.com/chat',
     $host: 'example.com',
     $pathname: '/chat',
     $raw_user_agent: 'Mozilla/5.0 Test Browser',
     $process_person_profile: false,
     $geoip_disable: true,
-    $cookieless_mode: true,
+    $session_id: '01960000-0000-7000-8000-000000000001',
   })
   expect(sanitizeAnalyticsEvent({ ...input, event: '$autocapture' })).toBeNull()
   expect(
@@ -79,7 +97,10 @@ it('captures once without transmitting the local deduplication ID', async () => 
   expect(sdk.init).toHaveBeenCalledWith(
     'phc_test_project',
     expect.objectContaining({
-      cookieless_mode: 'always',
+      persistence: 'cookie',
+      opt_out_capturing_by_default: true,
+      opt_out_persistence_by_default: true,
+      cross_subdomain_cookie: false,
       autocapture: false,
       capture_pageview: false,
       disable_session_recording: true,
@@ -87,6 +108,8 @@ it('captures once without transmitting the local deduplication ID', async () => 
       advanced_disable_flags: true,
     }),
   )
+  expect(sdk.init.mock.calls[0]?.[1].cookieless_mode).toBeUndefined()
+  expect(sdk.opt_in_capturing).toHaveBeenCalledWith({ captureEventName: false })
 })
 it('does not initialize for private routes, normal local review, or privacy opt-outs', async () => {
   const { captureAnalytics } = await import('./analytics')
@@ -120,5 +143,33 @@ it('analytics failures cannot interrupt an inquiry or navigation', async () => {
   })
   const { captureAnalytics } = await import('./analytics')
   expect(() => captureAnalytics('inquiry_submitted')).not.toThrow()
+  await vi.waitFor(() => expect(sdk.capture).toHaveBeenCalledTimes(1))
+})
+
+it('waits for consent, supports withdrawal, and ignores events before acceptance', async () => {
+  const { setAnalyticsConsent } = await import('./analytics-consent')
+  const { captureAnalytics, captureAnalyticsOnce } = await import('./analytics')
+  setAnalyticsConsent('rejected')
+  captureAnalytics('$pageview')
+  captureAnalyticsOnce('inquiry_reviewed', 'draft')
+  expect(sdk.init).not.toHaveBeenCalled()
+  setAnalyticsConsent('accepted')
+  captureAnalyticsOnce('inquiry_reviewed', 'draft')
+  await vi.waitFor(() => expect(sdk.capture).toHaveBeenCalledTimes(1))
+  setAnalyticsConsent('rejected')
+  expect(sdk.opt_out_capturing).toHaveBeenCalledTimes(1)
+  captureAnalytics('$pageview')
+  expect(sdk.capture).toHaveBeenCalledTimes(1)
+})
+
+it('does not initialize after consent is withdrawn during the SDK import', async () => {
+  const { setAnalyticsConsent } = await import('./analytics-consent')
+  const { captureAnalytics } = await import('./analytics')
+  captureAnalytics('$pageview')
+  setAnalyticsConsent('rejected')
+  await new Promise((resolve) => setTimeout(resolve, 0))
+  expect(sdk.init).not.toHaveBeenCalled()
+  setAnalyticsConsent('accepted')
+  captureAnalytics('$pageview')
   await vi.waitFor(() => expect(sdk.capture).toHaveBeenCalledTimes(1))
 })

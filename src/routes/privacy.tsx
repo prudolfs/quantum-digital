@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { pageHead } from '@/lib/seo'
+import { AnalyticsPreferencesButton } from '@/components/site-analytics'
 import { loadPublishedContent } from '@/server/content'
 
 export const Route = createFileRoute('/privacy')({
@@ -60,15 +61,21 @@ function PrivacyPage() {
         <p className="body-copy">
           PostHog helps measure public page visits and the steps from starting
           chat to requesting, reviewing, and submitting an inquiry. Analytics
-          uses cookieless mode and does not add analytics cookies or store a
-          visitor ID in your browser. PostHog processes technical connection
-          information to group cookieless visits. It does not receive your name,
-          email, chat messages, project details, timing, or budget through these
-          events. Session replay and automatic form capture are disabled, and
-          analytics excludes the private admin pages, URL query strings, and
-          fragments. Do Not Track and Global Privacy Control signals are
-          respected.
+          starts only after you accept analytics cookies. PostHog stores a
+          first-party cookie with a random visitor ID and a session ID to count
+          visits, including returning browsers, for up to 180 days. Your accept
+          or reject choice is saved locally so you do not have to repeat it. You
+          can change that choice below or through Cookie preferences in the
+          footer. Rejecting stops future tracking and removes the analytics
+          cookie; essential chat and admin cookies remain. PostHog receives the
+          public page path and browser information, including User-Agent. It
+          does not receive your name, email, chat messages, project details,
+          timing, or budget through these events. Session replay and automatic
+          form capture are disabled, and analytics excludes the private admin
+          pages, URL query strings, and fragments. Do Not Track and Global
+          Privacy Control signals are respected.
         </p>
+        <AnalyticsPreferencesButton />
       </section>
       <section>
         <h2 className="section-title">Cookies and abuse prevention</h2>
