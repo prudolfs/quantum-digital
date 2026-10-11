@@ -135,6 +135,11 @@ test('tracks public navigation and inquiry outcomes without contact data or rest
   expect(events[0]!.properties.$raw_user_agent).toContain('Mozilla/5.0')
   expect(events[0]!.properties.$cookieless_mode).toBeUndefined()
   const visitor = events[0]!.properties.distinct_id
+  const device = events[0]!.properties.$device_id
+  expect(device).toMatch(
+    /^[\da-f]{8}-[\da-f]{4}-7[\da-f]{3}-[89ab][\da-f]{3}-[\da-f]{12}$/i,
+  )
+  expect(device).toBe(visitor)
   const session = events[0]!.properties.$session_id
   expect(visitor).not.toContain('cookieless')
   expect(session).toMatch(
@@ -190,6 +195,7 @@ test('tracks public navigation and inquiry outcomes without contact data or rest
     expect(event.properties.$host).toBe(new URL(baseURL!).hostname)
     expect(event.properties.$raw_user_agent).toContain('Mozilla/5.0')
     expect(event.properties.distinct_id).toBe(visitor)
+    expect(event.properties.$device_id).toBe(device)
     expect(event.properties.$session_id).toBe(session)
     expect(event.properties.$cookieless_mode).toBeUndefined()
   }
@@ -209,6 +215,12 @@ test('tracks public navigation and inquiry outcomes without contact data or rest
       cookie.name.startsWith('ph_'),
     ),
   ).not.toEqual([])
+  const identityCookie = (await page.context().cookies()).find((cookie) =>
+    cookie.name.endsWith('_posthog'),
+  )!
+  expect(JSON.parse(decodeURIComponent(identityCookie.value)).$device_id).toBe(
+    device,
+  )
   expect(
     await page.evaluate(() =>
       Object.keys(localStorage).filter((key) => key.startsWith('ph_')),

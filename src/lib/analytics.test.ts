@@ -58,7 +58,7 @@ it('drops unknown events and removes personal data, query strings, and SDK enric
       $referrer: 'https://private.example.com/path',
       $initial_referrer: 'private',
       $set: { email: 'private@example.com' },
-      $device_id: 'persistent-id',
+      $device_id: '01960000-0000-7000-8000-000000000002',
       $session_id: '01960000-0000-7000-8000-000000000001',
       $cookieless_mode: true,
       $host: 'private.example.com',
@@ -78,8 +78,26 @@ it('drops unknown events and removes personal data, query strings, and SDK enric
     $raw_user_agent: 'Mozilla/5.0 Test Browser',
     $process_person_profile: false,
     $geoip_disable: true,
+    $device_id: '01960000-0000-7000-8000-000000000002',
     $session_id: '01960000-0000-7000-8000-000000000001',
   })
+  for (const device of ['private@example.com', null, 'persistent-id']) {
+    expect(
+      sanitizeAnalyticsEvent({
+        ...input,
+        properties: { ...input.properties, $device_id: device },
+      })!.properties.$device_id,
+    ).toBeUndefined()
+  }
+  expect(
+    sanitizeAnalyticsEvent({
+      ...input,
+      properties: {
+        ...input.properties,
+        $device_id: '11111111-1111-4111-8111-111111111111',
+      },
+    })!.properties.$device_id,
+  ).toBe('11111111-1111-4111-8111-111111111111')
   expect(sanitizeAnalyticsEvent({ ...input, event: '$autocapture' })).toBeNull()
   expect(
     sanitizeAnalyticsEvent({ ...input, properties: { page_path: '/admin' } }),

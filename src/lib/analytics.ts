@@ -45,7 +45,7 @@ export function analyticsPath(pathname: string) {
 }
 
 // Replace SDK-enriched properties: no query strings, referrers, form text,
-// transcript/draft IDs, identities, or error messages leave the browser.
+// transcript/draft IDs, personal identities, or error messages leave the browser.
 export function sanitizeAnalyticsEvent(event: CaptureResult | null) {
   if (!event || !events.has(event.event)) return null
   const path = event.properties.page_path
@@ -67,6 +67,15 @@ export function sanitizeAnalyticsEvent(event: CaptureResult | null) {
     if (typeof event.properties[key] === 'string')
       properties[key] = event.properties[key]
   }
+  // Keep the SDK's random browser UUID, including older UUIDv4 cookies.
+  const device = event.properties.$device_id
+  if (
+    typeof device === 'string' &&
+    /^[\da-f]{8}-[\da-f]{4}-[47][\da-f]{3}-[89ab][\da-f]{3}-[\da-f]{12}$/i.test(
+      device,
+    )
+  )
+    properties.$device_id = device
   // Web Analytics needs the SDK's session UUID to aggregate cookie-mode visits.
   const session = event.properties.$session_id
   if (

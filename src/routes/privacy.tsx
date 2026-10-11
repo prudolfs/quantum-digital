@@ -62,11 +62,11 @@ function PrivacyPage() {
           PostHog helps measure public page visits and the steps from starting
           chat to requesting, reviewing, and submitting an inquiry. Analytics
           starts only after you accept analytics cookies. PostHog stores a
-          first-party cookie with a random visitor ID and a session ID to count
-          visits, including returning browsers, for up to 180 days. Your accept
-          or reject choice is saved locally so you do not have to repeat it. You
-          can change that choice below or through Cookie preferences in the
-          footer. Rejecting stops future tracking and removes the analytics
+          first-party cookie with a random visitor/device ID and a session ID to
+          count visits, including returning browsers, for up to 180 days. Your
+          accept or reject choice is saved locally so you do not have to repeat
+          it. You can change that choice below or through Cookie preferences in
+          the footer. Rejecting stops future tracking and removes the analytics
           cookie; essential chat and admin cookies remain. PostHog receives the
           public page path and browser information, including User-Agent. It
           does not receive your name, email, chat messages, project details,
