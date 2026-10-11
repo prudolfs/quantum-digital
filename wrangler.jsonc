@@ -7,6 +7,8 @@
   "observability": { "enabled": true },
   // Public VITE_* values also supply build defaults; local/CI env values override them.
   "vars": {
+    "VITE_POSTHOG_PROJECT_TOKEN": "phc_qGc6Rwiayw2DmkqOrPBhi7JuuM4iuffFo7xP00QziQi",
+    "VITE_POSTHOG_HOST": "https://eu.i.posthog.com",
     "AI_MODEL": "google/gemini-2.5-flash",
     "VITE_CONVEX_SITE_URL": "https://peaceful-koala-818.convex.site",
     "VITE_CONVEX_URL": "https://peaceful-koala-818.convex.cloud",

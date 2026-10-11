@@ -10,7 +10,7 @@ Asset budgets per illustration are 320 KB for the self-contained GLB, 80 KB for 
 
 ## Release packaging
 
-Run `pnpm deploy:check` before publishing. It performs a guarded release build and Wrangler dry-run without changing the live Worker. `pnpm build:release` uses the four approved public settings from Wrangler or explicit CI environment variables, overriding ignored local Vite files. It rejects local/test Turnstile keys, missing values, non-public HTTP endpoints, and mismatched standard Convex endpoints. Normal `pnpm build` preserves local Vite settings for browser tests.
+Run `pnpm deploy:check` before publishing. It performs a guarded release build and Wrangler dry-run without changing the live Worker. `pnpm build:release` uses the six approved public settings from Wrangler or explicit CI environment variables, overriding ignored local Vite files. It rejects local/test Turnstile keys, missing values, non-public HTTP endpoints, and mismatched standard Convex endpoints. Normal `pnpm build` preserves local Vite settings for browser tests.
 
 Keep the working Convex endpoints and matching Worker/Convex bridge secret. This frontend release requires no Convex schema deployment, record migration, admin bootstrap, or secret replacement. A future backend cutover needs its own verification. Never archive `.dev.vars`, `.env.local`, transcripts, or credentials with release artifacts.
 

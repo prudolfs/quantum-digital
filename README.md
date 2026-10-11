@@ -29,22 +29,24 @@ Open http://localhost:3000. Convex generates local deployment values in `.env.lo
 
 ## Configuration
 
-| Variable                  | Location                              | Purpose                                                        |
-| ------------------------- | ------------------------------------- | -------------------------------------------------------------- |
-| `VITE_SITE_URL`           | Cloudflare build / `.env.local`       | Public origin; defaults to the supplied Workers domain         |
-| `VITE_CONVEX_URL`         | Cloudflare build / `.env.local`       | Public Convex client endpoint                                  |
-| `VITE_CONVEX_SITE_URL`    | Cloudflare build / `.env.local`       | Public Convex HTTP-actions endpoint                            |
-| `INTAKE_BRIDGE_SECRET`    | Worker binding and Convex environment | Matching server secret for the intake bridge                   |
-| `AI_GATEWAY_API_KEY`      | Worker secret binding                 | AI Gateway credential                                          |
-| `VITE_TURNSTILE_SITE_KEY` | Cloudflare build / `.env.local`       | Public managed Turnstile widget key                            |
-| `TURNSTILE_SECRET_KEY`    | Worker secret / `.dev.vars`           | Server-side Turnstile validation                               |
-| `AI_MODEL`                | Worker binding                        | Supported `provider/model` slug                                |
-| `SITE_URL`                | Convex environment                    | Exact website origin for authentication                        |
-| `ADMIN_SETUP_KEY`         | Convex environment                    | One-time owner bootstrap secret, at least 32 random characters |
-| `ADMIN_OWNER_EMAIL`       | Convex environment                    | Sole allowed owner account                                     |
-| `BETTER_AUTH_SECRET`      | Convex environment                    | Server-side authentication secret                              |
+| Variable                     | Location                              | Purpose                                                        |
+| ---------------------------- | ------------------------------------- | -------------------------------------------------------------- |
+| `VITE_SITE_URL`              | Cloudflare build / `.env.local`       | Public origin; defaults to the supplied Workers domain         |
+| `VITE_CONVEX_URL`            | Cloudflare build / `.env.local`       | Public Convex client endpoint                                  |
+| `VITE_CONVEX_SITE_URL`       | Cloudflare build / `.env.local`       | Public Convex HTTP-actions endpoint                            |
+| `INTAKE_BRIDGE_SECRET`       | Worker binding and Convex environment | Matching server secret for the intake bridge                   |
+| `AI_GATEWAY_API_KEY`         | Worker secret binding                 | AI Gateway credential                                          |
+| `VITE_TURNSTILE_SITE_KEY`    | Cloudflare build / `.env.local`       | Public managed Turnstile widget key                            |
+| `VITE_POSTHOG_PROJECT_TOKEN` | Wrangler / Cloudflare build           | Public PostHog project token (`phc_`)                          |
+| `VITE_POSTHOG_HOST`          | Wrangler / Cloudflare build           | PostHog ingestion host; configured for EU                      |
+| `TURNSTILE_SECRET_KEY`       | Worker secret / `.dev.vars`           | Server-side Turnstile validation                               |
+| `AI_MODEL`                   | Worker binding                        | Supported `provider/model` slug                                |
+| `SITE_URL`                   | Convex environment                    | Exact website origin for authentication                        |
+| `ADMIN_SETUP_KEY`            | Convex environment                    | One-time owner bootstrap secret, at least 32 random characters |
+| `ADMIN_OWNER_EMAIL`          | Convex environment                    | Sole allowed owner account                                     |
+| `BETTER_AUTH_SECRET`         | Convex environment                    | Server-side authentication secret                              |
 
-`VITE_*` values are public and fixed at build time. Vite uses the four approved public values from Wrangler `vars` as defaults; `.env.local` and Cloudflare build variables override them. Server secrets are never copied from Wrangler into browser definitions. Never put credentials in them. Backend URLs require HTTPS except explicit loopback development URLs. `.dev.vars`, `.env.local`, `.env.convex.local`, and `.convex/` are ignored.
+`VITE_*` values are public and fixed at build time. Vite uses the six approved public values from Wrangler `vars` as defaults; `.env.local` and Cloudflare build variables override them. Server secrets are never copied from Wrangler into browser definitions. Never put credentials in them. Backend URLs require HTTPS except explicit loopback development URLs. `.dev.vars`, `.env.local`, `.env.convex.local`, and `.convex/` are ignored.
 
 ## Quality checks
 
@@ -90,3 +92,5 @@ About uses the approved résumé-grounded career journey in `src/content/about.t
 - [Chat behavior](docs/chat-behavior.md)
 
 Project context and delivery uses the same gold-chevron FAQ rows and Motion transitions as the homepage, with keyboard and JavaScript-free support. See [Release checks](docs/work-release.md) for verification and rollback guidance.
+
+Public cookieless PostHog analytics tracks page views and the chat/inquiry funnel. The EU project token and host are public Wrangler build defaults; optional Cloudflare build variables can override them. Enable cookieless analytics in the PostHog project. See [Analytics setup and events](docs/analytics.md).

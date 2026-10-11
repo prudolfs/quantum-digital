@@ -3,6 +3,7 @@ import type { z } from 'zod'
 import { contactFormSchema, preparedInquirySchema } from '../../shared/chat'
 import { InquiryReview } from './inquiry-review'
 import { Button } from './ui/button'
+import { captureAnalyticsOnce } from '@/lib/analytics'
 
 export type ContactDraft = z.infer<typeof preparedInquirySchema> & {
   receipt?: 'saved' | 'expired'
@@ -58,6 +59,11 @@ export function ChatContactForm({
           result.error ?? 'The draft could not be prepared. Please retry.',
         )
       setDraft(parsed.data)
+      captureAnalyticsOnce(
+        'inquiry_reviewed',
+        parsed.data.draftId,
+        'contact_form',
+      )
     } catch (failure) {
       setError(failure instanceof Error ? failure.message : 'Please retry.')
     } finally {
@@ -70,6 +76,7 @@ export function ChatContactForm({
       <InquiryReview
         draft={draft}
         receipt={draft.receipt}
+        analyticsSource="contact_form"
         active={active}
         busy={busy}
         onEdit={() => setDraft(undefined)}

@@ -44,5 +44,23 @@ export function releasePublicEnvironment(
     cloud.replace('.convex.cloud', '') !== site.replace('.convex.site', '')
   )
     throw new Error('Release Convex URLs must reference the same deployment')
+  for (const setting of ['VITE_POSTHOG_PROJECT_TOKEN', 'VITE_POSTHOG_HOST']) {
+    const value = environment[setting] ?? runtime[setting]
+    if (typeof value === 'string' && value.trim())
+      values[setting] = value.trim()
+  }
+  if (
+    Boolean(values.VITE_POSTHOG_PROJECT_TOKEN) !==
+    Boolean(values.VITE_POSTHOG_HOST)
+  )
+    throw new Error('Configure both PostHog project token and host, or neither')
+  if (values.VITE_POSTHOG_PROJECT_TOKEN) {
+    if (!values.VITE_POSTHOG_PROJECT_TOKEN.startsWith('phc_'))
+      throw new Error(
+        'Use the public PostHog project token, never a personal API key',
+      )
+    if (new URL(values.VITE_POSTHOG_HOST).protocol !== 'https:')
+      throw new Error('PostHog host must use HTTPS')
+  }
   return values
 }

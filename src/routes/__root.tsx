@@ -5,6 +5,7 @@ import {
   createRootRoute,
 } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
+import { SiteAnalytics } from '@/components/site-analytics'
 import { SiteLayout } from '@/components/site-layout'
 import appCss from '@/styles.css?url'
 import interFont from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url'
@@ -36,9 +37,12 @@ export const Route = createRootRoute({
   }),
   shellComponent: RootDocument,
   component: () => (
-    <SiteLayout>
-      <Outlet />
-    </SiteLayout>
+    <>
+      <SiteAnalytics />
+      <SiteLayout>
+        <Outlet />
+      </SiteLayout>
+    </>
   ),
 })
 

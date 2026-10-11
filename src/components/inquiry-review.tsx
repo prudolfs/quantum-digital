@@ -3,6 +3,11 @@ import type { z } from 'zod'
 import { preparedInquirySchema } from '../../shared/chat'
 export { preparedInquirySchema } from '../../shared/chat'
 import { Button } from '@/components/ui/button'
+import {
+  captureAnalytics,
+  captureAnalyticsOnce,
+  type AnalyticsSource,
+} from '@/lib/analytics'
 
 type PreparedInquiry = z.infer<typeof preparedInquirySchema>
 
@@ -13,6 +18,7 @@ export function InquiryReview({
   busy = false,
   canEdit = true,
   receipt,
+  analyticsSource = 'conversation',
 }: {
   draft: PreparedInquiry
   onEdit: () => void
@@ -20,12 +26,22 @@ export function InquiryReview({
   busy?: boolean
   canEdit?: boolean
   receipt?: 'saved' | 'expired'
+  analyticsSource?: AnalyticsSource
 }) {
   const [status, setStatus] = useState<
     'review' | 'saving' | 'saved' | 'editing'
   >(receipt === 'saved' ? 'saved' : 'review')
   const [error, setError] = useState('')
   async function confirm() {
+    if (
+      status === 'saving' ||
+      status === 'saved' ||
+      receipt === 'saved' ||
+      !active ||
+      busy
+    )
+      return
+    captureAnalytics('inquiry_submit_attempted', analyticsSource)
     setStatus('saving')
     setError('')
     try {
@@ -44,7 +60,9 @@ export function InquiryReview({
           result.error ?? 'Your inquiry wasn’t saved. Please retry.',
         )
       setStatus('saved')
+      captureAnalyticsOnce('inquiry_submitted', draft.draftId, analyticsSource)
     } catch (failure) {
+      captureAnalytics('inquiry_submission_failed', analyticsSource)
       setError(
         failure instanceof Error
           ? failure.message

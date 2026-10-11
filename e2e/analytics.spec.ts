@@ -1,0 +1,290 @@
+import { test, expect, type Page } from '@playwright/test'
+import { gunzipSync } from 'node:zlib'
+
+test.skip(
+  process.env.ANALYTICS_E2E_LOCAL !== '1',
+  'Requires the isolated local analytics build and intercepted ingestion',
+)
+
+type CapturedEvent = { event: string; properties: Record<string, unknown> }
+async function interceptAnalytics(page: Page) {
+  const events: CapturedEvent[] = []
+  // The SDK filters automation via navigator.webdriver; emulate a normal visitor
+  // only in this intercepted integration check. Production keeps bot filtering.
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'webdriver', { get: () => false })
+    Object.defineProperty(navigator, 'userAgentData', { get: () => undefined })
+    Object.defineProperty(navigator, 'userAgent', {
+      get: () =>
+        'Mozilla/5.0 AppleWebKit/537.36 Chrome/131.0.0.0 Safari/537.36',
+    })
+  })
+  await page.route('**://*.posthog.com/**', async (route) => {
+    const body = route.request().postDataBuffer()
+    if (body?.length) {
+      let json: string
+      if (body[0] === 0x1f && body[1] === 0x8b)
+        json = gunzipSync(body).toString()
+      else if (body.toString().startsWith('data='))
+        json = Buffer.from(
+          new URLSearchParams(body.toString()).get('data')!,
+          'base64',
+        ).toString()
+      else json = body.toString()
+      const parsed = JSON.parse(json)
+      for (const event of Array.isArray(parsed)
+        ? parsed
+        : (parsed.batch ?? [parsed])) {
+        if (event.event) events.push(event)
+      }
+    }
+    await route.fulfill({ json: { status: 1 } })
+  })
+  return events
+}
+
+test('tracks public navigation and inquiry outcomes without contact data or restored conversions', async ({
+  page,
+  baseURL,
+}) => {
+  test.setTimeout(60_000)
+  const events = await interceptAnalytics(page)
+  const details = {
+    name: 'Private Example',
+    email: 'private@example.com',
+    summary: 'Confidential project description for an inquiry.',
+  }
+  const draft = {
+    draftId: 'private-draft',
+    details,
+    expiresAt: Date.now() + 3_600_000,
+  }
+  let restored = false
+  const tool = {
+    type: 'tool-prepareInquiry',
+    toolCallId: 'private-call',
+    state: 'output-available',
+    input: details,
+    output: draft,
+  }
+  await page.route('**/api/chat-session', (route) =>
+    route.fulfill({
+      json: {
+        available: true,
+        messages: restored
+          ? [{ id: 'assistant-private', role: 'assistant', parts: [tool] }]
+          : [],
+        receipts: restored ? { 'private-draft': 'saved' } : {},
+      },
+    }),
+  )
+  await page.route('**/api/chat', (route) => {
+    const stream = [
+      { type: 'start', messageId: 'assistant-private' },
+      {
+        type: 'tool-input-available',
+        toolCallId: 'private-call',
+        toolName: 'prepareInquiry',
+        input: details,
+      },
+      {
+        type: 'tool-output-available',
+        toolCallId: 'private-call',
+        output: draft,
+      },
+      { type: 'finish', finishReason: 'stop' },
+    ]
+    return route.fulfill({
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'x-vercel-ai-ui-message-stream': 'v1',
+      },
+      body:
+        stream.map((event) => `data: ${JSON.stringify(event)}\n\n`).join('') +
+        'data: [DONE]\n\n',
+    })
+  })
+  let submissions = 0
+  await page.route('**/api/inquiries', (route) => {
+    submissions++
+    return route.fulfill(
+      submissions === 1
+        ? { status: 503, json: { saved: false, error: 'Please retry.' } }
+        : { json: { saved: true, inquiryId: 'private-inquiry' } },
+    )
+  })
+  const count = (name: string) =>
+    events.filter((event) => event.event === name).length
+  await page.goto('/about?email=private@example.com#private-fragment')
+  await expect.poll(() => count('$pageview'), { timeout: 10_000 }).toBe(1)
+  expect(events[0]!.properties.page_path).toBe('/about')
+  // Use the real client router, not a full document reload.
+  await page
+    .getByRole('link', { name: 'Let’s talk', exact: true })
+    .last()
+    .click()
+  await expect(page).toHaveURL(`${baseURL}/chat`)
+  await expect.poll(() => count('$pageview'), { timeout: 10_000 }).toBe(2)
+  await page
+    .getByRole('textbox', { name: 'Message the assistant' })
+    .fill(details.summary)
+  await page.getByRole('button', { name: 'Send', exact: true }).click()
+  await expect(
+    page.getByRole('heading', { name: 'Review your inquiry' }),
+  ).toBeVisible()
+  await expect
+    .poll(() => count('inquiry_reviewed'), { timeout: 10_000 })
+    .toBe(1)
+  expect(count('chat_started')).toBe(1)
+  expect(count('inquiry_requested')).toBe(1)
+  expect(count('inquiry_submitted')).toBe(0)
+  await page.getByRole('button', { name: 'Confirm and submit inquiry' }).click()
+  await expect(page.getByRole('alert')).toContainText('Please retry.')
+  await expect
+    .poll(() => count('inquiry_submission_failed'), { timeout: 10_000 })
+    .toBe(1)
+  expect(count('inquiry_submitted')).toBe(0)
+  await page.getByRole('button', { name: 'Confirm and submit inquiry' }).click()
+  await expect(
+    page.getByText('Your inquiry is saved.', { exact: false }),
+  ).toBeVisible()
+  await expect
+    .poll(() => count('inquiry_submitted'), { timeout: 10_000 })
+    .toBe(1)
+  expect(count('inquiry_submit_attempted')).toBe(2)
+  restored = true
+  await page.reload()
+  await expect(
+    page.getByText('Your inquiry is saved.', { exact: false }),
+  ).toBeVisible()
+  await expect.poll(() => count('$pageview'), { timeout: 10_000 }).toBe(3)
+  expect(count('inquiry_requested')).toBe(1)
+  expect(count('inquiry_reviewed')).toBe(1)
+  expect(count('inquiry_submitted')).toBe(1)
+  const payload = JSON.stringify(events)
+  for (const value of [
+    ...Object.values(details),
+    draft.draftId,
+    'private-inquiry',
+    'private-fragment',
+  ])
+    expect(payload).not.toContain(value)
+  expect(
+    (await page.context().cookies()).filter((cookie) =>
+      cookie.name.startsWith('ph_'),
+    ),
+  ).toEqual([])
+  expect(
+    await page.evaluate(() =>
+      Object.keys(localStorage).filter((key) => key.startsWith('ph_')),
+    ),
+  ).toEqual([])
+})
+
+test('does not track admin or send events when Global Privacy Control is enabled', async ({
+  page,
+}) => {
+  const events = await interceptAnalytics(page)
+  await page.goto('/admin')
+  await page.waitForTimeout(3500)
+  expect(events).toEqual([])
+  await page.addInitScript(() =>
+    Object.defineProperty(navigator, 'globalPrivacyControl', { value: true }),
+  )
+  await page.goto('/about')
+  await page.waitForTimeout(3500)
+  expect(events).toEqual([])
+})
+
+test('tracks inline contact request, draft review and confirmed submission', async ({
+  page,
+}) => {
+  test.setTimeout(60_000)
+  const events = await interceptAnalytics(page)
+  const details = {
+    name: 'Inline Private',
+    email: 'inline-private@example.com',
+    summary: 'Build a confidential coordination application.',
+  }
+  const draft = {
+    draftId: 'inline-private-draft',
+    details,
+    expiresAt: Date.now() + 3_600_000,
+  }
+  await page.route('**/api/chat-session', (route) =>
+    route.fulfill({ json: { available: true } }),
+  )
+  await page.route('**/api/chat', (route) => {
+    const output = {
+      formId: 'inline-private-form',
+      details: { summary: details.summary },
+    }
+    const streamEvents = [
+      { type: 'start', messageId: 'inline-assistant' },
+      {
+        type: 'tool-input-available',
+        toolCallId: 'inline-call',
+        toolName: 'requestContactDetails',
+        input: output.details,
+      },
+      { type: 'tool-output-available', toolCallId: 'inline-call', output },
+      { type: 'finish', finishReason: 'stop' },
+    ]
+    return route.fulfill({
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'x-vercel-ai-ui-message-stream': 'v1',
+      },
+      body:
+        streamEvents
+          .map((event) => `data: ${JSON.stringify(event)}\n\n`)
+          .join('') + 'data: [DONE]\n\n',
+    })
+  })
+  await page.route('**/api/inquiry-drafts', (route) =>
+    route.fulfill({ json: draft }),
+  )
+  await page.route('**/api/inquiries', (route) =>
+    route.fulfill({
+      json: { saved: true, inquiryId: 'inline-private-inquiry' },
+    }),
+  )
+  const count = (name: string) =>
+    events.filter((event) => event.event === name).length
+  await page.goto('/chat')
+  await page
+    .getByRole('button', { name: 'Contact Rudolfs', exact: true })
+    .click()
+  await expect(page.locator('.chat-contact-card')).toBeVisible()
+  await expect
+    .poll(() => count('inquiry_requested'), { timeout: 10_000 })
+    .toBe(1)
+  expect(count('inquiry_reviewed')).toBe(0)
+  await page.getByLabel('Name', { exact: true }).fill(details.name)
+  await page.getByLabel('Email', { exact: true }).fill(details.email)
+  await page
+    .getByRole('button', { name: 'Review inquiry', exact: true })
+    .click()
+  await expect(
+    page.getByRole('heading', { name: 'Review your inquiry' }),
+  ).toBeVisible()
+  await expect
+    .poll(() => count('inquiry_reviewed'), { timeout: 10_000 })
+    .toBe(1)
+  expect(count('inquiry_submitted')).toBe(0)
+  await page.getByRole('button', { name: 'Confirm and submit inquiry' }).click()
+  await expect
+    .poll(() => count('inquiry_submitted'), { timeout: 10_000 })
+    .toBe(1)
+  for (const capturedEvent of events.filter((candidate) =>
+    candidate.event.startsWith('inquiry_'),
+  ))
+    expect(capturedEvent.properties.source).toBe('contact_form')
+  for (const value of Object.values(details))
+    expect(JSON.stringify(events)).not.toContain(value)
+  expect(
+    await page.evaluate(() =>
+      Object.keys(sessionStorage).filter((key) => key.startsWith('ph_')),
+    ),
+  ).toEqual([])
+})

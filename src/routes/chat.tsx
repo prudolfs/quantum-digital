@@ -27,6 +27,7 @@ import {
 } from '../../shared/chat'
 import { profileLinks } from '@/content/site'
 import { publicEnv } from '@/env'
+import { captureAnalytics, captureAnalyticsOnce } from '@/lib/analytics'
 import { ChatTurnstile } from '@/components/chat-turnstile'
 import { portfolioLinks } from '@/content/professional-background'
 import { ActionIcon } from '@/components/action-icon'
@@ -89,6 +90,8 @@ function ChatPage() {
     id: string
     text: string
   } | null>(null)
+  const seenInquiryTools = useRef(new Set<string>())
+  const inquiryRequested = useRef(false)
   const followLatest = useRef(true)
   const latest = useRef<HTMLDivElement>(null)
   const {
@@ -115,6 +118,34 @@ function ChatPage() {
         })
     },
   })
+  useEffect(() => {
+    for (const message of messages) {
+      for (const part of message.parts) {
+        if (
+          !isToolUIPart(part) ||
+          part.state !== 'output-available' ||
+          seenInquiryTools.current.has(part.toolCallId)
+        )
+          continue
+        const form =
+          part.type === 'tool-requestContactDetails' &&
+          contactFormSchema.safeParse(part.output).success
+        const draft =
+          part.type === 'tool-prepareInquiry'
+            ? preparedInquirySchema.safeParse(part.output)
+            : undefined
+        if (!form && !draft?.success) continue
+        seenInquiryTools.current.add(part.toolCallId)
+        const source = form ? 'contact_form' : 'conversation'
+        if (!inquiryRequested.current) {
+          inquiryRequested.current = true
+          captureAnalytics('inquiry_requested', source)
+        }
+        if (draft?.success)
+          captureAnalyticsOnce('inquiry_reviewed', draft.data.draftId, source)
+      }
+    }
+  }, [messages])
   const busy = status === 'submitted' || status === 'streaming'
   const verified = !verificationRequired || Boolean(verificationToken)
   const conversationSize = JSON.stringify(messages).length
@@ -177,6 +208,20 @@ function ChatPage() {
         }
         if (abort.signal.aborted) return
         connection.setRevision(result.revision ?? 0)
+        for (const message of result.messages ?? []) {
+          for (const part of message.parts) {
+            if (
+              isToolUIPart(part) &&
+              part.state === 'output-available' &&
+              ['tool-requestContactDetails', 'tool-prepareInquiry'].includes(
+                part.type,
+              )
+            ) {
+              seenInquiryTools.current.add(part.toolCallId)
+              inquiryRequested.current = true
+            }
+          }
+        }
         setMessages(result.messages ?? [])
         setReceipts(result.receipts ?? {})
         setContactDrafts(result.contactDrafts ?? {})
@@ -220,6 +265,7 @@ function ChatPage() {
     followLatest.current = true
     setResponseNotice(null)
     clearError()
+    if (messages.length === 0) captureAnalytics('chat_started')
     await sendMessage({ text: text.trim() })
   }
   async function submit(event: FormEvent) {
@@ -249,6 +295,8 @@ function ChatPage() {
         )
       const result = (await response.json()) as { revision?: number }
       connection.setRevision(result.revision ?? 0)
+      seenInquiryTools.current.clear()
+      inquiryRequested.current = false
       setMessages([])
       setReceipts({})
       setContactDrafts({})

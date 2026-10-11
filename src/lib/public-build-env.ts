@@ -3,6 +3,8 @@ const publicKeys = [
   'VITE_CONVEX_URL',
   'VITE_CONVEX_SITE_URL',
   'VITE_TURNSTILE_SITE_KEY',
+  'VITE_POSTHOG_PROJECT_TOKEN',
+  'VITE_POSTHOG_HOST',
 ] as const
 
 export function publicBuildDefines(

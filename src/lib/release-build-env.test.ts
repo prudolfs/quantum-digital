@@ -49,3 +49,32 @@ it('rejects loopback and HTTP release origins', () => {
     }),
   ).toThrow('public HTTPS')
 })
+
+it('preserves optional public analytics settings and requires a safe complete pair', () => {
+  const settings = {
+    ...configured,
+    VITE_POSTHOG_PROJECT_TOKEN: 'phc_project',
+    VITE_POSTHOG_HOST: 'https://eu.i.posthog.com',
+  }
+  expect(
+    releasePublicEnvironment(settings, {}).VITE_POSTHOG_PROJECT_TOKEN,
+  ).toBe('phc_project')
+  expect(
+    releasePublicEnvironment(settings, {
+      VITE_POSTHOG_PROJECT_TOKEN: '',
+      VITE_POSTHOG_HOST: '',
+    }),
+  ).not.toHaveProperty('VITE_POSTHOG_PROJECT_TOKEN')
+  expect(() =>
+    releasePublicEnvironment(
+      { ...configured, VITE_POSTHOG_PROJECT_TOKEN: 'phc_project' },
+      {},
+    ),
+  ).toThrow('both PostHog')
+  expect(() =>
+    releasePublicEnvironment(
+      { ...settings, VITE_POSTHOG_PROJECT_TOKEN: 'phx_personal' },
+      {},
+    ),
+  ).toThrow('personal API key')
+})

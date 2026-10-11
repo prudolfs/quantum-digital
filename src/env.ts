@@ -25,6 +25,23 @@ const publicEnvironmentSchema = z.object({
     .default('https://quantum-digital.pukitis-rudolfs.workers.dev'),
   VITE_CONVEX_URL: optionalBackendUrl,
   VITE_CONVEX_SITE_URL: optionalBackendUrl,
+  VITE_POSTHOG_PROJECT_TOKEN: z.preprocess(
+    (value) => (value === '' ? undefined : value),
+    z
+      .string()
+      .regex(/^phc_/, 'Use the public PostHog project token')
+      .optional(),
+  ),
+  VITE_POSTHOG_HOST: z.preprocess(
+    (value) => (value === '' ? undefined : value),
+    z
+      .url()
+      .refine(
+        (value) => new URL(value).protocol === 'https:',
+        'Use HTTPS for PostHog',
+      )
+      .optional(),
+  ),
   VITE_TURNSTILE_SITE_KEY: z.preprocess(
     (value) => (value === '' ? undefined : value),
     z.string().min(1).optional(),

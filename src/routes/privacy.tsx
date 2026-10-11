@@ -56,6 +56,21 @@ function PrivacyPage() {
         </p>
       </section>
       <section>
+        <h2 className="section-title">Website analytics</h2>
+        <p className="body-copy">
+          PostHog helps measure public page visits and the steps from starting
+          chat to requesting, reviewing, and submitting an inquiry. Analytics
+          uses cookieless mode and does not add analytics cookies or store a
+          visitor ID in your browser. PostHog processes technical connection
+          information to group cookieless visits. It does not receive your name,
+          email, chat messages, project details, timing, or budget through these
+          events. Session replay and automatic form capture are disabled, and
+          analytics excludes the private admin pages, URL query strings, and
+          fragments. Do Not Track and Global Privacy Control signals are
+          respected.
+        </p>
+      </section>
+      <section>
         <h2 className="section-title">Cookies and abuse prevention</h2>
         <p className="body-copy">
           Chat uses an essential HttpOnly cookie, renewed for 30 days, to
