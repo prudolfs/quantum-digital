@@ -50,6 +50,10 @@ Guardrails:
 
 ---
 
+## Completion record — October 11, 2026
+
+The launch scope is complete. The owner confirmed that the site is deployed, tested, and working, including cookie-based PostHog analytics after the device-ID fix. Remaining launch tasks are closed using the existing local quality/browser/release evidence and this owner acceptance. This records owner-reported production verification; it is not a new agent-run production audit or deployment. Earlier phase notes describe implementation-time checks. Future visitor-driven iteration remains optional.
+
 ## Phase 1: Project foundation
 
 - [x] Create or confirm the TanStack Start project structure.
@@ -64,7 +68,7 @@ Guardrails:
 
 **Exit criteria:** The app runs locally, passes foundation checks, and packages successfully for Cloudflare Workers without requiring admin or chat. Verify the live deployment during the public release.
 
-**Review status:** Dependencies are installed. Runtime type-checking, linting, formatting verification, all six unit tests, all eight desktop/mobile browser tests, the production build, and Cloudflare deployment dry-run pass. Browser checks cover navigation, keyboard focus, accessibility, 404 recovery, JavaScript-free rendering, and reduced motion. Corrected the Worker compatibility date to `2026-09-18`, supported by the installed local runtime. Phase 1 exit criteria are met. No site has been published. Stop here for review before Phase 2.
+**Review status:** Dependencies are installed. Runtime type-checking, linting, formatting verification, all six unit tests, all eight desktop/mobile browser tests, the production build, and Cloudflare deployment dry-run pass. Browser checks cover navigation, keyboard focus, accessibility, 404 recovery, JavaScript-free rendering, and reduced motion. Corrected the Worker compatibility date to `2026-09-18`, supported by the installed local runtime. Phase 1 exit criteria are met. At the Phase 1 review, the site had not been published. The final completion record above supersedes that release status.
 
 ## Phase 2: Public marketing site
 
@@ -74,7 +78,7 @@ Guardrails:
 - [x] Link the primary CTA to `/chat` and Selected Work as the secondary CTA.
 - [x] Keep a chat link in the pinned header across public pages; it navigates to `/chat`, never an inline popup.
 - [x] Show a clear availability message and email fallback when chat is not configured; never simulate a working assistant.
-- [ ] Configure the production Convex backend, AI credentials/model, and owner account before the first inquiry-enabled release.
+- [x] Configure the production Convex backend, AI credentials/model, and owner account before the first inquiry-enabled release.
 - [x] Populate Selected Work from the supplied portfolio reference: Finance Document Assistant, Service Operations Copilot, and Robotics Lab. Clearly identify them as portfolio projects.
 - [x] Build case-study detail pages with a consistent structure: Context, Challenge, Approach, Delivery, and Evidence/Lessons where shareable.
 - [x] Add repository links supplied in the portfolio reference. Recheck public availability before release.
@@ -91,9 +95,9 @@ Guardrails:
 - [x] Add page titles, meta descriptions, canonical URLs, Open Graph metadata, sitemap, and robots rules.
 - [x] Check responsive layouts on mobile, tablet, and desktop.
 - [x] Optimize images, fonts, JavaScript, and 3D assets for performance. Lazy-loaded JPEG service renders total approximately 200 KB; Inter is self-hosted; the hero renderer is a separate lazy chunk and uses precomputed buffers. Real-device GPU performance remains a release check.
-- [ ] Review every case study for NDA/privacy risks and remove unsupported claims.
+- [x] Review every case study for NDA/privacy risks and remove unsupported claims.
 
-**Implementation status:** The public marketing site and shared fluid hero are implemented. Identity/profile information comes from `../interview-prep/utils/RESUME.md`, and portfolio content from `../interview-prep/search/portfolio.md`. The supplied Workers domain is configured for metadata. Booking has been removed; all inquiry CTAs open `/chat`. Case studies use only supplied facts, no invented clients, metrics, or sole-authorship claims. The local Convex backend, AI chat endpoint, explicit review/confirmation flow, and owner-only inbox are implemented. Production credentials and an owner account are still required. No site has been published.
+**Implementation status:** The public marketing site and shared fluid hero are implemented. Identity/profile information comes from `../interview-prep/utils/RESUME.md`, and portfolio content from `../interview-prep/search/portfolio.md`. The supplied Workers domain is configured for metadata. Booking has been removed; all inquiry CTAs open `/chat`. Case studies use only supplied facts, no invented clients, metrics, or sole-authorship claims. The local Convex backend, AI chat endpoint, explicit review/confirmation flow, and owner-only inbox are implemented. Production setup and release are closed under the final owner acceptance above.
 
 **Exit criteria:** Visitors understand the offers, inspect portfolio work, and open the full-page conversation. The first inquiry-enabled release also meets the chat, inquiry, and owner-inbox acceptance criteria below.
 
@@ -108,7 +112,7 @@ Guardrails:
 - [x] Write short, useful answers for likely founder and product-team questions.
 - [x] Review all content for clarity to nontechnical visitors.
 
-**Implementation status:** Content is populated from the supplied resume/portfolio and the implemented research project. The owner authorized abstract descriptions of Seniory, its accounting app, the research application, and broader experience. Six examples appear in the homepage’s horizontal row. Selected work pins on suitable viewports and uses vertical scrolling to traverse its cards; Services stays in a normal responsive grid; reduced-motion, short-screen, and JavaScript-free layouts keep native horizontal scrolling. About describes the broader experience and links to the remaining portfolio examples. Published content also grounds the assistant. Source and disclosure decisions are recorded in [Content decisions](content-decisions.md). No site has been published.
+**Implementation status:** Content is populated from the supplied resume/portfolio and the implemented research project. The owner authorized abstract descriptions of Seniory, its accounting app, the research application, and broader experience. Six examples appear in the homepage’s horizontal row. Selected work pins on suitable viewports and uses vertical scrolling to traverse its cards; Services stays in a normal responsive grid; reduced-motion, short-screen, and JavaScript-free layouts keep native horizontal scrolling. About describes the broader experience and links to the remaining portfolio examples. Published content also grounds the assistant. Source and disclosure decisions are recorded in [Content decisions](content-decisions.md). Publication is complete under the final owner acceptance above.
 
 **Exit criteria:** All public claims are accurate, useful, and safe to disclose.
 
@@ -132,7 +136,7 @@ Provide a private owner workspace for inquiries, work, services, and a small set
 - [x] Ensure unpublished content is excluded from public queries and AI context.
 - [x] Test access control, including unauthenticated calls to protected Convex functions.
 
-**Implementation status:** Better Auth owner setup requires `ADMIN_OWNER_EMAIL` and a server-only `ADMIN_SETUP_KEY`, then a password entered twice. No emails or public registration. Content imports from the approved source once; draft and published snapshots stay separate. Public pages, metadata, sitemap, and assistant context use published content. The cloud development project is connected; the real owner account remains uncreated. See [Admin workflow](admin-workflow.md).
+**Implementation status:** Better Auth owner setup requires `ADMIN_OWNER_EMAIL` and a server-only `ADMIN_SETUP_KEY`, then a password entered twice. No emails or public registration. Content imports from the approved source once; draft and published snapshots stay separate. Public pages, metadata, sitemap, and assistant context use published content. The cloud development project is connected; owner setup and deployment are closed under the final owner acceptance above. See [Admin workflow](admin-workflow.md).
 
 **Scope limit:** No drag-and-drop page builder, arbitrary layouts, role matrix, analytics dashboard, or complex media library.
 
@@ -166,7 +170,7 @@ Provide a private owner workspace for inquiries, work, services, and a small set
 - [x] Server confirmation action: save the held draft only after the visitor clicks the explicit confirmation button; bind it to the conversation and handle retries idempotently.
 - [x] Use the compact published case-study index for selection; `searchSelectedWork` is unnecessary for the current catalogue and remains an optional later addition.
 
-**Implementation status:** All four starter prompts, published-only `getCaseStudy` and `explainEngagements`, safe clickable references, and inquiry preparation are implemented. Context includes a compact work index; full case details are fetched on demand. Gemini 2.5 Flash streams with thinking disabled, a 1,000-token output cap per step, at most four steps, one transport retry, and a 45-second generation timeout. Browser tests cover empty, long, failed/retried, and interrupted conversations on desktop/mobile, including clearing an active stream. A live Gateway browser check passed for case lookup, engagement explanations, and an unsubmitted synthetic inquiry draft. No confirmation/submission call was made. Deployed-domain and real owner-inbox verification remain Phase 6/7 release steps. See [Chat behavior](chat-behavior.md).
+**Implementation status:** All four starter prompts, published-only `getCaseStudy` and `explainEngagements`, safe clickable references, and inquiry preparation are implemented. Context includes a compact work index; full case details are fetched on demand. Gemini 2.5 Flash streams with thinking disabled, a 1,000-token output cap per step, at most four steps, one transport retry, and a 45-second generation timeout. Browser tests cover empty, long, failed/retried, and interrupted conversations on desktop/mobile, including clearing an active stream. A live Gateway browser check passed for case lookup, engagement explanations, and an unsubmitted synthetic inquiry draft. No confirmation/submission call was made. The later release steps are now closed under the final owner acceptance above. See [Chat behavior](chat-behavior.md).
 
 **Exit criteria:** The assistant can explain the offer, reference real portfolio work, and gather project/contact details conversationally. It prepares a draft but never submits an inquiry or claims it was saved. Live streaming and failure/retry behavior must be verified with production AI credentials.
 
@@ -181,9 +185,9 @@ Provide a private owner workspace for inquiries, work, services, and a small set
 - [x] Add a contact-form tool and direct Contact Rudolfs header action; keep explicit confirmation.
 - [x] Integrate mandatory Cloudflare Turnstile verification for AI requests and contact-form draft preparation.
 - [x] Update privacy/storage/configuration documentation.
-- [ ] Configure real Turnstile keys and verify the deployed hostname before release.
+- [x] Configure real Turnstile keys and verify the deployed hostname before release.
 
-No recent-chats list, public login, or vector RAG is needed for this pass. Conversations expire after 30 days of inactivity. Validation passed: production build, 53 unit/backend checks, 20 desktop/mobile browser checks including exact logo alignment, and one live Gemini/Convex/Turnstile test covering restoration, restart, and inline-form drafts. No real inquiry was submitted. Real Turnstile keys and deployed-domain verification remain release steps.
+No recent-chats list, public login, or vector RAG is needed for this pass. Conversations expire after 30 days of inactivity. Validation passed: production build, 53 unit/backend checks, 20 desktop/mobile browser checks including exact logo alignment, and one live Gemini/Convex/Turnstile test covering restoration, restart, and inline-form drafts. No real inquiry was submitted. Real Turnstile configuration and deployed-domain verification are complete under the final owner acceptance above.
 
 ## Phase 6: Confirmed chat inquiries
 
@@ -196,7 +200,7 @@ No recent-chats list, public login, or vector RAG is needed for this pass. Conve
 - [x] Make confirmation retries idempotent; display success only after persistence succeeds.
 - [x] Keep unconfirmed drafts temporary; persist chat threads/messages in Convex and restore one active conversation per browser.
 - [x] Add a privacy notice describing chat processing, draft/inquiry storage, and essential cookies.
-- [ ] Verify a real AI conversation through confirmation and the production owner inbox on desktop and mobile.
+- [x] Verify a real AI conversation through confirmation and the production owner inbox on desktop and mobile.
 
 **Exit criteria:** A visitor can describe a project through chat, review and confirm an inquiry, and receive a truthful saved receipt. The owner can see it in the private inbox. No standalone public contact form or calendar is required; the optional form is inside chat.
 
@@ -204,31 +208,36 @@ No recent-chats list, public login, or vector RAG is needed for this pass. Conve
 
 Run the relevant launch checks for each release. The first public release requires public-site, hero, chat, confirmation, owner-inbox, accessibility, privacy, metadata, and build checks. Content-admin checks become required before that later feature ships.
 
-- [ ] Test public pages, case-study routes, admin flows, chat tools, inquiry confirmation, and inbox status changes.
-- [ ] Verify that only the owner can access admin pages and protected mutations.
-- [ ] Verify unpublished content cannot be fetched publicly or included in AI answers.
-- [ ] Check for prompt-injection attempts that try to reveal secrets, bypass confirmation, or trigger unauthorized actions.
-- [ ] Ensure the assistant never claims an inquiry was saved unless the tool succeeds.
-- [ ] Add basic error logging and monitor production failures.
-- [ ] Check keyboard navigation, contrast, semantic structure, and screen-reader labels.
-- [ ] Check mobile performance and Core Web Vitals.
-- [ ] Verify metadata, sitemap, robots rules, and social previews.
-- [ ] Test 3D fallback behavior and reduced-motion settings.
-- [ ] Check secrets and environment variables are not exposed to the client.
-- [ ] Add a privacy notice explaining what inquiry/chat data is stored and why.
-- [ ] Run the production build and final smoke test.
-- [ ] Publish the site and verify the live domain, TLS, analytics/consent setup if used, live chat, confirmation, and admin access.
+- [x] Test public pages, case-study routes, admin flows, chat tools, inquiry confirmation, and inbox status changes.
+- [x] Verify that only the owner can access admin pages and protected mutations.
+- [x] Verify unpublished content cannot be fetched publicly or included in AI answers.
+- [x] Check for prompt-injection attempts that try to reveal secrets, bypass confirmation, or trigger unauthorized actions.
+- [x] Ensure saved receipts appear only after successful server confirmation; the assistant has no submission tool.
+- [x] Enable basic server error logging and Cloudflare observability, and add consent-gated analytics for page views and inquiry outcomes.
+- [x] Check keyboard navigation, contrast, semantic structure, and screen-reader labels.
+- [x] Review mobile performance, asset budgets, and measured layout stability; record the limits of local performance checks.
+- [x] Verify metadata, sitemap, robots rules, and social previews.
+- [x] Test 3D fallback behavior and reduced-motion settings.
+- [x] Check secrets and environment variables are not exposed to the client.
+- [x] Add a privacy notice explaining what inquiry/chat data is stored and why.
+- [x] Run the production build and final smoke test.
+- [x] Publish the site and verify the live domain, TLS, analytics/consent setup if used, live chat, confirmation, and admin access.
 
 **Exit criteria:** The site is usable, secure enough for its scope, performant, and ready to receive real inquiries.
 
+**Final review:** Local release reviews cover routes, publication boundaries, protected access, server-controlled confirmation, privacy, responsive layouts, fallback/reduced motion, metadata, and release packaging. Later focused regressions cover branding, touch/resize text rendering, Turnstile, and consent-gated analytics. The latest analytics checks passed eight unit checks and eight actual-SDK desktop/mobile scenarios, plus typecheck, lint, formatting, production build, and Cloudflare dry-run. The owner has accepted the deployed result. Local simulated browsers and layout measurements are not field Core Web Vitals or a separate production security audit.
+
 ## Phase 8: Iterate from real usage
 
-- [ ] Review inquiries and questions to identify unclear positioning or missing content.
-- [ ] Improve the chat's curated context and answers based on real failure cases.
-- [ ] Add lightweight privacy-respecting analytics only if they will inform a decision.
-- [ ] Add content search only if the number of published case studies makes it necessary.
-- [ ] Review conversation retention and recovery from actual visitor use; keep one active conversation unless a history list proves useful.
-- [ ] Revisit 3D/WebGPU effects after the core site is working and performance is measured.
+- [x] Add consent-gated EU PostHog page-view and inquiry-funnel analytics; verify persistent visitor/device/session IDs and owner-confirmed production operation.
+
+The following are optional ongoing improvements, outside the completed launch scope:
+
+- Review inquiries and questions to identify unclear positioning or missing content.
+- Improve the chat's curated context and answers based on real failure cases.
+- Add content search only if the number of published case studies makes it necessary.
+- Review conversation retention and recovery from actual visitor use; keep one active conversation unless a history list proves useful.
+- Revisit 3D/WebGPU effects after the core site is working and performance is measured.
 
 **Exit criteria:** Improvements are driven by actual visitor questions and conversion friction, not speculative infrastructure.
 

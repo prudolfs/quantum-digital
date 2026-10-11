@@ -1,5 +1,9 @@
 # Work and About release checks
 
+## Current release status
+
+The owner confirmed deployment and successful production testing on October 11, 2026, including PostHog cookie analytics after the device-ID correction. The launch and work/About enhancement plans are complete. The checks below remain the workflow for future releases; automated local results and owner-reported production acceptance are recorded separately.
+
 ## Local verification
 
 Use the pinned pnpm version from `package.json`. Run `pnpm check`, `pnpm build`, and `pnpm test:e2e` with the local testing configuration. The browser suite covers all six work routes, About, homepage/related-work navigation, keyboard and JavaScript-free disclosures, graphics failure, mobile stills, metadata/sitemap, restored chat references, and explicit inquiry review. Provider responses are mocked; real admin and Gateway checks are opt-in.
