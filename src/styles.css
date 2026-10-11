@@ -52,6 +52,8 @@
 
 :root {
   color-scheme: dark;
+  scrollbar-color: var(--color-portal-gold) var(--color-surface);
+  scrollbar-width: thin;
   font-family: var(--font-sans);
   background: var(--color-canvas);
   color: var(--color-white);

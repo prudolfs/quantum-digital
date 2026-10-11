@@ -43,8 +43,11 @@ export function ChatTurnstile({
   onToken: (token: string) => void
 }) {
   const container = useRef<HTMLDivElement>(null)
-  const [failed, setFailed] = useState(false)
+  const [failedVerification, setFailedVerification] = useState('')
   const [retry, setRetry] = useState(0)
+  const verificationId = `${siteKey}:${attempt}:${retry}`
+  const [completedVerification, setCompletedVerification] = useState('')
+  const failed = failedVerification === verificationId
   useEffect(() => {
     let disposed = false
     let widget: string | undefined
@@ -60,30 +63,49 @@ export function ChatTurnstile({
           size: container.current.clientWidth < 300 ? 'compact' : 'flexible',
           appearance: 'interaction-only',
           callback: (token: string) => {
-            setFailed(false)
+            if (disposed) return
+            setFailedVerification('')
+            setCompletedVerification(verificationId)
             onToken(token)
           },
-          'expired-callback': () => onToken(''),
-          'error-callback': () => {
+          'before-interactive-callback': () => {
+            if (disposed) return
+            setCompletedVerification('')
+            setFailedVerification('')
             onToken('')
-            setFailed(true)
+          },
+          'expired-callback': () => {
+            if (disposed) return
+            setCompletedVerification('')
+            onToken('')
+          },
+          'error-callback': () => {
+            if (disposed) return
+            setCompletedVerification('')
+            onToken('')
+            setFailedVerification(verificationId)
           },
           'timeout-callback': () => {
+            if (disposed) return
+            setCompletedVerification('')
             onToken('')
-            setFailed(true)
+            setFailedVerification(verificationId)
           },
         })
       })
       .catch(() => {
-        if (!disposed) setFailed(true)
+        if (!disposed) setFailedVerification(verificationId)
       })
     return () => {
       disposed = true
       if (widget) window.turnstile?.remove(widget)
     }
-  }, [siteKey, attempt, retry, onToken])
+  }, [siteKey, attempt, retry, onToken, verificationId])
   return (
-    <div className="chat-verification">
+    <div
+      className="chat-verification"
+      hidden={completedVerification === verificationId}
+    >
       <div ref={container} />
       {failed && (
         <p role="alert">

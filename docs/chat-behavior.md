@@ -43,7 +43,7 @@ Requests accept text from visitors, with up to 2,000 characters per message acro
 
 ## Cloudflare Turnstile
 
-Use a managed Turnstile widget with `appearance: interaction-only` and action `chat`. It can request interaction when needed. `VITE_TURNSTILE_SITE_KEY` is public build-time configuration; `TURNSTILE_SECRET_KEY` is a Worker secret. `/api/chat` and `/api/inquiry-drafts` call Siteverify before generation/draft storage and require successful validation, the current hostname, and action `chat`. Tokens are single use and renewed after each attempt. Missing configuration and failed verification fail closed. Existing same-origin checks and rate limits remain. Explicit Cloudflare dummy keys are supported only on loopback: their successful testing metadata is checked instead of real hostname/action values. Public domains reject the always-pass testing secret.
+Use a managed Turnstile widget with `appearance: interaction-only` and action `chat`. It can request interaction when needed. `VITE_TURNSTILE_SITE_KEY` is public build-time configuration; `TURNSTILE_SECRET_KEY` is a Worker secret. `/api/chat` and `/api/inquiry-drafts` call Siteverify before generation/draft storage and require successful validation, the current hostname, and action `chat`. After successful verification, the widget wrapper is hidden and releases its space above the composer. The widget stays mounted to receive token-expiry callbacks. Expiration, a new interactive challenge, errors, timeouts, or another request make verification available again; callbacks from removed widgets are ignored. Tokens are single use and renewed after each attempt. Missing configuration and failed verification fail closed. Existing same-origin checks and rate limits remain. Explicit Cloudflare dummy keys are supported only on loopback: their successful testing metadata is checked instead of real hostname/action values. Public domains reject the always-pass testing secret.
 
 See [Cloudflare server validation](https://developers.cloudflare.com/turnstile/get-started/server-side-validation/) and [testing keys](https://developers.cloudflare.com/turnstile/troubleshooting/testing/).
 
@@ -56,6 +56,8 @@ For Gemini 2.5 Flash, thinking is disabled for this straightforward chat workloa
 ## Verification
 
 `pnpm check` covers published lookup, absent/unpublished work, engagement data, inquiry preparation without a submission capability, input/history limits, stopped-tool conversion, safe links, and actionable errors, alongside the existing backend tests.
+
+`e2e/turnstile.spec.ts` simulates an interactive widget that remains visible after success. It verifies collapsing the completed widget, token-expiry recovery, error/retry, ignored callbacks from removed widgets, and token consumption/renewal after sending on desktop/mobile. No external verification or model requests are made in that regression.
 
 `e2e/chat.spec.ts` checks exact header-logo alignment, transparent workspace layout, the header contact action/form, navigation/reload restoration, failed/successful restart, starter prompts, lookup/engagement cards, safe link rendering, keyboard submission, stopped partial responses, continued history, clearing during streaming, retry, and long conversations on desktop/mobile. Provider output is deterministic in those tests; no model calls are made. Existing inquiry tests check review and submission-retry behavior independently.
 

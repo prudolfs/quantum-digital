@@ -30,6 +30,7 @@ Use gold for hero cursor effects and secondary tiles behind trailing CTA arrows.
 
 ## Typography and layout
 
+- Use a thin gold page scrollbar on the dark surface track, matching Selected work's mobile scrollbar.
 - Use Inter for display, body, and interface text, with system sans-serif fallbacks. Use a system monospace stack sparingly for small labels.
 - Use medium-weight display headings, tight tracking, and responsive sizing. Balance compact heading line height with readable wrapping; keep body text comfortably spaced.
 - Use a centered content width of approximately 80rem, 20px mobile gutters, and 32px gutters on wider screens. Give sections generous vertical spacing.
