@@ -85,7 +85,6 @@ export function Hero({
           <h1 id="hero-heading" className="hero-title">
             Build better
             <br className="hero-break" /> products.
-            <br />
             <span className="hero-emphasis">
               <span className="sr-only">{phrase}</span>
               <span

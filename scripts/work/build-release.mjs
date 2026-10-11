@@ -11,11 +11,12 @@ console.log(
   new URL(publicSettings.VITE_SITE_URL).origin,
   'using approved Wrangler/CI public settings.',
 )
-const result = process.env.npm_execpath
-  ? spawnSync(process.execPath, [process.env.npm_execpath, 'run', 'build'], {
-      env: environment,
-      stdio: 'inherit',
-    })
-  : spawnSync('pnpm', ['run', 'build'], { env: environment, stdio: 'inherit' })
+const manager = process.env.npm_execpath ?? 'pnpm'
+const isJavaScript = /\.(?:cjs|mjs|js)$/.test(manager)
+const result = spawnSync(
+  isJavaScript ? process.execPath : manager,
+  isJavaScript ? [manager, 'run', 'build'] : ['run', 'build'],
+  { env: environment, stdio: 'inherit' },
+)
 if (result.error) throw result.error
 process.exitCode = result.status ?? 1

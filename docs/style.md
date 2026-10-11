@@ -30,9 +30,14 @@ Use gold for hero cursor effects and secondary tiles behind trailing CTA arrows.
 
 ## Typography and layout
 
+- Use the original Quantum Digital vector wordmark in both the marketing and chat headers. Its blue Q is the first letter of Quantum; do not prepend another icon or repeat the brand in adjacent text. `BrandLink` provides the shared, home-linked, accessible treatment. The asset in `public/brand/quantum-digital.svg` preserves the original paths from the old monorepo header.
+- Use only that wordmark's blue Q for the transparent favicon. Keep `public/favicon.svg` and the 16/32/48/256px images in `public/favicon.ico` consistent with the original vector path.
+
 - Use a thin gold page scrollbar on the dark surface track, matching Selected work's mobile scrollbar.
 - Use Inter for display, body, and interface text, with system sans-serif fallbacks. Use a system monospace stack sparingly for small labels.
 - Use medium-weight display headings, tight tracking, and responsive sizing. Balance compact heading line height with readable wrapping; keep body text comfortably spaced.
+- Keep the homepage hero title's compact 0.98 line height. Render “Put AI to work.” as a separate block with a 0.16em top margin so it clears the descender in “products.” without widening the gap between “Build better” and “products.”, including the animated text rendering.
+- Align fluid text copies to the browser text baseline using measured font ascent/descent and DOM range bounds. Avoid estimated offsets that shift the heading when the reveal animation hands over to the canvas.
 - Use a centered content width of approximately 80rem, 20px mobile gutters, and 32px gutters on wider screens. Give sections generous vertical spacing.
 - Keep the header pinned to the top. Its navigation background is transparent at scroll zero and fades in on scrolling or pointer hover using Motion. At scroll zero with no header hover, the background fades out even if a link is focused. Use subtle borders, rounded cards, and restrained glow. Keep case-study content quieter than the hero.
 - Stack the hero copy and visual on mobile; use two columns on wide screens. Below 851px, use a hamburger menu with a full-viewport backdrop and a top navigation panel that leaves an outside dismissal area. Animate with Motion, trap focus, lock background scrolling, and close on outside tap, Escape, navigation, or resizing to desktop. Keep a native disclosure fallback when JavaScript is disabled.

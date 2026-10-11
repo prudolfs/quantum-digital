@@ -1,3 +1,4 @@
+import { BrandLink } from '@/components/brand-link'
 import { publicWorkRecord } from '../../shared/work-disclosure'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { ArrowUp, Square, RotateCcw, MessageSquare } from 'lucide-react'
@@ -329,10 +330,7 @@ function ChatPage() {
       />
       <header className="chat-topbar section-shell">
         <div className="chat-topbar-surface navigation-surface">
-          <Link to="/" className="brand-link" aria-label="Quantum Digital home">
-            <img src="/hero/q-symbol.svg" width="24" height="24" alt="" />
-            Quantum<span>Digital</span>
-          </Link>
+          <BrandLink />
           <div className="chat-topbar-actions">
             <button
               className="chat-contact-action"

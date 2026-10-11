@@ -199,13 +199,13 @@ a {
 .brand-link {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  font-size: 1rem;
-  font-weight: 600;
-  letter-spacing: -0.04em;
+  min-width: 0;
 }
-.brand-link > span:first-child {
-  color: var(--color-ice);
+.brand-logo {
+  display: block;
+  width: 201px;
+  max-width: 100%;
+  height: auto;
 }
 .brand-dot {
   width: 6px;
@@ -334,9 +334,6 @@ nav a[aria-current='page'] {
   .section-shell {
     padding-inline: 32px;
   }
-  .brand-link {
-    font-size: 1.125rem;
-  }
   nav {
     gap: 32px;
   }
@@ -361,9 +358,6 @@ html {
 .brand-link {
   gap: 2px;
   white-space: nowrap;
-}
-.brand-link img {
-  margin-right: 10px;
 }
 .navigation-surface {
   padding: 18px 24px;
@@ -466,12 +460,14 @@ nav {
   letter-spacing: 0.09em;
 }
 .hero-title {
-  font: 500 clamp(3rem, 6.4vw, 5.9rem)/1.02 var(--font-display);
+  font: 500 clamp(3rem, 6.4vw, 5.9rem)/0.98 var(--font-display);
   color: var(--color-ice);
   letter-spacing: -0.065em;
   margin: 0;
 }
 .hero-emphasis {
+  display: block;
+  margin-top: 0.16em;
   color: var(--color-brand);
 }
 .reveal-word {
@@ -1914,10 +1910,6 @@ nav {
   .chat-topbar {
     padding-block: 12px;
   }
-  .chat-topbar .brand-link {
-    font-size: 1.05rem;
-    gap: 5px;
-  }
   .chat-restart > span:first-child {
     display: none;
   }
@@ -2014,10 +2006,6 @@ nav {
   }
 }
 @media (max-width: 600px) {
-  .chat-topbar .brand-link {
-    font-size: 1rem;
-    gap: 2px;
-  }
   .chat-restart > span:first-child {
     display: inline;
   }

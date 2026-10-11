@@ -1,3 +1,4 @@
+import { BrandLink } from '@/components/brand-link'
 import { HeaderNavigation } from '@/components/header-navigation'
 import { Link, useLocation } from '@tanstack/react-router'
 import { useEffect, useState, type ReactNode } from 'react'
@@ -52,10 +53,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
             animate={{ opacity: showHeaderBackground ? 1 : 0 }}
             transition={{ duration: reducedMotion ? 0 : 0.25, ease: 'easeOut' }}
           />
-          <Link to="/" className="brand-link" aria-label="Quantum Digital home">
-            <img src="/hero/q-symbol.svg" width="24" height="24" alt="" />
-            Quantum<span>Digital</span>
-          </Link>
+          <BrandLink />
           <HeaderNavigation />
         </motion.div>
       </header>

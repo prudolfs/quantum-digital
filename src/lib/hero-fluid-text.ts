@@ -14,7 +14,7 @@ export function paintHeroText(
   if (!context) return
   context.scale(pixelRatio, pixelRatio)
   context.clearRect(0, 0, width, height)
-  context.textBaseline = 'top'
+  context.textBaseline = 'alphabetic'
   context.fontKerning = 'normal'
   const origin = container.getBoundingClientRect()
   const range = document.createRange()
@@ -29,6 +29,9 @@ export function paintHeroText(
       const style = getComputedStyle(parent)
       context.font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`
       context.fillStyle = style.color
+      const metrics = context.measureText(content)
+      const ascent = metrics.fontBoundingBoxAscent
+      const descent = metrics.fontBoundingBoxDescent
       for (let index = 0; index < content.length; index++) {
         if (/\s/.test(content[index] ?? '')) continue
         range.setStart(node, index)
@@ -38,7 +41,12 @@ export function paintHeroText(
           context.fillText(
             content[index] ?? '',
             rect.left - origin.left,
-            rect.top - origin.top + parseFloat(style.fontSize) * 0.14,
+            // Range bounds include the font box, rather than just visible ink.
+            // Match its baseline so swapping DOM text for the texture cannot jump.
+            rect.top -
+              origin.top +
+              (rect.height - ascent - descent) / 2 +
+              ascent,
           )
         }
       }
