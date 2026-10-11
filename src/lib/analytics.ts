@@ -42,13 +42,22 @@ export function sanitizeAnalyticsEvent(event: CaptureResult | null) {
   if (!event || !events.has(event.event)) return null
   const path = event.properties.page_path
   if (typeof path !== 'string' || !analyticsPath(path)) return null
+  const pagePath = analyticsPath(path)!
+  const url = new URL(pagePath, publicEnv.VITE_SITE_URL)
   const properties: Record<string, unknown> = {
-    page_path: analyticsPath(path),
-    $current_url: new URL(analyticsPath(path)!, publicEnv.VITE_SITE_URL).href,
+    page_path: pagePath,
+    $current_url: url.href,
+    $host: url.hostname,
+    $pathname: pagePath,
     $process_person_profile: false,
     $geoip_disable: true,
     $cookieless_mode: true,
   }
+  // Cookieless ingestion needs the real browser User-Agent to derive its
+  // server-side visitor/session hash. Removing it can drop otherwise valid
+  // pageviews. Take it from the browser, never from custom event properties.
+  if (typeof navigator !== 'undefined' && navigator.userAgent)
+    properties.$raw_user_agent = navigator.userAgent
   for (const key of ['token', 'distinct_id', '$lib', '$lib_version']) {
     if (typeof event.properties[key] === 'string')
       properties[key] = event.properties[key]

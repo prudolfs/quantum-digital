@@ -118,6 +118,10 @@ test('tracks public navigation and inquiry outcomes without contact data or rest
   await page.goto('/about?email=private@example.com#private-fragment')
   await expect.poll(() => count('$pageview'), { timeout: 10_000 }).toBe(1)
   expect(events[0]!.properties.page_path).toBe('/about')
+  expect(events[0]!.properties.$pathname).toBe('/about')
+  expect(events[0]!.properties.$host).toBe(new URL(baseURL!).hostname)
+  expect(events[0]!.properties.$raw_user_agent).toContain('Mozilla/5.0')
+  expect(events[0]!.properties.$cookieless_mode).toBe(true)
   // Use the real client router, not a full document reload.
   await page
     .getByRole('link', { name: 'Let’s talk', exact: true })
@@ -158,6 +162,16 @@ test('tracks public navigation and inquiry outcomes without contact data or rest
     page.getByText('Your inquiry is saved.', { exact: false }),
   ).toBeVisible()
   await expect.poll(() => count('$pageview'), { timeout: 10_000 }).toBe(3)
+  for (const event of events.filter(
+    (candidate) => candidate.event === '$pageview',
+  )) {
+    expect(event.properties.$pathname).toBe(event.properties.page_path)
+    expect(event.properties.$current_url).toBe(
+      new URL(event.properties.page_path as string, baseURL!).href,
+    )
+    expect(event.properties.$host).toBe(new URL(baseURL!).hostname)
+    expect(event.properties.$raw_user_agent).toContain('Mozilla/5.0')
+  }
   expect(count('inquiry_requested')).toBe(1)
   expect(count('inquiry_reviewed')).toBe(1)
   expect(count('inquiry_submitted')).toBe(1)

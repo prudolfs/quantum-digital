@@ -18,7 +18,10 @@ beforeEach(() => {
     origin: 'https://example.com',
     hostname: 'example.com',
   })
-  vi.stubGlobal('navigator', { doNotTrack: '0' })
+  vi.stubGlobal('navigator', {
+    doNotTrack: '0',
+    userAgent: 'Mozilla/5.0 Test Browser',
+  })
 })
 afterEach(() => vi.unstubAllGlobals())
 it('drops unknown events and removes personal data, query strings, and SDK enrichment', async () => {
@@ -40,6 +43,9 @@ it('drops unknown events and removes personal data, query strings, and SDK enric
       $initial_referrer: 'private',
       $set: { email: 'private@example.com' },
       $device_id: 'persistent-id',
+      $host: 'private.example.com',
+      $pathname: '/chat?email=private@example.com',
+      $raw_user_agent: 'private custom text',
     },
   } as CaptureResult
   const result = sanitizeAnalyticsEvent(input)!
@@ -49,6 +55,9 @@ it('drops unknown events and removes personal data, query strings, and SDK enric
     token: 'phc_test',
     distinct_id: '$posthog_cookieless',
     $current_url: 'https://example.com/chat',
+    $host: 'example.com',
+    $pathname: '/chat',
+    $raw_user_agent: 'Mozilla/5.0 Test Browser',
     $process_person_profile: false,
     $geoip_disable: true,
     $cookieless_mode: true,
