@@ -1052,10 +1052,6 @@ nav {
   .hero-footnote {
     margin-top: 24px;
   }
-  .hero-fluid-copy--ready #hero-heading,
-  .hero-fluid-copy--ready .hero-fluid-copy__description {
-    opacity: 1;
-  }
   .section-intro,
   .approach-section {
     gap: 32px;

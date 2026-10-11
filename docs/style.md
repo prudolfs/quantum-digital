@@ -52,7 +52,8 @@ Use gold for hero cursor effects and secondary tiles behind trailing CTA arrows.
 - Keep the fluid simulation shared between shape displacement, localized text distortion, and gold cursor sparks. It must not intercept CTA clicks or scrolling.
 - Reveal the emphasized headline phrase once with a 0.05-second letter stagger. Recompute the phrase and layout alignment when website copy changes.
 - Render the heading and description as semantic HTML before enhancement. Show the enhanced text only after it is aligned and ready; restore HTML on initialization failure or context loss.
-- Use lazy loading, capability-based particle budgets, adaptive resolution, and off-screen/hidden-tab pause. Keep readable DOM copy on narrow or coarse-pointer layouts.
+- Use lazy loading, capability-based particle budgets, adaptive resolution, and off-screen/hidden-tab pause. Enable localized fluid text on touch screens when graphics are supported; retain semantic DOM copy and restore its visible paint on graphics failure.
+- On mobile, respond to single-finger taps and swipes with softer gold dye/sparks and localized text distortion. Use passive touch listeners so effects continue during native scrolling, without pointer capture or preventing defaults. Ignore controls and multi-touch gestures; reset motion tracking on touch end/cancel. Keep reduced-motion and unsupported-device fallbacks static.
 - Provide a static Q illustration when motion is reduced or graphics are unavailable. Essential copy and actions never depend on the effect.
 - Keep hero tuning in code for the first version. A visual parameter editor is outside the initial admin scope.
 
@@ -81,7 +82,7 @@ Use gold for hero cursor effects and secondary tiles behind trailing CTA arrows.
 - Use repeating SVG tiles with ice-colored strokes at roughly 2.5% opacity. Fade the top and bottom edges of section patterns, and keep them behind content without intercepting pointer events. Patterns remain static and visible when motion is reduced.
 - Additional patterns should follow the same geometric line style, scale, and restrained contrast; add them selectively rather than decorating every section.
 - Fade the conversation section’s graphics to transparent over the bottom 96px so cursor trails blend into the footer. Keep the top edge at full opacity.
-- In the final conversation section, type “working towards?” once on its first appearance, reserving its full layout space throughout. Reuse the hero’s gold cursor sparks and localized fluid title distortion across the full section, without the particle shape cycle. Enable title distortion on wide layouts with a fine pointer; pause graphics offscreen or when the tab is hidden. Keep the full semantic heading readable without JavaScript, with reduced motion, and after graphics failure or context loss.
+- In the final conversation section, type “working towards?” once on its first appearance, reserving its full layout space throughout. Reuse the hero’s gold cursor sparks and localized fluid title distortion across the full section, without the particle shape cycle. Enable title distortion for mouse and touch input when graphics are supported; pause graphics offscreen or when the tab is hidden. Keep the full semantic heading readable without JavaScript, with reduced motion, and after graphics failure or context loss.
 
 ## Accessibility and acceptance
 

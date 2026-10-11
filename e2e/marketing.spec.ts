@@ -278,10 +278,7 @@ test('shared renderer cycles all shapes, pauses offscreen and restores HTML afte
           (element) => element.getBoundingClientRect().bottom <= innerHeight,
         ),
     ).toBe(true)
-  await expect(page.locator('#hero-heading')).toHaveCSS(
-    'opacity',
-    finePointer ? '0' : '1',
-  )
+  await expect(page.locator('#hero-heading')).toHaveCSS('opacity', '0')
   await page.screenshot({
     path: `test-results/hero-${finePointer ? 'desktop' : 'mobile'}.png`,
   })
@@ -311,10 +308,7 @@ test('shared renderer cycles all shapes, pauses offscreen and restores HTML afte
   expect(await conversationCanvas.boundingBox()).toEqual(
     await page.locator('#conversation').boundingBox(),
   )
-  await expect(page.locator('#conversation-heading')).toHaveCSS(
-    'opacity',
-    finePointer ? '0' : '1',
-  )
+  await expect(page.locator('#conversation-heading')).toHaveCSS('opacity', '0')
   if (finePointer) {
     const bounds = await page.locator('#conversation-heading').boundingBox()
     await page.mouse.move(bounds!.x + 40, bounds!.y + 30)

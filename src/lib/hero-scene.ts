@@ -222,9 +222,6 @@ export function createHeroScene({
   )
   const finePointer = window.matchMedia('(pointer: fine)')
   const mobileParticles = window.matchMedia('(max-width: 639px)')
-  const desktopText = window.matchMedia(
-    '(min-width: 1024px) and (hover: hover) and (pointer: fine)',
-  )
 
   const showDOM = () => {
     copy?.classList.remove('hero-fluid-copy--ready')
@@ -260,7 +257,6 @@ export function createHeroScene({
       heading &&
       (description || effectsOnly) &&
       copy?.dataset.heroCopyReady === 'true' &&
-      desktopText.matches &&
       !reducedMotion &&
       p.fluid.enabled
     ) {
@@ -306,39 +302,58 @@ export function createHeroScene({
   })
   document.fonts.addEventListener('loadingdone', scheduleResize)
   finePointer.addEventListener('change', scheduleResize)
-  desktopText.addEventListener('change', scheduleResize)
   window.addEventListener('resize', scheduleResize)
 
-  const move = (event: PointerEvent) => {
+  const interact = (
+    clientX: number,
+    clientY: number,
+    time: number,
+    target: EventTarget | null,
+    touch = false,
+    start = false,
+  ) => {
+    if (!active || !overlay.visible) return
     if (
-      !active ||
-      !overlay.visible ||
-      !finePointer.matches ||
-      event.pointerType === 'touch'
-    )
-      return
-    if ((event.target as Element).closest('a,button,input,select,textarea')) {
+      !(target instanceof Element) ||
+      target.closest(
+        'a,button,input,select,textarea,summary,[role="button"],[contenteditable]',
+      )
+    ) {
       lastPointer = null
       return
     }
     const rect = host.getBoundingClientRect()
-    const x = (event.clientX - rect.left) / rect.width
-    const y = 1 - (event.clientY - rect.top) / rect.height
+    const x = (clientX - rect.left) / rect.width
+    const y = 1 - (clientY - rect.top) / rect.height
     if (x < 0 || x > 1 || y < 0 || y > 1) {
       lastPointer = null
       return
     }
     textMaterial.uniforms.uPointer!.value.set(x, y)
-    if (lastPointer && event.timeStamp - lastPointer.time < 180) {
-      const dx = event.clientX - lastPointer.x,
-        dy = lastPointer.y - event.clientY
+    const strength = touch ? 0.55 : 1
+    if (start) {
+      fluid.addSplat(x, y, 0, 0, {
+        dyeColor: [
+          shared.uGold.value.r * 0.35,
+          shared.uGold.value.g * 0.35,
+          shared.uGold.value.b * 0.35,
+        ],
+      })
+      cursorPositions.setXYZ(cursorIndex, x, y, 0)
+      born.setX(cursorIndex, clock)
+      cursorIndex = (cursorIndex + 1) % cursorCount
+      cursorPositions.needsUpdate = born.needsUpdate = true
+    }
+    if (lastPointer && time - lastPointer.time < 180) {
+      const dx = clientX - lastPointer.x,
+        dy = lastPointer.y - clientY
       const speed = Math.hypot(dx, dy)
       if (speed > 0.4) {
         fluid.addSplat(
           x,
           y,
-          Math.max(-80, Math.min(80, dx)) * p.fluid.force,
-          Math.max(-80, Math.min(80, dy)) * p.fluid.force,
+          Math.max(-80, Math.min(80, dx)) * p.fluid.force * strength,
+          Math.max(-80, Math.min(80, dy)) * p.fluid.force * strength,
           {
             dyeColor: [
               shared.uGold.value.r * 0.65,
@@ -347,7 +362,7 @@ export function createHeroScene({
             ],
           },
         )
-        const emissions = Math.min(10, Math.ceil(speed / 3))
+        const emissions = Math.min(touch ? 6 : 10, Math.ceil(speed / 3))
         for (let i = 0; i < emissions; i++) {
           const t = (i + 1) / emissions
           cursorPositions.setXYZ(
@@ -363,12 +378,39 @@ export function createHeroScene({
         born.needsUpdate = true
       }
     }
-    lastPointer = { x: event.clientX, y: event.clientY, time: event.timeStamp }
+    lastPointer = { x: clientX, y: clientY, time }
+  }
+  const move = (event: PointerEvent) => {
+    if (event.pointerType === 'touch' || !finePointer.matches) return
+    interact(event.clientX, event.clientY, event.timeStamp, event.target)
   }
   const leave = () => {
     lastPointer = null
   }
+  const touch = (event: TouchEvent) => {
+    if (event.touches.length !== 1) {
+      leave()
+      return
+    }
+    const point = event.touches[0]!
+    const start = event.type === 'touchstart'
+    if (start) leave()
+    interact(
+      point.clientX,
+      point.clientY,
+      event.timeStamp,
+      event.target,
+      true,
+      start,
+    )
+  }
   window.addEventListener('pointermove', move, { passive: true })
+  // Passive touch events continue during native scrolling after pointercancel.
+  // Never capture the pointer or prevent scrolling, pinch zoom, or CTA clicks.
+  host.addEventListener('touchstart', touch, { passive: true })
+  host.addEventListener('touchmove', touch, { passive: true })
+  host.addEventListener('touchend', leave, { passive: true })
+  host.addEventListener('touchcancel', leave, { passive: true })
   host.addEventListener('pointerleave', leave)
 
   if (effectsOnly) onReady(true)
@@ -465,8 +507,11 @@ export function createHeroScene({
       window.removeEventListener('resize', scheduleResize)
       document.fonts.removeEventListener('loadingdone', scheduleResize)
       finePointer.removeEventListener('change', scheduleResize)
-      desktopText.removeEventListener('change', scheduleResize)
       window.removeEventListener('pointermove', move)
+      host.removeEventListener('touchstart', touch)
+      host.removeEventListener('touchmove', touch)
+      host.removeEventListener('touchend', leave)
+      host.removeEventListener('touchcancel', leave)
       host.removeEventListener('pointerleave', leave)
       scene.remove(overlay, shapes, cursor, text)
       for (const material of [
