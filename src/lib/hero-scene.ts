@@ -86,10 +86,14 @@ export function createHeroScene({
     },
   }
   const textCanvas = document.createElement('canvas')
-  const textTexture = new CanvasTexture(textCanvas)
-  textTexture.colorSpace = SRGBColorSpace
-  textTexture.generateMipmaps = false
-  textTexture.minFilter = textTexture.magFilter = LinearFilter
+  const createTextTexture = () => {
+    const texture = new CanvasTexture(textCanvas)
+    texture.colorSpace = SRGBColorSpace
+    texture.generateMipmaps = false
+    texture.minFilter = texture.magFilter = LinearFilter
+    return texture
+  }
+  let textTexture = createTextTexture()
   const textMaterial = new ShaderMaterial({
     vertexShader: shaders.fullscreenVertex,
     fragmentShader: shaders.textFragment,
@@ -211,6 +215,8 @@ export function createHeroScene({
   let resizeNeeded = true
   let index = 0
   let pendingCopy = false
+  let textPrepared = false
+  let touchTextUntil = 0
   const copy = host.querySelector<HTMLElement>(
     effectsOnly ? '.conversation-copy' : '.hero-copy',
   )
@@ -221,6 +227,7 @@ export function createHeroScene({
     '.hero-fluid-copy__description',
   )
   const finePointer = window.matchMedia('(pointer: fine)')
+  const touchPointer = window.matchMedia('(pointer: coarse)')
   const mobileParticles = window.matchMedia('(max-width: 639px)')
 
   const showDOM = () => {
@@ -253,6 +260,7 @@ export function createHeroScene({
     )
     textMaterial.uniforms.uAspect!.value = width / height
     showDOM()
+    textPrepared = false
     if (
       heading &&
       (description || effectsOnly) &&
@@ -268,9 +276,20 @@ export function createHeroScene({
         width,
         height,
       )
-      textTexture.needsUpdate = true
-      text.visible = true
-      pendingCopy = true
+      // WebGL texture storage cannot change dimensions after allocation.
+      // Recreate it for the freshly sized canvas, rather than uploading into
+      // the old storage and stretching/clipping text after a live resize.
+      const previousTexture = textTexture
+      textTexture = createTextTexture()
+      textMaterial.uniforms.uText!.value = textTexture
+      previousTexture.dispose()
+      textPrepared = true
+      // Keep native Retina text at rest on touch screens. Preparing the fluid
+      // texture must not replace crisp DOM text when typing finishes.
+      if (!touchPointer.matches || clock < touchTextUntil) {
+        text.visible = true
+        pendingCopy = true
+      }
     }
     resizeNeeded = false
   }
@@ -302,6 +321,7 @@ export function createHeroScene({
   })
   document.fonts.addEventListener('loadingdone', scheduleResize)
   finePointer.addEventListener('change', scheduleResize)
+  touchPointer.addEventListener('change', scheduleResize)
   window.addEventListener('resize', scheduleResize)
 
   const interact = (
@@ -330,6 +350,13 @@ export function createHeroScene({
       return
     }
     textMaterial.uniforms.uPointer!.value.set(x, y)
+    if (touch && touchPointer.matches) {
+      touchTextUntil = clock + 0.6
+      if (textPrepared && !text.visible) {
+        text.visible = true
+        pendingCopy = true
+      }
+    }
     const strength = touch ? 0.55 : 1
     if (start) {
       fluid.addSplat(x, y, 0, 0, {
@@ -484,12 +511,16 @@ export function createHeroScene({
         control?.pause()
         revealControl?.pause()
         lastPointer = null
+        touchTextUntil = 0
+        if (touchPointer.matches) showDOM()
       }
     },
     tick(delta: number) {
       if (disposed || !active) return
       if (resizeNeeded) resize()
       clock += Math.min(delta, 1 / 30)
+      if (touchPointer.matches && text.visible && clock >= touchTextUntil)
+        showDOM()
       shared.uTime.value = clock
       shared.uDpr.value = renderer.getPixelRatio()
       if (p.fluid.enabled && !reducedMotion) fluid.step(Math.min(delta, 1 / 30))
@@ -507,6 +538,7 @@ export function createHeroScene({
       window.removeEventListener('resize', scheduleResize)
       document.fonts.removeEventListener('loadingdone', scheduleResize)
       finePointer.removeEventListener('change', scheduleResize)
+      touchPointer.removeEventListener('change', scheduleResize)
       window.removeEventListener('pointermove', move)
       host.removeEventListener('touchstart', touch)
       host.removeEventListener('touchmove', touch)

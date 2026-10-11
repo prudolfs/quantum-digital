@@ -25,8 +25,14 @@ test('mobile touch drives fluid text and gold trails without blocking scrolling 
     'false',
     { timeout: 20_000 },
   )
-  await expect(page.locator('.hero-copy')).toHaveClass(/hero-fluid-copy--ready/)
-  await expect(page.locator('#hero-heading')).toHaveCSS('opacity', '0')
+  await expect(page.locator('.hero-copy')).toHaveAttribute(
+    'data-hero-copy-ready',
+    'true',
+  )
+  await expect(page.locator('.hero-copy')).not.toHaveClass(
+    /hero-fluid-copy--ready/,
+  )
+  await expect(page.locator('#hero-heading')).toHaveCSS('opacity', '1')
   const title = page.locator('#hero-heading')
   const bounds = (await title.boundingBox())!
   const before = await page.screenshot({ clip: bounds })
@@ -80,47 +86,59 @@ test('mobile touch drives fluid text and gold trails without blocking scrolling 
     },
     { x: bounds.x + 150, y },
   )
-  const after = await page.screenshot({
-    clip: bounds,
-    path: 'test-results/mobile-fluid-touch.png',
-  })
-  await page.evaluate((timer) => clearInterval(timer), trail)
-  const gold = await page.evaluate(
-    async (images) => {
-      const counts = []
-      for (const image of images) {
-        const bitmap = await createImageBitmap(
-          await (await fetch(`data:image/png;base64,${image}`)).blob(),
+  await expect(title).toHaveCSS('opacity', '0')
+  await expect
+    .poll(
+      async () => {
+        const after = await page.screenshot({
+          clip: bounds,
+          path: 'test-results/mobile-fluid-touch.png',
+        })
+        const gold = await page.evaluate(
+          async (images) => {
+            const counts = []
+            for (const image of images) {
+              const bitmap = await createImageBitmap(
+                await (await fetch(`data:image/png;base64,${image}`)).blob(),
+              )
+              const canvas = document.createElement('canvas')
+              canvas.width = bitmap.width
+              canvas.height = bitmap.height
+              const context = canvas.getContext('2d')!
+              context.drawImage(bitmap, 0, 0)
+              const pixels = context.getImageData(
+                0,
+                0,
+                canvas.width,
+                canvas.height,
+              ).data
+              let count = 0
+              for (let i = 0; i < pixels.length; i += 4) {
+                if (
+                  pixels[i]! > 80 &&
+                  pixels[i]! > pixels[i + 1]! * 1.1 &&
+                  pixels[i + 1]! > pixels[i + 2]! * 1.4
+                )
+                  count++
+              }
+              counts.push(count)
+              bitmap.close()
+            }
+            return counts
+          },
+          [before.toString('base64'), after.toString('base64')],
         )
-        const canvas = document.createElement('canvas')
-        canvas.width = bitmap.width
-        canvas.height = bitmap.height
-        const context = canvas.getContext('2d')!
-        context.drawImage(bitmap, 0, 0)
-        const pixels = context.getImageData(
-          0,
-          0,
-          canvas.width,
-          canvas.height,
-        ).data
-        let count = 0
-        for (let i = 0; i < pixels.length; i += 4) {
-          if (
-            pixels[i]! > 80 &&
-            pixels[i]! > pixels[i + 1]! * 1.1 &&
-            pixels[i + 1]! > pixels[i + 2]! * 1.4
-          )
-            count++
-        }
-        counts.push(count)
-        bitmap.close()
-      }
-      return counts
-    },
-    [before.toString('base64'), after.toString('base64')],
-  )
-  expect(gold[1]!).toBeGreaterThan(gold[0]! + 10)
+        return gold[1]! - gold[0]!
+      },
+      { timeout: 15_000, intervals: [100, 200, 500] },
+    )
+    .toBeGreaterThan(10)
+  await page.evaluate((timer) => clearInterval(timer), trail)
   await title.dispatchEvent('touchend', { bubbles: true })
+  await expect(title).toHaveCSS('opacity', '1', { timeout: 10_000 })
+  await expect(page.locator('.hero-copy')).not.toHaveClass(
+    /hero-fluid-copy--ready/,
+  )
   // Native browser touches prove the effect does not capture the scrolling gesture.
   const client = await page.context().newCDPSession(page)
   await client.send('Input.dispatchTouchEvent', {
