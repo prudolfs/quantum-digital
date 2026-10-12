@@ -105,3 +105,7 @@ Use gold for hero cursor effects and secondary tiles behind trailing CTA arrows.
 ## Analytics consent
 
 Use a compact, nonmodal analytics-cookie banner with equally visible accept/reject actions and a Privacy link. Match the dark surface, ice text, and existing button styles. On chat, position it below the header so it does not cover the bottom composer. Keep Cookie preferences available in the footer and Privacy page. Essential chat/admin cookies are independent of the analytics choice.
+
+## Service page pilot
+
+Service detail pages reuse the selected-work typography, full-width selective patterns, scoped deliverable/process sections, current published related work, and shared FAQ disclosures. The Product development pilot uses a responsive static Blender render labelled “Conceptual illustration.” Its 2860 × 1560 master and editable scene stay in source assets; desktop/mobile WebPs are 1400 × 764 and 768 × 419. Static artwork is immediate and reserves its dimensions. Desktop scope columns stack at tablet/mobile widths, and chat actions use the existing trailing gold-icon treatment. Service-card detail links appear only for active, published page mappings.

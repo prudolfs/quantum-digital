@@ -3,11 +3,18 @@ Run: blender --background --python scripts/render-services.py
 These are illustrations of service themes, not completed client products.
 """
 import math
+import argparse
+import sys
 from pathlib import Path
 import bpy
 from mathutils import Vector
 
-OUTPUT = Path(__file__).resolve().parents[1] / 'public' / 'services'
+ROOT = Path(__file__).resolve().parents[1]
+parser = argparse.ArgumentParser()
+parser.add_argument('--theme', choices=['product', 'ai', 'workflow', 'integration'])
+parser.add_argument('--master', action='store_true')
+options = parser.parse_args(sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else [])
+OUTPUT = ROOT / 'public' / 'services'
 OUTPUT.mkdir(parents=True, exist_ok=True)
 
 def material(name, color, metallic=0, emission=0):
@@ -52,7 +59,7 @@ def connection(start, end, surface, radius=0.018):
     obj.data.materials.append(surface)
     return obj
 
-for theme in ['product', 'ai', 'workflow', 'integration']:
+for theme in ([options.theme] if options.theme else ['product', 'ai', 'workflow', 'integration']):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
     scene.render.engine = 'CYCLES'
@@ -64,6 +71,12 @@ for theme in ['product', 'ai', 'workflow', 'integration']:
     scene.render.resolution_percentage = 100
     scene.render.image_settings.file_format = 'JPEG'
     scene.render.image_settings.quality = 85
+    if options.master:
+        scene.render.resolution_x = 2860
+        scene.render.resolution_y = 1560
+        scene.cycles.samples = 64
+        scene.render.image_settings.file_format = 'PNG'
+        bpy.context.preferences.filepaths.save_version = 0
     scene.view_settings.view_transform = 'AgX'
     world = bpy.data.worlds.new('Navy studio')
     world.use_nodes = True
@@ -124,5 +137,11 @@ for theme in ['product', 'ai', 'workflow', 'integration']:
     camera.data.type = 'ORTHO'
     camera.data.ortho_scale = 5.8
     scene.camera = camera
-    scene.render.filepath = str(OUTPUT / f'{theme}.jpg')
+    if options.master:
+        source = ROOT / 'assets' / 'services' / theme
+        source.mkdir(parents=True, exist_ok=True)
+        scene.render.filepath = str(source / f'{theme}-hero.png')
+        bpy.ops.wm.save_as_mainfile(filepath=str(source / f'{theme}-hero.blend'))
+    else:
+        scene.render.filepath = str(OUTPUT / f'{theme}.jpg')
     bpy.ops.render.render(write_still=True)

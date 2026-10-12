@@ -10,6 +10,7 @@ import { ServiceArt } from '@/components/service-art'
 import { engagements } from '@/content/site'
 import { pageHead } from '@/lib/seo'
 import { loadPublishedContent } from '@/server/content'
+import { servicePageRoute } from '../../shared/service-pages'
 
 export const Route = createFileRoute('/')({
   loader: () => loadPublishedContent(),
@@ -119,6 +120,16 @@ function HomePage() {
                   <h3>{service.title}</h3>
                   <p className="body-copy">{service.description}</p>
                   <p className="service-detail">{service.detail}</p>
+                  {servicePageRoute(service) && (
+                    <Link
+                      className="text-link service-detail-link"
+                      to="/services/$slug"
+                      params={{ slug: servicePageRoute(service)!.slug }}
+                    >
+                      Explore {servicePageRoute(service)!.label.toLowerCase()}
+                      <ActionIcon icon={ArrowRight} />
+                    </Link>
+                  )}
                 </div>
               </article>
             ))}

@@ -87,14 +87,24 @@ Rebuild from that generator in later phases, with theme-specific execution so re
 
 ## Phase 2: First page and shared presentation
 
-- [ ] Start with Product development as the first complete page.
-- [ ] Retain its editable scene and high-resolution master render; create optimized desktop/mobile hero images.
-- [ ] Build the shared service-page layout using appropriate selected-work and FAQ components.
-- [ ] Add the service narrative, published related work, conceptual-art label, and contextual chat action.
-- [ ] Link the corresponding homepage card and support direct page loads and unknown-route recovery.
-- [ ] Review desktop, tablet, mobile, keyboard, reduced motion, and JavaScript-free behavior before expanding the set.
+- [x] Start with Product development as the first complete page.
+- [x] Retain its editable scene and high-resolution master render; create optimized desktop/mobile hero images.
+- [x] Build the shared service-page layout using appropriate selected-work and FAQ components.
+- [x] Add the service narrative, published related work, conceptual-art label, and contextual chat action.
+- [x] Link the corresponding homepage card and support direct page loads and unknown-route recovery.
+- [x] Review desktop, tablet, mobile, keyboard, reduced motion, and JavaScript-free behavior before expanding the set.
 
 **Exit criteria:** One page demonstrates the complete content and responsive visual direction with a fast, usable static hero.
+
+## Phase 2 review — October 12, 2026
+
+Product development is implemented at `/services/product-development`, using its current published service record, a responsive static hero, problem/scope/process sections, current published related work, five practical answers, and product-labelled chat actions. The homepage card links to the page only for the active published ID. Unknown, renamed, and unpublished IDs do not resolve. Metadata, sitemap inclusion, and analytics path approval cover the pilot.
+
+The original Blender generator now supports a single-theme master rebuild. Retained the editable scene and 2860 × 1560 lossless PNG outside `public/`; derived 1400 × 764 and 768 × 419 WebPs of 37,326 and 17,576 bytes. Existing homepage images remain unchanged. The source masters are absent from the public build. No service model is exported or loaded yet.
+
+Verification passed: nine focused unit checks, ten desktop/mobile service and content browser checks, a final six-scenario service rerun after the scope-layout refinement, typecheck, lint, formatting, production build, and Cloudflare dry-run. Desktop/tablet/mobile captures at 1440, 820, 390, and 320 pixels show one main heading, the appropriate image, and no horizontal overflow. Browser checks cover keyboard/reduced-motion questions, accessibility, native JavaScript-free disclosures, navigation, chat entry, metadata/sitemap, and 404 handling. Chat-session writes and analytics ingestion were intercepted in the new service checks; no deployment or inquiry submission was made.
+
+Detailed captures and review notes remain in ignored `docs/local/`. The current CTA enters chat without automatically sending a message; richer service-aware chat context remains Phase 4. Stop for owner review before Phase 3.
 
 ## Phase 3: Optimized interactive illustration
 
@@ -130,4 +140,4 @@ Rebuild from that generator in later phases, with theme-specific execution so re
 
 ## Progress
 
-Phase 1 is complete with all six tasks checked. Phases 2–5 remain unchecked. Page and asset implementation has not started; wait for owner review before Phase 2.
+Phases 1 and 2 are complete with their tasks checked. Phases 3–5 remain unchecked. The Product development pilot uses static artwork; wait for owner review before Phase 3.

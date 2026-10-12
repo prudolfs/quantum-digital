@@ -40,6 +40,14 @@ beforeEach(() => {
   })
 })
 afterEach(() => vi.unstubAllGlobals())
+it('tracks the reviewed service route without accepting arbitrary service paths', async () => {
+  const { analyticsPath } = await import('./analytics')
+  expect(analyticsPath('/services/product-development')).toBe(
+    '/services/product-development',
+  )
+  expect(analyticsPath('/services/private-project')).toBeNull()
+  expect(analyticsPath('/services/ai-integrations')).toBeNull()
+})
 it('drops unknown events and removes personal data, query strings, and SDK enrichment', async () => {
   const { sanitizeAnalyticsEvent } = await import('./analytics')
   const input = {

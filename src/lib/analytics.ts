@@ -1,4 +1,5 @@
 import type { CaptureResult, PostHog } from 'posthog-js/dist/module.slim'
+import { servicePageRoutes } from '../../shared/service-pages'
 import { publicEnv } from '@/env'
 import {
   getAnalyticsConsent,
@@ -37,6 +38,12 @@ const workSlugs = new Set([
 ])
 export function analyticsPath(pathname: string) {
   if (['/', '/about', '/chat', '/privacy'].includes(pathname)) return pathname
+  if (
+    Object.values(servicePageRoutes).some(
+      (route) => pathname === `/services/${route.slug}`,
+    )
+  )
+    return pathname
   if (pathname.startsWith('/work/')) {
     const slug = pathname.slice('/work/'.length)
     return workSlugs.has(slug) ? pathname : '/work/:slug'

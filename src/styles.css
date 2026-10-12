@@ -2204,6 +2204,57 @@ nav {
   color: var(--color-muted);
   margin-top: 18px;
 }
+.service-illustration img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+}
+.service-detail-link {
+  margin-top: 18px;
+}
+.service-scope {
+  background-color: #071323;
+}
+.service-scope-note {
+  margin-top: 32px;
+  max-width: 55rem;
+}
+.service-scope .work-applications {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.service-process {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 32px;
+  list-style: none;
+  padding: 0;
+}
+.service-process li {
+  border-top: 1px solid var(--color-border);
+  padding-top: 24px;
+}
+.service-process h3 {
+  margin-block: 18px 12px;
+  font-size: 1.375rem;
+}
+@media (max-width: 1000px) {
+  .service-scope .work-applications {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .service-process {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 767px) {
+  .service-scope .work-applications {
+    grid-template-columns: 1fr;
+  }
+  .service-process {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+}
 .work-section {
   padding-block: 88px;
 }

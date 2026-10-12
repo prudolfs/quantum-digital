@@ -1,0 +1,17 @@
+{
+  "master": "product-hero.png",
+  "assets": [
+    {
+      "filename": "product-hero.webp",
+      "width": 1400,
+      "height": 764,
+      "bytes": 37326
+    },
+    {
+      "filename": "product-hero-mobile.webp",
+      "width": 768,
+      "height": 419,
+      "bytes": 17576
+    }
+  ]
+}

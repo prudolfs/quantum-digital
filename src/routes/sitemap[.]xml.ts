@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { publicEnv } from '@/env'
 import { fetchPublishedContent } from '@/server/content'
+import { servicePageRoute } from '../../shared/service-pages'
 
 const escape = (value: string) =>
   value
@@ -14,13 +15,17 @@ export const Route = createFileRoute('/sitemap.xml')({
   server: {
     handlers: {
       GET: async () => {
-        const { caseStudies } = await fetchPublishedContent()
+        const { caseStudies, services } = await fetchPublishedContent()
         const origin = new URL(publicEnv.VITE_SITE_URL).origin
         const paths = [
           '/',
           '/about',
           '/chat',
           '/privacy',
+          ...services.flatMap((service) => {
+            const route = servicePageRoute(service)
+            return route ? [`/services/${route.slug}`] : []
+          }),
           ...caseStudies.map(
             (study) => `/work/${encodeURIComponent(study.slug)}`,
           ),

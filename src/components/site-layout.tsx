@@ -21,7 +21,9 @@ export function SiteLayout({ children }: { children: ReactNode }) {
   })
   const isWork = useLocation({
     select: (location) =>
-      location.pathname.startsWith('/work/') || location.pathname === '/about',
+      location.pathname.startsWith('/work/') ||
+      location.pathname.startsWith('/services/') ||
+      location.pathname === '/about',
   })
   const { scrollY } = useScroll()
   const reducedMotion = useReducedMotion()
