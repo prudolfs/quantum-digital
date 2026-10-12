@@ -1,0 +1,11 @@
+{
+  "master": "integration-background.png",
+  "assets": [
+    {
+      "filename": "integration-background.webp",
+      "width": 1400,
+      "height": 764,
+      "bytes": 8672
+    }
+  ]
+}

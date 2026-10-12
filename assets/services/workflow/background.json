@@ -1,0 +1,11 @@
+{
+  "master": "workflow-background.png",
+  "assets": [
+    {
+      "filename": "workflow-background.webp",
+      "width": 1400,
+      "height": 764,
+      "bytes": 7422
+    }
+  ]
+}

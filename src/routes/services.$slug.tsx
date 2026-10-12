@@ -2,7 +2,7 @@ import { createFileRoute, notFound } from '@tanstack/react-router'
 import { loadPublishedContent } from '@/server/content'
 import { findPublishedServicePage } from '@/content/service-pages'
 import { ServicePage } from '@/components/service-page'
-import { pageHead } from '@/lib/seo'
+import { servicePageHead } from '@/lib/service-seo'
 
 export const Route = createFileRoute('/services/$slug')({
   loader: async ({ params }) => {
@@ -13,14 +13,7 @@ export const Route = createFileRoute('/services/$slug')({
     if (!page) throw notFound()
     return page
   },
-  head: ({ loaderData }) =>
-    loaderData
-      ? pageHead(
-          `${loaderData.route.label} | Quantum Digital`,
-          loaderData.service.description,
-          `/services/${loaderData.route.slug}`,
-        )
-      : {},
+  head: ({ loaderData }) => (loaderData ? servicePageHead(loaderData) : {}),
   component: ServiceDetail,
 })
 

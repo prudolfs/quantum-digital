@@ -46,7 +46,12 @@ it('tracks the reviewed service route without accepting arbitrary service paths'
     '/services/product-development',
   )
   expect(analyticsPath('/services/private-project')).toBeNull()
-  expect(analyticsPath('/services/ai-integrations')).toBeNull()
+  for (const slug of [
+    'ai-integrations',
+    'workflow-automation',
+    'system-integrations',
+  ])
+    expect(analyticsPath(`/services/${slug}`)).toBe(`/services/${slug}`)
 })
 it('drops unknown events and removes personal data, query strings, and SDK enrichment', async () => {
   const { sanitizeAnalyticsEvent } = await import('./analytics')

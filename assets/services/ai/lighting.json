@@ -1,0 +1,11 @@
+{
+  "master": "ai-hero.png",
+  "assets": [
+    {
+      "filename": "ai-lighting.jpg",
+      "width": 1400,
+      "height": 764,
+      "bytes": 83077
+    }
+  ]
+}

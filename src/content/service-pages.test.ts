@@ -32,12 +32,38 @@ it('does not resurrect unpublished or renamed service and related-work records',
     findPublishedServicePage(content, 'product-development'),
   ).toBeUndefined()
   expect(findPublishedServicePage(defaultContent, 'unknown')).toBeUndefined()
-  expect(
-    findPublishedServicePage(defaultContent, 'ai-integrations'),
-  ).toBeUndefined()
   const page = findPublishedServicePage(
     { ...defaultContent, caseStudies: [] },
     'product-development',
   )!
   expect(page.related).toEqual([])
+})
+
+it('provides distinct narratives and only currently published related examples for all four offers', () => {
+  const headings = new Set<string>()
+  for (const service of defaultContent.services) {
+    const route = servicePageRoute(service)!
+    const page = findPublishedServicePage(defaultContent, route.slug)!
+    headings.add(page.narrative.startingHeading)
+    expect(page.narrative.questions).toHaveLength(5)
+    expect(page.related).toHaveLength(2)
+    expect(
+      findPublishedServicePage(
+        {
+          ...defaultContent,
+          services: defaultContent.services.filter(
+            (item) => item.id !== service.id,
+          ),
+        },
+        route.slug,
+      ),
+    ).toBeUndefined()
+    expect(
+      findPublishedServicePage(
+        { ...defaultContent, caseStudies: [] },
+        route.slug,
+      )?.related,
+    ).toEqual([])
+  }
+  expect(headings.size).toBe(4)
 })

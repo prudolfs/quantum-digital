@@ -61,6 +61,7 @@ export async function handleChat(request: Request) {
       }),
   })
   let messages
+  let requestedService: unknown
   let revision = 0
   let generationRevision: number | undefined
   try {
@@ -74,6 +75,8 @@ export async function handleChat(request: Request) {
       return failure('INVALID_CONVERSATION', 400)
     if (body.messages.length > chatLimits.messages)
       return failure('CONVERSATION_LIMIT', 413)
+    requestedService =
+      'serviceContext' in body ? body.serviceContext : undefined
     messages = await validateUIMessages({ messages: body.messages, tools })
     const invalid = conversationError(messages)
     if (invalid)
@@ -125,7 +128,7 @@ export async function handleChat(request: Request) {
     const gateway = createGateway({ apiKey: env.AI_GATEWAY_API_KEY })
     const result = streamText({
       model: gateway(env.AI_MODEL!),
-      system: `${chatInstructions}\nPublished context: ${JSON.stringify(chatContext(content))}`,
+      system: `${chatInstructions}\nPublished context: ${JSON.stringify(chatContext(content, requestedService))}`,
       messages: await convertToModelMessages(messages, {
         tools,
         ignoreIncompleteToolCalls: true,

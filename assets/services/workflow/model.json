@@ -1,0 +1,30 @@
+{
+  "blender": "4.5.14 LTS",
+  "source": "workflow-hero.blend",
+  "model": "workflow-hero.glb",
+  "bytes": 143864,
+  "triangles": 1500,
+  "bounds": {
+    "min": [-1.875, -0.07499999552965164, -0.6250001192092896],
+    "max": [1.875, 0.9149488806724548, 0.5]
+  },
+  "meshes": [
+    "Workflow step",
+    "Step signal",
+    "Sphere",
+    "Cylinder",
+    "Workflow step.001",
+    "Step signal.001",
+    "Sphere.001",
+    "Cylinder.001",
+    "Workflow step.002",
+    "Step signal.002",
+    "Sphere.002",
+    "Cylinder.002"
+  ],
+  "excluded": ["Studio floor", "camera", "lights"],
+  "lighting": "Camera-projected studio beauty texture; KHR_materials_unlit",
+  "texture": "workflow-lighting.jpg",
+  "textureBytes": 78992,
+  "limitation": "Baked highlights and shadow are fixed; use a bounded tilt, not orbit controls."
+}

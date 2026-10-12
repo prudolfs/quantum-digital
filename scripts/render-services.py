@@ -66,6 +66,7 @@ for theme in ([options.theme] if options.theme else ['product', 'ai', 'workflow'
     scene.cycles.device = 'CPU'
     scene.cycles.samples = 32
     scene.cycles.use_denoising = True
+    scene.cycles.denoising_use_gpu = False
     scene.render.resolution_x = 880
     scene.render.resolution_y = 480
     scene.render.resolution_percentage = 100

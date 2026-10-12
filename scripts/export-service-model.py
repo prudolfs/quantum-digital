@@ -35,9 +35,15 @@ if options.render_background:
     for obj in meshes:
         obj.visible_camera = False
     scene.cycles.samples = 16
+    # The plate needs only delivery-resolution detail; retain a lossless
+    # 1430px source (half the hero master), then derive the 1400px WebP.
+    percentage = scene.render.resolution_percentage
+    scene.render.resolution_percentage = 50
+    scene.cycles.denoising_use_gpu = False
     scene.render.image_settings.file_format = 'PNG'
     scene.render.filepath = str(source / f'{theme}-background.png')
     bpy.ops.render.render(write_still=True)
+    scene.render.resolution_percentage = percentage
     for obj in meshes:
         obj.visible_camera = True
 
@@ -61,6 +67,9 @@ for obj in meshes:
     for modifier in obj.modifiers:
         if modifier.type == 'BEVEL':
             modifier.segments = 2
+    if obj.name.startswith('Sphere'):
+        simplify = obj.modifiers.new('Web sphere budget', 'DECIMATE')
+        simplify.ratio = 0.5 if theme == 'ai' and obj.name == 'Sphere' else 0.25
     bpy.ops.object.convert(target='MESH')
     uv = obj.data.uv_layers.active or obj.data.uv_layers.new(name='Baked studio projection')
     for loop in obj.data.loops:

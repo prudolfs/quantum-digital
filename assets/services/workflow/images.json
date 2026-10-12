@@ -1,0 +1,17 @@
+{
+  "master": "workflow-hero.png",
+  "assets": [
+    {
+      "filename": "workflow-hero.webp",
+      "width": 1400,
+      "height": 764,
+      "bytes": 22834
+    },
+    {
+      "filename": "workflow-hero-mobile.webp",
+      "width": 768,
+      "height": 419,
+      "bytes": 10912
+    }
+  ]
+}

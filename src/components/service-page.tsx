@@ -3,28 +3,27 @@ import { ArrowDown, ArrowLeft, ArrowRight, MessageSquare } from 'lucide-react'
 import { ActionIcon } from './action-icon'
 import { FaqItem } from './faq-item'
 import { WorkModel } from './work-model'
-import { productServiceArt } from '@/lib/service-model-config'
+import { serviceArt } from '@/lib/service-model-config'
 import type { findPublishedServicePage } from '@/content/service-pages'
 
 type ServicePageData = NonNullable<ReturnType<typeof findPublishedServicePage>>
 
-function ServiceAction({ children }: { children: string }) {
+function ServiceAction({ children, slug }: { children: string; slug: string }) {
   return (
-    <Link className="text-link work-action" to="/chat">
+    <Link
+      className="text-link work-action"
+      to="/chat"
+      search={{ service: slug }}
+    >
       {children} <ActionIcon icon={MessageSquare} />
     </Link>
   )
 }
 
 function Illustration({ theme }: { theme: string }) {
-  if (theme === 'product')
-    return (
-      <WorkModel
-        key={theme}
-        art={productServiceArt}
-        className="service-illustration"
-      />
-    )
+  const art = serviceArt(theme)
+  if (art)
+    return <WorkModel key={theme} art={art} className="service-illustration" />
   return (
     <figure className="work-model service-illustration">
       <picture>
@@ -63,7 +62,9 @@ export function ServicePage({
                 {service.description}
               </p>
               <div className="work-actions">
-                <ServiceAction>{narrative.action}</ServiceAction>
+                <ServiceAction slug={route.slug}>
+                  {narrative.action}
+                </ServiceAction>
                 <a className="text-link work-action" href="#deliverables">
                   Explore the scope <ActionIcon icon={ArrowDown} />
                 </a>
@@ -82,7 +83,7 @@ export function ServicePage({
             </div>
             <div>
               <dt>The starting point</dt>
-              <dd>A useful journey, with a scope we agree together.</dd>
+              <dd>{narrative.startingPoint}</dd>
             </div>
           </dl>
         </div>
@@ -94,7 +95,7 @@ export function ServicePage({
         <div className="work-section-intro">
           <div>
             <p className="eyebrow">01 / A useful starting point</p>
-            <h2 id="problems-heading">Connect the idea to the product.</h2>
+            <h2 id="problems-heading">{narrative.startingHeading}</h2>
           </div>
           <p className="body-copy">{narrative.audience}</p>
         </div>
@@ -131,7 +132,7 @@ export function ServicePage({
           </div>
           <p className="service-scope-note body-copy">
             These are possible parts of an engagement. We agree the deliverables
-            around your product; every project has its own scope.
+            around your needs; every project has its own scope.
           </p>
         </div>
       </section>
@@ -144,10 +145,7 @@ export function ServicePage({
             <p className="eyebrow">03 / How we work</p>
             <h2 id="process-heading">Make progress reviewable.</h2>
           </div>
-          <p className="body-copy">
-            Product decisions, architecture, and delivery stay connected. Each
-            step gives us something concrete to review.
-          </p>
+          <p className="body-copy">{narrative.processIntro}</p>
         </div>
         <ol className="service-process">
           {narrative.steps.map((step, index) => (
@@ -169,10 +167,7 @@ export function ServicePage({
               <p className="eyebrow">04 / Relevant work</p>
               <h2 id="related-heading">The engineering behind the offer.</h2>
             </div>
-            <p className="body-copy">
-              A closer look at connected product journeys and mobile business
-              workflows. These examples describe the work and its boundaries.
-            </p>
+            <p className="body-copy">{narrative.relatedIntro}</p>
           </div>
           <div className="work-related">
             {related.map((study) => (
@@ -209,11 +204,8 @@ export function ServicePage({
       <footer className="work-closing section-shell">
         <p className="eyebrow">Build something useful</p>
         <h2>{narrative.closing}</h2>
-        <p className="body-copy">
-          Tell me about the people using it, what they need to do, and where you
-          are starting from.
-        </p>
-        <ServiceAction>{narrative.action}</ServiceAction>
+        <p className="body-copy">{narrative.closingIntro}</p>
+        <ServiceAction slug={route.slug}>{narrative.action}</ServiceAction>
       </footer>
     </article>
   )

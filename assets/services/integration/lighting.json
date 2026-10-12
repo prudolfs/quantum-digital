@@ -1,0 +1,11 @@
+{
+  "master": "integration-hero.png",
+  "assets": [
+    {
+      "filename": "integration-lighting.jpg",
+      "width": 1400,
+      "height": 764,
+      "bytes": 71383
+    }
+  ]
+}

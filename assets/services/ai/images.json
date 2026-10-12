@@ -1,0 +1,17 @@
+{
+  "master": "ai-hero.png",
+  "assets": [
+    {
+      "filename": "ai-hero.webp",
+      "width": 1400,
+      "height": 764,
+      "bytes": 24862
+    },
+    {
+      "filename": "ai-hero-mobile.webp",
+      "width": 768,
+      "height": 419,
+      "bytes": 11386
+    }
+  ]
+}

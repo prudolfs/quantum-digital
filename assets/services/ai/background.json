@@ -1,0 +1,11 @@
+{
+  "master": "ai-background.png",
+  "assets": [
+    {
+      "filename": "ai-background.webp",
+      "width": 1400,
+      "height": 764,
+      "bytes": 7454
+    }
+  ]
+}

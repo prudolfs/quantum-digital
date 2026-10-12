@@ -128,14 +128,28 @@ Detailed captures and measurements remain in ignored `docs/local/`. No deploymen
 
 ## Phase 4: Remaining pages and discoverability
 
-- [ ] Complete AI integrations, Workflow automation, and System integrations, reviewing each independently.
-- [ ] Retain each high-resolution master and produce its optimized page assets using the validated workflow.
-- [ ] Connect homepage cards, related published work, and service-aware chat context without changing inquiry confirmation behavior.
-- [ ] Add distinct titles, descriptions, canonical URLs, social metadata, and published-only sitemap entries.
-- [ ] Add accurate structured identity/page data where useful, matching visible content and existing public profiles.
-- [ ] Keep public service facts available to the assistant through the existing curated context; do not introduce vector RAG for this small collection.
+- [x] Complete AI integrations, Workflow automation, and System integrations, reviewing each independently.
+- [x] Retain each high-resolution master and produce its optimized page assets using the validated workflow.
+- [x] Connect homepage cards, related published work, and service-aware chat context without changing inquiry confirmation behavior.
+- [x] Add distinct titles, descriptions, canonical URLs, social metadata, and published-only sitemap entries.
+- [x] Add accurate structured identity/page data where useful, matching visible content and existing public profiles.
+- [x] Keep public service facts available to the assistant through the existing curated context; do not introduce vector RAG for this small collection.
 
 **Exit criteria:** All four pages are useful, discoverable, accurate, and consistent with their homepage cards and assistant explanations.
+
+## Phase 4 review — October 12, 2026
+
+AI integrations, Workflow automation, and System integrations are implemented at their approved routes. Each has distinct audience/problem/scope/process copy, five practical answers, current published related work, and its own reviewed conceptual illustration. Service identity and illustration choice remain independent. Homepage links, loaders, sitemap entries, analytics path approval, and assistant references resolve the same exact published IDs; unknown, renamed, and unpublished records do not gain pages or context.
+
+Retained all three editable scenes and 2860 × 1560 hero PNG masters. Desktop/mobile WebPs are 1400 × 764 and 768 × 419. AI stills are 24,862 / 11,386 bytes; workflow 22,834 / 10,912; integrations 17,924 / 9,020. Actual baked-lighting models are 191,268, 143,864, and 113,600 bytes, with 3,212, 1,500, and 932 triangles respectively. Optimized matching studio plates are 7,454, 7,422, and 8,672 bytes. Plates retain lossless 1430 × 780 sources above delivery resolution, avoiding unnecessary full-master background rendering. The original Product development assets and homepage JPEGs remain unchanged. All four GLBs are self-contained, unlit, and exclude the studio floor/camera/lights. Source masters and standalone lighting textures are absent from the public build.
+
+Service actions enter chat with a validated optional topic. The visitor may view the service or clear the topic; existing messages and typed input remain intact. Navigation sends no message and prepares no inquiry. Only an explicit send carries the slug, and the server independently resolves it against freshly loaded published content. Unknown hints add no arbitrary text to the system context. The assistant shares the page audience, problems, possible deliverables, steps, practical answers, and current related-work URLs through curated context. Safe rendering permits only current published service links, including in restored text. Existing Turnstile, conversation persistence, contact-form tools, and explicit inquiry confirmation remain in place. No schema migration, new AI tool, or vector RAG was introduced.
+
+All pages have distinct titles/descriptions/canonical/social metadata and published-only sitemap entries. Structured Person, Service, and WebPage data matches the visible published fields and existing approved profiles. It adds no prices, reviews, ratings, or guarantees. The shared site social image remains the approved Quantum Digital preview.
+
+Verification passed: typecheck, lint, formatting, 84 unit tests, production build, and Cloudflare dry-run. The production browser run passed 48 scenarios with six intentional platform-specific skips, covering all four service pages, the shared viewer, mobile/reduced-motion and graphics-failure stills, keyboard/JavaScript-free FAQs, accessibility, metadata/sitemap/404s, related navigation, restored chat, validated topic clearing, safe links, and inquiry confirmation. Each new model/still/pointer transition was reviewed independently. Captures at 1440, 820, 390, and 320 pixels have no horizontal overflow; local desktop captures measured CLS 0 and no page errors for all three new pages. The shared optional runtime is about 199 KB gzip. These are local checks, not physical-device or field-performance guarantees.
+
+Detailed captures and measurements remain in ignored `docs/local/`. Documentation and the reproducible source workflow are updated. No deployment or real inquiry submission was made. Stop for owner review before Phase 5.
 
 ## Phase 5: Review and release
 
@@ -150,4 +164,4 @@ Detailed captures and measurements remain in ignored `docs/local/`. No deploymen
 
 ## Progress
 
-Phases 1–3 are complete with their tasks checked. Phases 4–5 remain unchecked. The Product development pilot has responsive stills and an optional baked-lighting model; wait for owner review before Phase 4.
+Phases 1–4 are complete with their tasks checked. All four published service pages have distinct content, optimized stills, optional baked-lighting models, discoverability, and validated chat topics. Phase 5 remains unchecked; stop for owner review before the final release phase.

@@ -1233,6 +1233,10 @@ nav {
   font-size: 1rem;
   line-height: 1.7;
 }
+.chat-service-context {
+  margin-bottom: 16px;
+}
+.chat-service-context a,
 .chat-privacy a,
 .chat-unavailable a {
   color: var(--color-ice);

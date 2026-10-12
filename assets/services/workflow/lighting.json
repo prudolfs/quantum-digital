@@ -1,0 +1,11 @@
+{
+  "master": "workflow-hero.png",
+  "assets": [
+    {
+      "filename": "workflow-lighting.jpg",
+      "width": 1400,
+      "height": 764,
+      "bytes": 78992
+    }
+  ]
+}

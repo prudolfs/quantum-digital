@@ -62,7 +62,7 @@ test('product service is reachable, responsive, accessible, and uses optimized s
     .getByRole('link', { name: 'Tell me about your product' })
     .first()
     .click()
-  await expect(page).toHaveURL(/\/chat$/)
+  await expect(page).toHaveURL(/\/chat\?service=product-development$/)
 })
 
 test('service metadata, sitemap, unknown routes, and direct loads remain correct', async ({
@@ -76,7 +76,12 @@ test('service metadata, sitemap, unknown routes, and direct loads remain correct
   )
   const sitemap = await page.request.get('/sitemap.xml')
   expect(await sitemap.text()).toContain('/services/product-development')
-  expect(await sitemap.text()).not.toContain('/services/ai-integrations')
+  for (const slug of [
+    'ai-integrations',
+    'workflow-automation',
+    'system-integrations',
+  ])
+    expect(await sitemap.text()).toContain(`/services/${slug}`)
   const missing = await page.goto('/services/missing-service')
   expect(missing?.status()).toBe(404)
   await expect(page.getByRole('heading', { level: 1 })).toContainText(

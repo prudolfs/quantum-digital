@@ -1,3 +1,7 @@
+import {
+  serviceChatContext,
+  servicePageRoute,
+} from '../../shared/service-pages'
 import { BrandLink } from '@/components/brand-link'
 import { publicWorkRecord } from '../../shared/work-disclosure'
 import { createFileRoute, Link } from '@tanstack/react-router'
@@ -39,6 +43,10 @@ import {
 } from '@/components/chat-contact-form'
 
 export const Route = createFileRoute('/chat')({
+  validateSearch: (search: Record<string, unknown>): { service?: string } =>
+    typeof search.service === 'string' && search.service.length <= 80
+      ? { service: search.service }
+      : {},
   loader: () => loadPublishedContent(),
   head: () =>
     pageHead(
@@ -52,8 +60,11 @@ export const Route = createFileRoute('/chat')({
 function ChatPage() {
   const {
     caseStudies,
+    services,
     settings: { contactEmail },
   } = Route.useLoaderData()
+  const { service: requestedService } = Route.useSearch()
+  const serviceContext = serviceChatContext(services, requestedService)
   const [availability, setAvailability] = useState<
     'loading' | 'ready' | 'unavailable'
   >('loading')
@@ -85,6 +96,9 @@ function ChatPage() {
     },
     [connection],
   )
+  useEffect(() => {
+    connection.setServiceContext(serviceContext?.slug)
+  }, [connection, serviceContext?.slug])
   const consumeToken = connection.consumeToken
   const [reconnecting, setReconnecting] = useState(false)
   const [responseNotice, setResponseNotice] = useState<{
@@ -174,6 +188,10 @@ function ChatPage() {
       '/#services',
       '/#engagements',
       '/privacy',
+      ...services.flatMap((service) => {
+        const route = servicePageRoute(service)
+        return route ? [`/services/${route.slug}`] : []
+      }),
       ...studies.map((study) => `/work/${study.slug}`),
     ]
     return new Set([
@@ -188,7 +206,7 @@ function ChatPage() {
         ),
       ),
     ])
-  }, [caseStudies, contactEmail])
+  }, [caseStudies, contactEmail, services])
   useEffect(() => {
     if (sessionVersion > 0) followLatest.current = true
     const abort = new AbortController()
@@ -391,6 +409,19 @@ function ChatPage() {
                 explore the offer and prepare an inquiry for Rudolfs.
               </p>
             </header>
+          )}
+          {serviceContext && (
+            <p className="chat-service-context body-copy">
+              Discussing {serviceContext.label}.{' '}
+              <Link to="/services/$slug" params={{ slug: serviceContext.slug }}>
+                View the service
+              </Link>{' '}
+              or{' '}
+              <Link to="/chat" search={{}} replace>
+                clear this topic
+              </Link>
+              .
+            </p>
           )}
           <p className="chat-privacy">
             You’re chatting with an AI assistant. A request is submitted only
