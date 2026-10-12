@@ -153,15 +153,25 @@ Detailed captures and measurements remain in ignored `docs/local/`. Documentatio
 
 ## Phase 5: Review and release
 
-- [ ] Review copy, claims, illustration labels, related-work relevance, and publication boundaries across all pages.
-- [ ] Run relevant type, lint, formatting, behavior, accessibility, responsive, metadata, and asset checks.
-- [ ] Inspect the production build for correct public settings and optimized image/model requests.
-- [ ] Update existing architecture, content, style, and release documentation where behavior changed; retain detailed evidence only in `docs/local/`.
-- [ ] Prepare a reviewable release summary and run the Cloudflare deployment dry-run.
-- [ ] After authorized deployment, verify the live service routes, images, links, sitemap, chat entry, and fallbacks.
+- [x] Review copy, claims, illustration labels, related-work relevance, and publication boundaries across all pages.
+- [x] Run relevant type, lint, formatting, behavior, accessibility, responsive, metadata, and asset checks.
+- [x] Inspect the production build for correct public settings and optimized image/model requests.
+- [x] Update existing architecture, content, style, and release documentation where behavior changed; retain detailed evidence only in `docs/local/`.
+- [x] Prepare a reviewable release summary and run the Cloudflare deployment dry-run.
+- [x] Record owner testing and acceptance, and prepare the approved GitHub → Cloudflare release handoff.
 
-**Exit criteria:** The service pages are reviewed and production-verified. Search indexing and AI citations are monitored separately; new pages and structured data do not guarantee either.
+**Exit criteria:** The service pages are reviewed, release-checked, and accepted by the owner; deployment follows the approved GitHub → Cloudflare pipeline. Search indexing and AI citations are monitored separately; new pages and structured data do not guarantee either.
+
+## Phase 5 review — October 12, 2026
+
+All four pages were reviewed for distinct service purpose, supported claims, conceptual-art labels, current published related examples, and publication boundaries. Product delivery, AI interpretation, process coordination, and system exchange remain separate offers. The abstract care/accounting/research examples retain their external-link exclusions. Page identity, structured data, approved profiles, sitemap entries, and assistant facts remain consistent with current published records.
+
+Fixed homepage service-card content alignment: corresponding category, title, description, detail divider, and action rows share their height within each desktop/tablet pair. Longer Workflow automation copy no longer leaves the neighboring Complex integrations content out of alignment. Sizing follows content rather than forcing a fixed card height. Mobile uses a natural single-column flow; older browsers retain the flex fallback. Geometry checks at 1440, 1024, 820, and 640 pixels confirm matching row positions, and 390/320-pixel captures have no overflow. Added a resize regression check for both desktop and mobile projects.
+
+Release verification passed: typecheck, lint, formatting, 84 unit tests, and 70 browser scenarios with six intentional platform-specific skips. Browser coverage includes all four services, responsive card alignment, accessibility, native/keyboard questions, optional model failures and pauses, reduced-motion/mobile stills, safe chat links and service topics, unsent text preservation, explicit inquiry confirmation, public navigation, About/work metadata, and 404 recovery. The guarded production build and Cloudflare deployment dry-run passed. Audited the production public origin, Convex endpoints, EU analytics host, and real Turnstile site key. All four optimized asset sets match the build; budgets and self-contained unlit models pass, the optional runtime is 198,563 bytes gzip, and source masters/standalone lighting textures do not ship.
+
+Updated architecture, style, release guidance, and this plan. Detailed captures, measurements, and release evidence remain in ignored `docs/local/`. The owner confirmed testing, accepted the result, and requested that all tasks be marked complete. Deployment uses the existing GitHub → Cloudflare pipeline, with an authorized commit/push. This acceptance and handoff close the plan; local checks and owner-reported acceptance are distinguished from an agent-executed live deployment. No direct Wrangler deployment, real provider call, or real inquiry submission was performed during this review. Search indexing and AI citations remain observations after release.
 
 ## Progress
 
-Phases 1–4 are complete with their tasks checked. All four published service pages have distinct content, optimized stills, optional baked-lighting models, discoverability, and validated chat topics. Phase 5 remains unchecked; stop for owner review before the final release phase.
+Phases 1–5 are complete and all tasks are checked. All four published service pages have distinct content, optimized stills, optional baked-lighting models, discoverability, validated chat topics, and aligned homepage card content. The owner tested and accepted the release; deployment follows the authorized GitHub → Cloudflare pipeline.

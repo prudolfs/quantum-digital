@@ -245,3 +245,49 @@ test('service topic preserves restored chat, validates unknown hints, and waits 
   await expect.poll(() => submitted).toBeDefined()
   expect(submitted).not.toHaveProperty('serviceContext')
 })
+
+test('homepage service pairs align corresponding content rows across responsive widths', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/')
+  await page.evaluate(() => document.fonts.ready)
+  for (const width of [1440, 1024, 820, 640, 390, 320]) {
+    await page.setViewportSize({ width, height: 1000 })
+    const cards = await page.locator('.service-card').evaluateAll((elements) =>
+      elements.map((card) => {
+        const bounds = card.getBoundingClientRect()
+        const selectors = [
+          '.eyebrow',
+          'h3',
+          '.body-copy',
+          '.service-detail',
+          '.service-detail-link',
+        ]
+        return {
+          height: bounds.height,
+          rows: selectors.map(
+            (selector) =>
+              card.querySelector(selector)!.getBoundingClientRect().top -
+              bounds.top,
+          ),
+        }
+      }),
+    )
+    expect(cards).toHaveLength(4)
+    if (width >= 640) {
+      for (let index = 0; index < cards.length; index += 2) {
+        expect(cards[index]!.height).toBeCloseTo(cards[index + 1]!.height, 0)
+        for (let row = 0; row < 5; row++)
+          expect(
+            Math.abs(cards[index]!.rows[row]! - cards[index + 1]!.rows[row]!),
+          ).toBeLessThan(1)
+      }
+    }
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true)
+  }
+})

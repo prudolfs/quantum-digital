@@ -1,12 +1,12 @@
-# Work and About release checks
+# Work, About, and service release checks
 
 ## Current release status
 
-The owner confirmed deployment and successful production testing on October 11, 2026, including PostHog cookie analytics after the device-ID correction. The launch and work/About enhancement plans are complete. The checks below remain the workflow for future releases; automated local results and owner-reported production acceptance are recorded separately.
+The owner confirmed deployment and successful production testing on October 11, 2026, including PostHog cookie analytics after the device-ID correction. The launch and work/About enhancement plans are complete. The service-page release was reviewed and accepted by the owner on October 12, 2026: four service pages, baked interactive illustrations, validated chat topics, and aligned homepage service-card content. Local release checks passed (84 unit tests, 70 browser scenarios, production build, and Cloudflare dry-run). Deployment uses the existing GitHub → Cloudflare pipeline. The checks below remain the workflow for future releases; automated local results and owner-reported acceptance are recorded separately.
 
 ## Local verification
 
-Use the pinned pnpm version from `package.json`. Run `pnpm check`, `pnpm build`, and `pnpm test:e2e` with the local testing configuration. The browser suite covers all six work routes, About, homepage/related-work navigation, keyboard and JavaScript-free disclosures, graphics failure, mobile stills, metadata/sitemap, restored chat references, and explicit inquiry review. Provider responses are mocked; real admin and Gateway checks are opt-in.
+Use the pinned pnpm version from `package.json`. Run `pnpm check`, `pnpm build`, and `pnpm test:e2e` with the local testing configuration. The browser suite covers all four mapped service routes, all six work routes, About, homepage/related-work navigation, paired service-card content alignment, keyboard and JavaScript-free disclosures, graphics failure, mobile stills, metadata/sitemap, restored chat references, validated service-entry topics and clearing with unsent text preserved, and explicit inquiry review. Provider responses are mocked; real admin and Gateway checks are opt-in.
 
 Inspect desktop, tablet, and narrow mobile layouts. Each hero must show its still immediately. Suitable desktop devices may load the optional model and respond subtly to pointer movement; reduced motion, touch, unavailable graphics, and constrained connection hints retain the still. Check model failure, offscreen/hidden-tab pause, long text, focus visibility, and smooth context-row opening and closing.
 
@@ -20,6 +20,10 @@ Keep the working Convex endpoints and matching Worker/Convex bridge secret. This
 
 ## Deployment and rollback
 
-After approval, `pnpm deploy` runs the guarded build and publishes the Worker. Record the preceding Worker version before deploying and retain the preceding source/assets. Smoke-test the public homepage, About, all work routes, unknown-slug handling, navigation, poster/model assets, metadata/sitemap, and chat verification/restoration. Routine checks must not submit real inquiries. Owner sign-in and an explicitly authorized inquiry-to-inbox test are separate checks.
+After approval, `pnpm deploy` runs the guarded build and publishes the Worker. Record the preceding Worker version before deploying and retain the preceding source/assets. Smoke-test the public homepage service rows, all four service routes, About, all work routes, unknown-slug handling, navigation, desktop/mobile poster and optional model/background assets, metadata/structured data/sitemap, and chat entry/verification/restoration. Service topics must not send messages automatically. Routine checks must not submit real inquiries. Owner sign-in and an explicitly authorized inquiry-to-inbox test are separate checks.
 
 If the release fails, use the recorded preceding Worker version with `pnpm exec wrangler rollback <version-id>`. No database rollback is required for these changes. Unpublishing a case study hides its route and current assistant lookup, but public illustration bundles and static asset URLs remain public. Restored tool results keep readable text while respecting current publication and disclosure rules.
+
+## Service release scope
+
+Service pages use current published IDs for routes, card links, sitemap entries, metadata, and assistant facts. Unknown/unpublished IDs return 404; related examples and safe chat links resolve current published records. Source scenes, master PNGs, and standalone lighting textures must not ship. Each optional service model embeds its baked texture and preloads a matching studio plate; constrained devices use the still. Check the [service plan](service-pages-plan.md) and [asset workflow](../assets/services/README.md) for reviewed sizes and framing. Search indexing and AI citations are separate observations, not release guarantees.
