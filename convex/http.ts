@@ -22,6 +22,19 @@ http.route({
       const body = await request.json()
       let result
       switch (body.operation) {
+        case 'request-rate':
+          result = await ctx.runMutation(internal.inquiries.checkRequestRate, {
+            kind: body.kind,
+            ipHash: body.ipHash,
+            ...(body.sessionHash ? { sessionHash: body.sessionHash } : {}),
+          })
+          break
+        case 'generation-reserve':
+          result = await ctx.runMutation(
+            internal.inquiries.reserveGeneration,
+            {},
+          )
+          break
         case 'conversation-load':
           result = await ctx.runMutation(internal.conversations.load, {
             sessionHash: body.sessionHash,
@@ -80,6 +93,8 @@ http.route({
         'CONVERSATION_BUSY',
         'CONVERSATION_LIMIT',
         'INVALID_CONVERSATION',
+        'ASSISTANT_PAUSED',
+        'AI_DAILY_LIMIT',
       ].find((code) => message.includes(code))
       return Response.json(
         {
@@ -89,7 +104,9 @@ http.route({
               ? 'Too many requests. Please try again later.'
               : 'The inquiry could not be processed. Please retry.'),
         },
-        { status: limited ? 429 : 400 },
+        {
+          status: limited || conversationError === 'AI_DAILY_LIMIT' ? 429 : 400,
+        },
       )
     }
   }),

@@ -34,6 +34,12 @@ Autocapture, replay, performance recording, automatic exceptions, heatmaps, surv
 
 Analytics is browser-side and best effort: blockers, offline browsers, or navigation can prevent delivery. A submission event follows a confirmed server receipt; it never changes database writes or inquiry confirmation. Convex's private inbox remains the authoritative inquiry record. No analytics calls or errors can block chat, navigation, or submission. The privacy page explains this collection.
 
+## Basic crash reporting
+
+The existing EU project also receives `$exception` events through the SDK's `captureException()` method. Public route error boundaries, uncaught errors and unhandled promise rejections are reported after analytics acceptance. Reports use fixed categories and standard error types, with deployed JavaScript file positions where available. Original messages, causes, function names, source context, breadcrumbs and visitor input are removed. Reports are deduplicated and capped at ten per page lifetime. Admin routes, privacy opt-outs and ordinary local development remain excluded; automatic SDK exception capture and console capture stay disabled.
+
+No extra token is needed. Inspect reports in PostHog → Error Tracking; optional notifications are configured there. The SDK now uses its standard lazy-loaded module because the slim build does not include the exception processor. Session replay, surveys and other automatic capture features remain disabled. Server-side failures stay in Cloudflare observability. See [security controls](security.md) for deployment order and limits.
+
 ## Verification
 
 Unit checks exercise property redaction, event/path restrictions, consent gating and withdrawal, deduplication without transmitting inquiry IDs, privacy signals, local exclusions, and analytics failures. Browser checks intercept all PostHog ingestion and use synthetic inquiries. They verify no capture/tracking cookies before acceptance or after rejection, remembered preferences, withdrawal clearing cookies, stable random visitor/device/session IDs and a matching device ID in the identity cookie across navigation and reload, required page-view metadata, both inquiry funnels, failed confirmation/retry, restoration, private-data redaction, and browser privacy signals. No test sends events to the live project or submits real inquiries.

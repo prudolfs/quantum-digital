@@ -34,6 +34,8 @@ Backend tests exercise actual Convex mutations, including no submission on prepa
 
 ## Turnstile setup
 
+The security update adds shared API request limits and a site-wide AI generation allowance. Load the updated Convex functions before running the matching Worker build. For isolated local review, use a development backend rather than the backend serving the live site. See [security controls and settings](security.md) for deployment order, daily allowance, emergency pause, and admin setup-key cleanup.
+
 Create a managed widget in the Cloudflare dashboard under Turnstile. Allow `quantum-digital.pukitis-rudolfs.workers.dev`; add localhost/127.0.0.1 only if using real keys for local development. Configure the public site key as `VITE_TURNSTILE_SITE_KEY` in `.env.local` and Cloudflare Workers Builds. Configure the secret as `TURNSTILE_SECRET_KEY` in `.dev.vars` locally and a Worker secret in Cloudflare. The secret does not belong in Convex or any `VITE_*` variable. Do not publish dummy keys.
 
 For local integration testing, Cloudflare documents an always-pass public key `1x00000000000000000000AA` and matching secret `1x0000000000000000000000000000000AA`. These are public test credentials, not production protection. Use explicit local configuration and a real widget before launch. Tokens expire after five minutes, are single-use, and must be refreshed for retry. The backend always requires verification; real keys require the current hostname and action `chat`. Explicit dummy keys on loopback require successful Cloudflare testing metadata. Public domains reject the always-pass testing secret, and missing configuration disables the assistant.

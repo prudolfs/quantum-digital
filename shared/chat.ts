@@ -51,6 +51,11 @@ export const engagementResultSchema = z.object({
 })
 
 export function chatErrorNotice(message: string) {
+  if (message.includes('AI_DAILY_LIMIT'))
+    return {
+      text: 'The assistant has reached its daily allowance. Please try again tomorrow. Existing inquiry drafts can still be reviewed and submitted.',
+      retry: false,
+    }
   if (message.includes('VERIFICATION_FAILED'))
     return {
       text: 'Please complete the security check, then retry your message.',

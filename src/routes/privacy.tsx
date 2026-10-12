@@ -73,7 +73,10 @@ function PrivacyPage() {
           timing, or budget through these events. Session replay and automatic
           form capture are disabled, and analytics excludes the private admin
           pages, URL query strings, and fragments. Do Not Track and Global
-          Privacy Control signals are respected.
+          Privacy Control signals are respected. With your analytics consent,
+          PostHog also receives basic crash reports: the public page path, error
+          category, and positions in site JavaScript files. Original error
+          messages and visitor input are excluded.
         </p>
         <AnalyticsPreferencesButton />
       </section>

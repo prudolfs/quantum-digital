@@ -78,8 +78,15 @@ export async function intakeRequest<T>(
     signal: AbortSignal.timeout(15_000),
   })
   if (!response.ok) {
-    if (response.status === 429)
-      throw new Error('Too many requests. Please try again later.')
+    if (
+      response.status === 400 &&
+      response.headers.get('Content-Type')?.startsWith('text/plain')
+    ) {
+      const message = await response.text()
+      if (message === 'Unknown operation')
+        throw new Error('INTAKE_OPERATION_UNAVAILABLE')
+      throw new Error('The inquiry could not be processed. Please retry.')
+    }
     const result = (await response.json().catch(() => null)) as {
       error?: string
     } | null
@@ -90,9 +97,13 @@ export async function intakeRequest<T>(
         'CONVERSATION_BUSY',
         'CONVERSATION_LIMIT',
         'INVALID_CONVERSATION',
+        'ASSISTANT_PAUSED',
+        'AI_DAILY_LIMIT',
       ].includes(result.error)
     )
       throw new Error(result.error)
+    if (response.status === 429)
+      throw new Error('Too many requests. Please try again later.')
     throw new Error('The inquiry could not be processed. Please retry.')
   }
   return response.json() as Promise<T>

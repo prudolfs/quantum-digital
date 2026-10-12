@@ -18,6 +18,7 @@ import {
 import { chatLimits, type preparedInquirySchema } from '../../shared/chat'
 import type { z } from 'zod'
 import { verifyTurnstile } from './turnstile'
+import { runSecurityOperation } from './security'
 import {
   assertSameOrigin,
   getSession,
@@ -47,7 +48,8 @@ export async function handleChat(request: Request) {
   } catch {
     return new Response('Forbidden', { status: 403 })
   }
-  if (!intakeAvailable()) return failure('ASSISTANT_UNAVAILABLE', 503)
+  if (!intakeAvailable() || env.AI_CHAT_ENABLED === 'false')
+    return failure('ASSISTANT_UNAVAILABLE', 503)
   const session = getSession(request)
   if (!session) return failure('SESSION_EXPIRED', 401)
   const sessionHash = await hash(session)
@@ -106,12 +108,6 @@ export async function handleChat(request: Request) {
     )
   }
   try {
-    await intakeRequest({
-      operation: 'rate',
-      ipHash: await hash(
-        `${env.INTAKE_BRIDGE_SECRET}:${request.headers.get('CF-Connecting-IP') ?? 'local'}`,
-      ),
-    })
     const content = await fetchPublishedContent()
     const saved = await intakeRequest<{
       revision: number
@@ -125,6 +121,7 @@ export async function handleChat(request: Request) {
     revision = saved.revision
     generationRevision = revision
     messages = saved.messages
+    await runSecurityOperation(request, { operation: 'generation-reserve' })
     const gateway = createGateway({ apiKey: env.AI_GATEWAY_API_KEY })
     const result = streamText({
       model: gateway(env.AI_MODEL!),
@@ -185,6 +182,8 @@ export async function handleChat(request: Request) {
       }
     }
     const code = error instanceof Error ? error.message : ''
+    if (code === 'AI_DAILY_LIMIT')
+      return failure('AI_DAILY_LIMIT', 429, generationRevision)
     if (
       [
         'CONVERSATION_CHANGED',

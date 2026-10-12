@@ -6,6 +6,7 @@ import {
   analyticsConfigured,
   analyticsPath,
   captureAnalytics,
+  listenForAppCrashes,
 } from '@/lib/analytics'
 import {
   getAnalyticsConsent,
@@ -29,6 +30,7 @@ export function AnalyticsPreferencesButton() {
 }
 
 export function SiteAnalytics() {
+  useEffect(() => listenForAppCrashes(), [])
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   })

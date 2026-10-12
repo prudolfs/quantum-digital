@@ -43,6 +43,67 @@ async function interceptAnalytics(page: Page) {
   return events
 }
 
+test('reports basic browser crashes after consent without original messages or visitor data', async ({
+  page,
+}) => {
+  const events = await interceptAnalytics(page)
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Accept analytics' }).waitFor()
+  await page.evaluate(() => {
+    window.dispatchEvent(
+      new ErrorEvent('error', {
+        error: new Error('before consent private@example.com'),
+      }),
+    )
+  })
+  expect(events.filter((event) => event.event === '$exception')).toHaveLength(0)
+  await page.getByRole('button', { name: 'Accept analytics' }).click()
+  await expect
+    .poll(() => events.some((event) => event.event === '$pageview'))
+    .toBe(true)
+  await page.evaluate(() => {
+    const error = new TypeError('private@example.com confidential conversation')
+    error.stack = `TypeError: private@example.com\n    at secretName (${location.origin}/assets/example-123.js:12:34)`
+    window.dispatchEvent(new ErrorEvent('error', { error }))
+    window.dispatchEvent(new ErrorEvent('error', { error }))
+    window.dispatchEvent(
+      new PromiseRejectionEvent('unhandledrejection', {
+        promise: Promise.resolve(),
+        reason: new Error('private rejection'),
+      }),
+    )
+  })
+  await expect
+    .poll(() => events.filter((event) => event.event === '$exception').length)
+    .toBe(2)
+  const crashes = events.filter((event) => event.event === '$exception')
+  expect(crashes.map((event) => event.properties.crash_source)).toEqual(
+    expect.arrayContaining(['unhandled_error', 'unhandled_rejection']),
+  )
+  expect(JSON.stringify(crashes)).not.toMatch(
+    /private|confidential|secretName|exception_steps|context_line/,
+  )
+  const exceptions = crashes.find(
+    (event) => event.properties.crash_source === 'unhandled_error',
+  )!.properties.$exception_list as {
+    type: string
+    value: string
+    stacktrace: { frames: { filename: string; lineno: number }[] }
+  }[]
+  expect(exceptions[0].type).toBe('TypeError')
+  expect(exceptions[0].value).toBe('unhandled_error')
+  expect(exceptions[0].stacktrace.frames[0].lineno).toBe(12)
+  await page.getByRole('button', { name: 'Cookie preferences' }).click()
+  await page.getByRole('button', { name: 'Reject analytics' }).click()
+  await page.evaluate(() =>
+    window.dispatchEvent(
+      new ErrorEvent('error', { error: new Error('after rejection') }),
+    ),
+  )
+  await page.waitForTimeout(500)
+  expect(events.filter((event) => event.event === '$exception')).toHaveLength(2)
+})
+
 test('tracks public navigation and inquiry outcomes without contact data or restored conversions', async ({
   page,
   baseURL,

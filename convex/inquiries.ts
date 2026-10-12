@@ -8,6 +8,7 @@ import {
 import { requireOwner } from './owner'
 import { inquirySchema } from '../shared/inquiry'
 import type { UIMessage } from 'ai'
+import { requestLimits } from '../shared/security'
 
 const detailFields = {
   name: v.string(),
@@ -22,6 +23,7 @@ async function consumeRate(
   key: string,
   limit: number,
   windowMs: number,
+  limitError = 'Too many requests. Please try again later.',
 ) {
   const now = Date.now()
   const record = await ctx.db
@@ -36,8 +38,7 @@ async function consumeRate(
     }))
   if (now - record.windowStart >= windowMs)
     return void (await ctx.db.patch(record._id, { count: 1, windowStart: now }))
-  if (record.count >= limit)
-    throw new ConvexError('Too many requests. Please try again later.')
+  if (record.count >= limit) throw new ConvexError(limitError)
   await ctx.db.patch(record._id, { count: record.count + 1 })
 }
 
@@ -45,6 +46,50 @@ export const checkChatRate = internalMutation({
   args: { ipHash: v.string() },
   handler: async (ctx, { ipHash }) =>
     consumeRate(ctx, `chat:${ipHash}`, 30, 60_000),
+})
+
+export const checkRequestRate = internalMutation({
+  args: {
+    kind: v.union(...Object.keys(requestLimits).map((key) => v.literal(key))),
+    ipHash: v.string(),
+    sessionHash: v.optional(v.string()),
+  },
+  handler: async (ctx, { kind, ipHash, sessionHash }) => {
+    const { maximum, windowMs } =
+      requestLimits[kind as keyof typeof requestLimits]
+    await consumeRate(ctx, `request:${kind}:ip:${ipHash}`, maximum, windowMs)
+    if (sessionHash)
+      await consumeRate(
+        ctx,
+        `request:${kind}:session:${sessionHash}`,
+        maximum,
+        windowMs,
+      )
+  },
+})
+
+export const reserveGeneration = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    if (process.env.AI_CHAT_ENABLED === 'false')
+      throw new ConvexError('ASSISTANT_PAUSED')
+    const configured = Number(process.env.AI_CHAT_DAILY_LIMIT ?? '200')
+    if (
+      !Number.isSafeInteger(configured) ||
+      configured < 1 ||
+      configured > 10_000
+    )
+      throw new ConvexError('ASSISTANT_PAUSED')
+    // A shared UTC-day counter, independent of visitor IP or session.
+    const day = new Date().toISOString().slice(0, 10)
+    await consumeRate(
+      ctx,
+      `generation:${day}`,
+      configured,
+      86_400_000,
+      'AI_DAILY_LIMIT',
+    )
+  },
 })
 
 export const prepare = internalMutation({

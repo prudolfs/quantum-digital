@@ -1,12 +1,13 @@
-import { beforeEach, afterEach, expect, it, vi } from 'vitest'
+import { beforeEach, afterEach, expect, test, vi } from 'vitest'
 import type { CaptureResult } from 'posthog-js/dist/module.slim'
 const sdk = vi.hoisted(() => ({
   init: vi.fn(),
   capture: vi.fn(),
+  captureException: vi.fn(),
   opt_in_capturing: vi.fn(),
   opt_out_capturing: vi.fn(),
 }))
-vi.mock('posthog-js/dist/module.slim', () => ({ default: sdk }))
+vi.mock('posthog-js/dist/module', () => ({ default: sdk }))
 vi.mock('@/env', () => ({
   publicEnv: {
     VITE_SITE_URL: 'https://example.com',
@@ -40,7 +41,7 @@ beforeEach(() => {
   })
 })
 afterEach(() => vi.unstubAllGlobals())
-it('tracks the reviewed service route without accepting arbitrary service paths', async () => {
+test('tracks the reviewed service route without accepting arbitrary service paths', async () => {
   const { analyticsPath } = await import('./analytics')
   expect(analyticsPath('/services/product-development')).toBe(
     '/services/product-development',
@@ -53,7 +54,7 @@ it('tracks the reviewed service route without accepting arbitrary service paths'
   ])
     expect(analyticsPath(`/services/${slug}`)).toBe(`/services/${slug}`)
 })
-it('drops unknown events and removes personal data, query strings, and SDK enrichment', async () => {
+test('drops unknown events and removes personal data, query strings, and SDK enrichment', async () => {
   const { sanitizeAnalyticsEvent } = await import('./analytics')
   const input = {
     uuid: '11111111-1111-4111-8111-111111111111',
@@ -116,7 +117,7 @@ it('drops unknown events and removes personal data, query strings, and SDK enric
     sanitizeAnalyticsEvent({ ...input, properties: { page_path: '/admin' } }),
   ).toBeNull()
 })
-it('captures once without transmitting the local deduplication ID', async () => {
+test('captures once without transmitting the local deduplication ID', async () => {
   const { captureAnalyticsOnce } = await import('./analytics')
   captureAnalyticsOnce('inquiry_submitted', 'private-draft', 'contact_form')
   captureAnalyticsOnce('inquiry_submitted', 'private-draft', 'contact_form')
@@ -142,7 +143,7 @@ it('captures once without transmitting the local deduplication ID', async () => 
   expect(sdk.init.mock.calls[0]?.[1].cookieless_mode).toBeUndefined()
   expect(sdk.opt_in_capturing).toHaveBeenCalledWith({ captureEventName: false })
 })
-it('does not initialize for private routes, normal local review, or privacy opt-outs', async () => {
+test('does not initialize for private routes, normal local review, or privacy opt-outs', async () => {
   const { captureAnalytics } = await import('./analytics')
   vi.stubGlobal('location', {
     pathname: '/admin',
@@ -168,7 +169,7 @@ it('does not initialize for private routes, normal local review, or privacy opt-
   expect(sdk.init).not.toHaveBeenCalled()
   expect(sdk.capture).not.toHaveBeenCalled()
 })
-it('analytics failures cannot interrupt an inquiry or navigation', async () => {
+test('analytics failures cannot interrupt an inquiry or navigation', async () => {
   sdk.capture.mockImplementationOnce(() => {
     throw new Error('Blocked analytics')
   })
@@ -177,7 +178,7 @@ it('analytics failures cannot interrupt an inquiry or navigation', async () => {
   await vi.waitFor(() => expect(sdk.capture).toHaveBeenCalledTimes(1))
 })
 
-it('waits for consent, supports withdrawal, and ignores events before acceptance', async () => {
+test('waits for consent, supports withdrawal, and ignores events before acceptance', async () => {
   const { setAnalyticsConsent } = await import('./analytics-consent')
   const { captureAnalytics, captureAnalyticsOnce } = await import('./analytics')
   setAnalyticsConsent('rejected')
@@ -193,7 +194,7 @@ it('waits for consent, supports withdrawal, and ignores events before acceptance
   expect(sdk.capture).toHaveBeenCalledTimes(1)
 })
 
-it('does not initialize after consent is withdrawn during the SDK import', async () => {
+test('does not initialize after consent is withdrawn during the SDK import', async () => {
   const { setAnalyticsConsent } = await import('./analytics-consent')
   const { captureAnalytics } = await import('./analytics')
   captureAnalytics('$pageview')
@@ -203,4 +204,48 @@ it('does not initialize after consent is withdrawn during the SDK import', async
   setAnalyticsConsent('accepted')
   captureAnalytics('$pageview')
   await vi.waitFor(() => expect(sdk.capture).toHaveBeenCalledTimes(1))
+})
+
+test('reports a scrubbed crash once and stops on consent withdrawal', async () => {
+  const { captureAppCrash } = await import('./analytics')
+  const { setAnalyticsConsent } = await import('./analytics-consent')
+  const error = new Error('private@example.com confidential chat')
+  setAnalyticsConsent('rejected')
+  captureAppCrash(error, 'route_error')
+  expect(sdk.captureException).not.toHaveBeenCalled()
+  setAnalyticsConsent('accepted')
+  captureAppCrash(error, 'route_error')
+  captureAppCrash(error, 'unhandled_error')
+  await vi.waitFor(() => expect(sdk.captureException).toHaveBeenCalledTimes(1))
+  expect(sdk.captureException.mock.calls[0][0].message).toBe('route_error')
+  expect(sdk.captureException.mock.calls[0][1]).toEqual({
+    page_path: '/chat',
+    crash_source: 'route_error',
+  })
+  expect(sdk.captureException.mock.calls[0][0].stack).not.toContain('private')
+  setAnalyticsConsent('rejected')
+  captureAppCrash(new Error('another'), 'unhandled_rejection')
+  expect(sdk.captureException).toHaveBeenCalledTimes(1)
+})
+
+test('allows only the minimal exception structure through the final event filter', async () => {
+  const { sanitizeAnalyticsEvent } = await import('./analytics')
+  const result = sanitizeAnalyticsEvent({
+    event: '$exception',
+    properties: {
+      page_path: '/chat',
+      crash_source: 'route_error',
+      $exception_list: [
+        { type: 'Error', value: 'route_error', stacktrace: { frames: [] } },
+      ],
+      $exception_message: 'private@example.com',
+      $exception_steps: ['chat text'],
+      $exception_personURL: 'private',
+    },
+  } as unknown as CaptureResult)
+  expect(result?.event).toBe('$exception')
+  expect(result?.properties.$exception_list).toHaveLength(1)
+  expect(JSON.stringify(result)).not.toMatch(
+    /private|chat text|exception_steps|exception_personURL/,
+  )
 })

@@ -5,3 +5,5 @@ INTAKE_BRIDGE_SECRET=
 AI_GATEWAY_API_KEY=
 AI_MODEL=
 TURNSTILE_SECRET_KEY=
+# Optional emergency switch; set false to pause new AI responses.
+AI_CHAT_ENABLED=true

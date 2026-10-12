@@ -1,5 +1,8 @@
 import { z } from 'zod'
 
+// Validate without runtime code generation under the production script policy.
+z.config({ jitless: true })
+
 const optionalBackendUrl = z.preprocess(
   (value) => (value === '' ? undefined : value),
   z

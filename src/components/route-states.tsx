@@ -6,6 +6,8 @@ import {
 import { LoaderCircle } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
 import { Button } from '@/components/ui/button'
+import { useEffect } from 'react'
+import { captureAppCrash } from '@/lib/analytics'
 
 export function LoadingState() {
   const reducedMotion = useReducedMotion()
@@ -34,7 +36,8 @@ export function LoadingState() {
   )
 }
 
-export function ErrorState({ reset }: ErrorComponentProps) {
+export function ErrorState({ reset, error }: ErrorComponentProps) {
+  useEffect(() => captureAppCrash(error, 'route_error'), [error])
   const router = useRouter()
   return (
     <section className="state-panel" role="alert">

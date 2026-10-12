@@ -88,6 +88,7 @@ About uses the approved résumé-grounded career journey in `src/content/about.t
 - [Style guide](docs/style.md)
 - [Content decisions](docs/content-decisions.md)
 - [Inquiry setup](docs/inquiry-setup.md)
+- [Security controls and production limits](docs/security.md)
 - [Admin workflow](docs/admin-workflow.md)
 - [Chat behavior](docs/chat-behavior.md)
 

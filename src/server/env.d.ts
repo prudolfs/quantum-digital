@@ -5,5 +5,6 @@ declare module 'cloudflare:workers' {
     AI_GATEWAY_API_KEY?: string
     TURNSTILE_SECRET_KEY?: string
     AI_MODEL?: string
+    AI_CHAT_ENABLED?: string
   }
 }

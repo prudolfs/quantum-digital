@@ -1,6 +1,11 @@
-import type { CaptureResult, PostHog } from 'posthog-js/dist/module.slim'
+import type { CaptureResult, PostHog } from 'posthog-js/dist/module'
 import { servicePageRoutes } from '../../shared/service-pages'
 import { publicEnv } from '@/env'
+import {
+  safeCrash,
+  sanitizeExceptionList,
+  type CrashSource,
+} from './crash-report'
 import {
   getAnalyticsConsent,
   subscribeAnalyticsConsent,
@@ -20,6 +25,7 @@ export type AnalyticsEvent =
   | 'inquiry_submission_failed'
 export type AnalyticsSource = 'contact_form' | 'conversation'
 const events = new Set<string>([
+  '$exception',
   '$pageview',
   'chat_started',
   'inquiry_requested',
@@ -94,6 +100,16 @@ export function sanitizeAnalyticsEvent(event: CaptureResult | null) {
     properties.$session_id = session
   if (['contact_form', 'conversation'].includes(event.properties.source))
     properties.source = event.properties.source
+  if (event.event === '$exception') {
+    const exceptions = sanitizeExceptionList(
+      event.properties.$exception_list,
+      event.properties.crash_source,
+      url.origin,
+    )
+    if (!exceptions) return null
+    properties.$exception_list = exceptions
+    properties.crash_source = event.properties.crash_source
+  }
   return { ...event, properties }
 }
 
@@ -121,7 +137,7 @@ function getClient() {
     !publicEnv.VITE_POSTHOG_HOST
   )
     return Promise.resolve(undefined)
-  client ??= import('posthog-js/dist/module.slim')
+  client ??= import('posthog-js/dist/module')
     .then(({ default: posthog }) => {
       // Consent can be withdrawn while the SDK is being imported.
       if (!allowed()) return undefined
@@ -200,4 +216,47 @@ export function captureAnalyticsOnce(
   if (captured.has(key)) return
   captured.add(key)
   captureAnalytics(event, source)
+}
+
+let crashCount = 0
+const reportedCrashes = new WeakSet<object>()
+export function captureAppCrash(error: unknown, source: CrashSource) {
+  if (!allowed() || crashCount >= 10 || !analyticsPath(location.pathname))
+    return
+  if (error instanceof Error && error.name === 'AbortError') return
+  if (error && typeof error === 'object') {
+    if (reportedCrashes.has(error)) return
+    reportedCrashes.add(error)
+  }
+  crashCount++
+  const path = analyticsPath(location.pathname)!
+  const safe = safeCrash(error, source, location.origin)
+  void getClient().then((posthog) => {
+    try {
+      if (allowed())
+        posthog?.captureException(safe, {
+          page_path: path,
+          crash_source: source,
+        })
+    } catch {
+      /* Crash reporting must never cause another crash. */
+    }
+  })
+}
+
+export function listenForAppCrashes() {
+  const error = (event: ErrorEvent) => {
+    if (event.error instanceof Error)
+      captureAppCrash(event.error, 'unhandled_error')
+  }
+  const rejection = (event: PromiseRejectionEvent) => {
+    if (event.reason instanceof Error)
+      captureAppCrash(event.reason, 'unhandled_rejection')
+  }
+  window.addEventListener('error', error)
+  window.addEventListener('unhandledrejection', rejection)
+  return () => {
+    window.removeEventListener('error', error)
+    window.removeEventListener('unhandledrejection', rejection)
+  }
 }
