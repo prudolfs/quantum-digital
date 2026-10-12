@@ -324,6 +324,21 @@ nav a[aria-current='page'] {
 .state-panel {
   padding: 40px;
 }
+.state-panel--loading {
+  display: grid;
+  min-height: 60svh;
+  align-content: center;
+  justify-items: center;
+  gap: 16px;
+  padding-inline: 24px;
+  text-align: center;
+}
+.loading-spinner {
+  width: 36px;
+  height: 36px;
+  margin-bottom: 8px;
+  color: var(--color-portal-gold);
+}
 .state-panel .body-copy {
   margin-block: 20px;
 }
@@ -343,6 +358,9 @@ nav a[aria-current='page'] {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .loading-spinner {
+    transform: none !important;
+  }
   *,
   *::before,
   *::after {

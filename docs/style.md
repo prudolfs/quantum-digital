@@ -113,3 +113,5 @@ Service detail pages reuse the selected-work typography, full-width selective pa
 Service section headings and explanatory copy are specific to product delivery, AI interpretation, process coordination, or system exchange. The contextual chat topic uses a short text line with links to the service and to clear the topic, without another card or automatic message. The existing composer, logo, privacy notice, and explicit inquiry review remain in place.
 
 Homepage service cards share corresponding content-row heights within each desktop/tablet pair. Subgrid aligns the category, title, description start, detail divider, and action despite different copy lengths; it uses content-driven sizing instead of a fixed card height. Mobile retains a natural single-column flow. A flex layout keeps actions low in browsers without subgrid support.
+
+Shared route-loading screens center their message and gold spinner within a roomy loading panel. Motion rotates the decorative spinner; reduced motion keeps it still, and a polite status announces the loading text.

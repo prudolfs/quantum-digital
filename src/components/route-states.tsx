@@ -3,11 +3,31 @@ import {
   useRouter,
   type ErrorComponentProps,
 } from '@tanstack/react-router'
+import { LoaderCircle } from 'lucide-react'
+import { motion, useReducedMotion } from 'motion/react'
 import { Button } from '@/components/ui/button'
 
 export function LoadingState() {
+  const reducedMotion = useReducedMotion()
   return (
-    <section className="state-panel" role="status" aria-live="polite">
+    <section
+      className="state-panel state-panel--loading"
+      role="status"
+      aria-live="polite"
+    >
+      <motion.div
+        className="loading-spinner"
+        aria-hidden="true"
+        initial={{ rotate: 0 }}
+        animate={{ rotate: reducedMotion ? 0 : 360 }}
+        transition={
+          reducedMotion
+            ? { duration: 0 }
+            : { duration: 1.1, repeat: Infinity, ease: 'linear' }
+        }
+      >
+        <LoaderCircle size={36} strokeWidth={1.5} />
+      </motion.div>
       <p className="eyebrow">One moment</p>
       <h1 className="section-title">Loading the page…</h1>
     </section>
