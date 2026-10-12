@@ -1,0 +1,11 @@
+{
+  "master": "product-background.png",
+  "assets": [
+    {
+      "filename": "product-background.webp",
+      "width": 1400,
+      "height": 764,
+      "bytes": 7604
+    }
+  ]
+}

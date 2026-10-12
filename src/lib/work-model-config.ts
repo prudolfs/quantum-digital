@@ -17,6 +17,9 @@ export type WorkModelArt = {
   horizontalSpan: number
   verticalSpan: number
   cropShift: [number, number]
+  mobileBreakpoint?: number
+  bakedLighting?: boolean
+  backgroundPoster?: string
 }
 
 export const financeModelArt: WorkModelArt = {

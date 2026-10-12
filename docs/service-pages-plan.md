@@ -108,13 +108,23 @@ Detailed captures and review notes remain in ignored `docs/local/`. The current 
 
 ## Phase 3: Optimized interactive illustration
 
-- [ ] Export and optimize the first service's actual Blender model within the agreed asset budget.
-- [ ] Connect the existing viewer with matching still/model framing and subtle pointer response.
-- [ ] Verify loading failure, unavailable graphics, mobile/reduced-motion stills, offscreen/hidden-tab pause, and route changes.
-- [ ] Measure asset transfer and layout stability; adjust the scene or keep the static version if the model does not justify its cost.
-- [ ] Review the first page before applying the approach to the other services.
+- [x] Export and optimize the first service's actual Blender model within the agreed asset budget.
+- [x] Connect the existing viewer with matching still/model framing and subtle pointer response.
+- [x] Verify loading failure, unavailable graphics, mobile/reduced-motion stills, offscreen/hidden-tab pause, and route changes.
+- [x] Measure asset transfer and layout stability; adjust the scene or keep the static version if the model does not justify its cost.
+- [x] Review the first page before applying the approach to the other services.
 
 **Exit criteria:** The selected-work-style enhancement adds value while preserving immediate content and reliable fallbacks.
+
+## Phase 3 review — October 12, 2026
+
+Product development now enhances its still with actual Blender geometry and a bounded mouse-responsive tilt on suitable desktop devices. At the owner's request, the studio appearance is baked into a camera-projected texture on the real meshes, using an unlit material. Highlights and the studio shadow stay fixed; this is a subtle tilt rather than an orbit viewer. The owner reviewed and accepted the small remaining lighting difference.
+
+The self-contained GLB is 169,904 bytes with 1,188 triangles and one embedded texture, below the 320 KB budget. The matching optimized studio background is 7,604 bytes. Editable/high-resolution source assets remain outside `public/`. Mobile, reduced motion, data saving, slow connections, and low-memory devices retain the original responsive still without requesting the model/runtime/background. A missing background, model failure, unavailable graphics, or context loss restores the still. The model renders only when needed and pauses offscreen/hidden. Cleanup releases owned textures and decoded bitmaps as well as geometry/materials. Existing selected-work models retain their live-lighting setup.
+
+Verification passed: 29 browser checks with 11 platform-specific skips across service pages/models and existing work, then five final viewer lifecycle/cleanup checks with five mobile skips. Nine focused unit checks, typecheck, lint, formatting, script syntax, asset/self-containment audits, production build, and Cloudflare dry-run pass. The shared optional viewer/Three.js is about 200 KB gzip, below the 225 KB budget. Local desktop capture measured CLS 0.00243 with no horizontal overflow or page errors; initial/live model bounds match. These local measurements are not physical-device or production-field guarantees.
+
+Detailed captures and measurements remain in ignored `docs/local/`. No deployment, inquiry submission, or backend migration was made. Stop for owner review before Phase 4.
 
 ## Phase 4: Remaining pages and discoverability
 
@@ -140,4 +150,4 @@ Detailed captures and review notes remain in ignored `docs/local/`. The current 
 
 ## Progress
 
-Phases 1 and 2 are complete with their tasks checked. Phases 3–5 remain unchecked. The Product development pilot uses static artwork; wait for owner review before Phase 3.
+Phases 1–3 are complete with their tasks checked. Phases 4–5 remain unchecked. The Product development pilot has responsive stills and an optional baked-lighting model; wait for owner review before Phase 4.

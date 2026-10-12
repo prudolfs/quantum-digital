@@ -4,11 +4,13 @@ import {
   Group,
   HemisphereLight,
   Mesh,
+  Texture,
   OrthographicCamera,
   Scene,
   Vector3,
   WebGLRenderer,
 } from 'three'
+import type { Object3D, Material, BufferGeometry } from 'three'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import type { WorkModelArt } from './work-model-config'
 
@@ -16,6 +18,31 @@ export type ModelController = {
   setPointer: (x: number, y: number) => void
   setActive: (active: boolean) => void
   dispose: () => void
+}
+
+function disposeModel(root: Object3D) {
+  const geometries = new Set<BufferGeometry>()
+  const materials = new Set<Material>()
+  const textures = new Set<Texture>()
+  root.traverse((object) => {
+    if (!(object instanceof Mesh)) return
+    geometries.add(object.geometry)
+    for (const material of Array.isArray(object.material)
+      ? object.material
+      : [object.material]) {
+      materials.add(material)
+      for (const value of Object.values(material))
+        if (value instanceof Texture) textures.add(value)
+    }
+  })
+  for (const geometry of geometries) geometry.dispose()
+  for (const material of materials) material.dispose()
+  for (const texture of textures) {
+    texture.dispose()
+    // Embedded glTF textures can own ImageBitmaps as well as GPU resources.
+    const image = texture.image as { close?: () => void } | undefined
+    if (typeof image?.close === 'function') image.close()
+  }
 }
 
 export async function mountWorkModel(
@@ -62,16 +89,18 @@ export async function mountWorkModel(
     .add(up.multiplyScalar(art.cropShift[1]))
   camera.position.add(shift)
   camera.lookAt(target.clone().add(shift))
-  scene.add(new HemisphereLight('#cce9fa', '#17334a', 1.5))
-  for (const [position, intensity, color] of [
-    [[0, 8, 6], 3, '#fff2dc'],
-    [[4, 6, -3], 3.5, '#8cc2ff'],
-    [[-5, 3, 2], 1.5, '#bfd9ff'],
-  ] as const) {
-    const light = new DirectionalLight(color, intensity)
-    light.position.set(position[0], position[1], position[2])
-    light.target.position.copy(target)
-    scene.add(light, light.target)
+  if (!art.bakedLighting) {
+    scene.add(new HemisphereLight('#cce9fa', '#17334a', 1.5))
+    for (const [position, intensity, color] of [
+      [[0, 8, 6], 3, '#fff2dc'],
+      [[4, 6, -3], 3.5, '#8cc2ff'],
+      [[-5, 3, 2], 1.5, '#bfd9ff'],
+    ] as const) {
+      const light = new DirectionalLight(color, intensity)
+      light.position.set(position[0], position[1], position[2])
+      light.target.position.copy(target)
+      scene.add(light, light.target)
+    }
   }
   const pivot = new Group()
   pivot.position.copy(target)
@@ -140,14 +169,7 @@ export async function mountWorkModel(
     observer.disconnect()
     canvas.removeEventListener('webglcontextlost', lost)
     signal.removeEventListener('abort', dispose)
-    scene.traverse((object) => {
-      if (!(object instanceof Mesh)) return
-      object.geometry.dispose()
-      for (const material of Array.isArray(object.material)
-        ? object.material
-        : [object.material])
-        material.dispose()
-    })
+    disposeModel(scene)
     renderer.dispose()
     renderer.forceContextLoss()
     canvas.remove()
@@ -160,15 +182,17 @@ export async function mountWorkModel(
     const bytes = await response.arrayBuffer()
     if (bytes.byteLength > 320_000) throw new Error('Model exceeds budget')
     const gltf = await new GLTFLoader().parseAsync(bytes, '')
-    if (signal.aborted) {
+    if (art.bakedLighting) {
       gltf.scene.traverse((object) => {
         if (!(object instanceof Mesh)) return
-        object.geometry.dispose()
         for (const material of Array.isArray(object.material)
           ? object.material
           : [object.material])
-          material.dispose()
+          material.toneMapped = false
       })
+    }
+    if (signal.aborted) {
+      disposeModel(gltf.scene)
       signal.throwIfAborted()
     }
     gltf.scene.position.sub(target)

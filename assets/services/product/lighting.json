@@ -1,0 +1,11 @@
+{
+  "master": "product-hero.png",
+  "assets": [
+    {
+      "filename": "product-lighting.jpg",
+      "width": 1400,
+      "height": 764,
+      "bytes": 111381
+    }
+  ]
+}

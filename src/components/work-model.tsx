@@ -5,7 +5,13 @@ import { financeModelArt, type WorkModelArt } from '@/lib/work-model-config'
 
 type Connection = { saveData?: boolean; effectiveType?: string }
 
-export function WorkModel({ art = financeModelArt }: { art?: WorkModelArt }) {
+export function WorkModel({
+  art = financeModelArt,
+  className = '',
+}: {
+  art?: WorkModelArt
+  className?: string
+}) {
   const host = useRef<HTMLDivElement>(null)
   const [stage, setStage] = useState('poster')
   const reduced = useReducedMotion()
@@ -41,6 +47,14 @@ export function WorkModel({ art = financeModelArt }: { art?: WorkModelArt }) {
       setStage('loading')
       timeout = window.setTimeout(fallback, 10_000)
       try {
+        if (art.backgroundPoster) {
+          const response = await fetch(art.backgroundPoster, {
+            signal: abort.signal,
+          })
+          if (!response.ok) throw new Error('Model background unavailable')
+          const bitmap = await createImageBitmap(await response.blob())
+          bitmap.close()
+        }
         const { mountWorkModel } = await import('@/lib/work-model-runtime')
         if (abort.signal.aborted) return
         const loaded = await mountWorkModel(element, {
@@ -113,17 +127,27 @@ export function WorkModel({ art = financeModelArt }: { art?: WorkModelArt }) {
     }
   }, [art])
   return (
-    <figure className="work-model" data-model-stage={stage}>
+    <figure className={`work-model ${className}`} data-model-stage={stage}>
       <div
         className="work-model-host"
-        style={{ aspectRatio: `${art.width} / ${art.height}` }}
+        style={{
+          aspectRatio: `${art.width} / ${art.height}`,
+          backgroundImage:
+            (stage === 'loading' || stage === 'live') && art.backgroundPoster
+              ? `url(${art.backgroundPoster})`
+              : undefined,
+          backgroundSize: '100% 100%',
+        }}
       >
         <motion.picture
           initial={false}
           animate={{ opacity: stage === 'live' ? 0 : 1 }}
           transition={{ duration: reduced ? 0 : 0.4 }}
         >
-          <source media="(max-width:700px)" srcSet={art.mobilePoster} />
+          <source
+            media={`(max-width:${art.mobileBreakpoint ?? 700}px)`}
+            srcSet={art.mobilePoster}
+          />
           <img
             className="work-model-poster"
             src={art.poster}

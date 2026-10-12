@@ -2,6 +2,8 @@ import { Link } from '@tanstack/react-router'
 import { ArrowDown, ArrowLeft, ArrowRight, MessageSquare } from 'lucide-react'
 import { ActionIcon } from './action-icon'
 import { FaqItem } from './faq-item'
+import { WorkModel } from './work-model'
+import { productServiceArt } from '@/lib/service-model-config'
 import type { findPublishedServicePage } from '@/content/service-pages'
 
 type ServicePageData = NonNullable<ReturnType<typeof findPublishedServicePage>>
@@ -15,31 +17,24 @@ function ServiceAction({ children }: { children: string }) {
 }
 
 function Illustration({ theme }: { theme: string }) {
-  const optimized = theme === 'product'
+  if (theme === 'product')
+    return (
+      <WorkModel
+        key={theme}
+        art={productServiceArt}
+        className="service-illustration"
+      />
+    )
   return (
     <figure className="work-model service-illustration">
       <picture>
-        {optimized && (
-          <source
-            media="(max-width: 767px)"
-            srcSet="/services/product/product-hero-mobile.webp"
-          />
-        )}
         <img
-          src={
-            optimized
-              ? '/services/product/product-hero.webp'
-              : `/services/${theme}.jpg`
-          }
-          width={optimized ? 1400 : 880}
-          height={optimized ? 764 : 480}
+          src={`/services/${theme}.jpg`}
+          width={880}
+          height={480}
           fetchPriority="high"
           decoding="async"
-          alt={
-            optimized
-              ? 'An illustrated interface rests on connected product layers.'
-              : 'An abstract illustration of connected software capabilities.'
-          }
+          alt="An abstract illustration of connected software capabilities."
         />
       </picture>
       <figcaption>Conceptual illustration</figcaption>

@@ -2213,6 +2213,16 @@ nav {
 .service-detail-link {
   margin-top: 18px;
 }
+.service-illustration .work-model-host {
+  overflow: hidden;
+  border-radius: 16px;
+  background: radial-gradient(
+    ellipse at 25% 100%,
+    #296781,
+    #0b3458 65%,
+    #07243d
+  );
+}
 .service-scope {
   background-color: #071323;
 }

@@ -15,4 +15,20 @@ The Blender command retains `product-hero.blend` and a lossless 2860 × 1560 `pr
 
 The image preparation command produces 1400 × 764 desktop and 768 × 419 mobile WebPs under `public/services/product/`. Both show the whole composition at the original aspect ratio; their declared dimensions reserve layout space. `images.json` records sizes. The script enforces 80 KB desktop and 35 KB mobile limits.
 
-Only optimized WebPs are served to visitors. These source files are retained outside `public/`. The page identifies its image as a conceptual illustration and uses a static hero in this phase. A lightweight export of the actual scene geometry and viewer integration belongs to Phase 3; no service GLB is shipped yet.
+Only optimized WebPs are served to visitors. These source files are retained outside `public/`. The page identifies its artwork as a conceptual illustration. Suitable desktop browsers enhance the still with the actual model; touch, reduced motion, constrained connections, and missing graphics keep the responsive image.
+
+## Baked web model
+
+After preparing the master and stills above:
+
+```sh
+node scripts/prepare-service-images.mjs product --lighting
+blender --background --python scripts/export-service-model.py -- --theme product --render-background
+node scripts/prepare-service-images.mjs product --background
+```
+
+The texture is a camera-projected bake of the reviewed studio beauty render onto the actual product meshes. It preserves that view’s lighting, reflections, and highlights; it is not a flat plane. The export reduces bevel segments, embeds the 1400 × 764 JPEG appearance texture, and uses `KHR_materials_unlit`. The original editable `.blend` and high-resolution hero PNG are not overwritten. The Blender command separately renders a high-resolution studio plate with the product hidden from camera rays but still casting its shadow. Keep all these source assets here.
+
+The self-contained `public/services/product/product-hero.glb` is 169,904 bytes with 1,188 triangles. It excludes the oversized floor, camera, and lights. The optimized background is 7,604 bytes and loads only for the optional desktop enhancement. `model.json`, `view.json`, `lighting.json`, and `background.json` record geometry, view, and image sizes. The browser retains the still until the background is decoded and the model has rendered a frame; it does not add real-time lighting to the baked model or tone-map the finished texture again.
+
+This is a bounded pointer tilt, not an orbit viewer. Highlights and the studio shadow remain fixed; small appearance differences from the still are accepted. The shared renderer rests when idle, pauses offscreen/hidden, and restores the image on loading/graphics failure. Model textures and their decoded bitmaps are disposed on cleanup. Existing selected-work models keep their original live-lighting setup.
