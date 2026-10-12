@@ -8,7 +8,7 @@ Preserve high-resolution Blender renders as source assets. Derive optimized page
 
 This is the single public planning document for this work. Detailed source reviews, captures, measurements, and phase notes belong in the ignored `docs/local/` folder. Update this document as decisions change; review each phase before proceeding.
 
-## Proposed pages
+## Page mapping
 
 | Service             | Proposed route                  | Existing illustration theme | Relevant work to consider                              |
 | ------------------- | ------------------------------- | --------------------------- | ------------------------------------------------------ |
@@ -17,7 +17,7 @@ This is the single public planning document for this work. Detailed source revie
 | Workflow automation | `/services/workflow-automation` | `workflow`                  | Research to Action, Accounting with AI Assistance      |
 | System integrations | `/services/system-integrations` | `integration`               | Care Coordination, Service Operations Copilot          |
 
-These titles, routes, and relationships are proposals to review in Phase 1. Related work must demonstrate a relevant capability; it must not imply an unsupported client result or guarantee.
+Phase 1 retains these titles and routes. Existing service IDs map to the routes in order: `product`, `ai`, `workflow`, and `integration`. These page names describe the offer; published card titles and descriptions remain authoritative. Related work demonstrates relevant engineering capabilities, without implying unsupported client outcomes or guarantees.
 
 ## Page structure
 
@@ -45,14 +45,45 @@ The current homepage images are 880 × 480 JPEGs in `public/services/`, generate
 
 ## Phase 1: Content and implementation boundaries
 
-- [ ] Review the four service titles, routes, audience, problems, and deliverables against the existing offers.
-- [ ] Outline distinct copy and practical questions for each page, without duplicating project narratives.
-- [ ] Select relevant work and preserve current publication and disclosure rules.
-- [ ] Define which fields remain code-managed and how existing admin-managed service cards link to the new pages.
-- [ ] Decide route visibility and related-work behavior when a service or case study is unpublished; avoid exposing drafts or reviving unpublished defaults.
-- [ ] Inspect the original Blender scenes and confirm the image/model export approach.
+- [x] Review the four service titles, routes, audience, problems, and deliverables against the existing offers.
+- [x] Outline distinct copy and practical questions for each page, without duplicating project narratives.
+- [x] Select relevant work and preserve current publication and disclosure rules.
+- [x] Define which fields remain code-managed and how existing admin-managed service cards link to the new pages.
+- [x] Decide route visibility and related-work behavior when a service or case study is unpublished; avoid exposing drafts or reviving unpublished defaults.
+- [x] Inspect the original Blender scenes and confirm the image/model export approach.
 
 **Exit criteria:** Each page has a useful, accurate purpose, and the publication/content boundary and asset approach are agreed.
+
+## Phase 1 decisions — October 12, 2026
+
+### Distinct service purposes
+
+| Page                | Audience and problem                                                                           | Scope and deliverables                                                                                                                          | Practical questions                                                                                     |
+| ------------------- | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Product development | Founders and product teams turning an idea into a useful first version or extending a product. | Define the core journey, connect interface/data/backend, deliver a scoped web or mobile application, and agree deployment and handover.         | Can we start without a specification? Can you build on an existing product? What does handover include? |
+| AI integrations     | Teams with a specific document, information, or request-handling task.                         | Connect model/provider, approved context, application tools, review states, and failure handling; assess usefulness on representative examples. | Does this task need AI? Can it work inside our application? How do people review uncertain results?     |
+| Workflow automation | Teams coordinating repeated steps, reviews, and handoffs.                                      | Map the process, build states and review queues, automate suitable steps, and preserve retries and activity history.                            | What should remain manual? Can we automate one step first? What happens when processing fails?          |
+| System integrations | Teams connecting existing software, APIs, and data.                                            | Define ownership and data contracts, implement bounded exchanges and authentication, and address failures, duplicate delivery, and handover.    | Can you connect our existing systems? What if an API is limited? How are failed exchanges handled?      |
+
+Scope is agreed per engagement. These are capabilities and potential deliverables, not promises of every feature in every project. Page copy must distinguish product delivery, AI interpretation, process coordination, and system-to-system exchange. The detailed draft outlines and source review are retained locally.
+
+### Content and publication boundary
+
+- Keep the current Convex service schema. Published `id`, `title`, `theme`, `description`, `detail`, and `art` continue to control card identity, introductory copy, and illustration choice. Draft edits do not alter public pages.
+- Add a code-managed mapping from the four exact service IDs to stable page slugs and richer narrative/FAQ definitions. Match by ID, never by illustration theme or an arbitrary title. Code-managed narratives are reviewed when the published offer changes.
+- A detail route exists only when its mapped service ID is currently published. Unknown slugs, unpublished IDs, and renamed IDs return the normal 404; the old route does not silently redirect to another service. Adding a replacement ID requires an explicit mapping review. Unmapped custom services retain their homepage cards without invented detail links.
+- After initialization, an empty published collection stays empty. A backend failure must not revive source defaults. Existing bootstrap defaults remain available only under the existing unconfigured/uninitialized behavior.
+- Related work is selected from current published records by its approved slug. Unpublished or renamed examples disappear; omit an empty related-work section. Care/accounting/research remain abstract and without external project links.
+- Derive homepage detail links, sitemap entries, metadata, structured page data, and assistant service references from the same published mapping. Extend analytics path approval for known service routes and chat clickable-link approval for currently published services. Restored chat text stays readable without keeping unavailable service links active.
+- Service chat entry may carry a validated service slug as optional UI context. Do not auto-send a message, replace a restored conversation, submit an inquiry, or include arbitrary URL text in AI context or analytics. Keep the existing review/confirmation flow. No schema migration or new AI tool is required by this phase.
+
+### Illustration boundary
+
+Inspected all four 880 × 480 illustrations and their original generator. Preserve the stacked product layers, AI node network, connected workflow stages, and paired integration systems. The current script reconstructs geometry and renders JPEGs; it does not save `.blend` files or export models. No service master assets are currently retained under `assets/services/`.
+
+Rebuild from that generator in later phases, with theme-specific execution so reviewing Product development does not overwrite the other homepage images. Save editable scenes and lossless masters at least 2800 pixels wide, then derive desktop/mobile WebP crops. Keep the existing homepage card assets until their replacements are reviewed. For the optional GLB, export only the illustration geometry, excluding the oversized studio floor, camera, and lights; optimize sphere tessellation and bevels while retaining the recognizable shapes. Record camera, target, crop, bounds, triangles, materials, and asset sizes for matching the still and web viewer. Blender lighting and browser materials differ, so verify the transition visually rather than assuming an exact match.
+
+**Review status:** Phase 1 complete. Reviewed the existing offers, schemas, publication loader/query, chat/link/analytics boundaries, Blender generator, and all four images. Documentation-only work; no routes, backend records, images, models, or deployment were changed. Stop here for owner review before Phase 2.
 
 ## Phase 2: First page and shared presentation
 
@@ -99,4 +130,4 @@ The current homepage images are 880 × 480 JPEGs in `public/services/`, generate
 
 ## Progress
 
-Planning only. Implementation has not started. Complete and review one phase at a time; check tasks only when their work or explicit review decision is finished.
+Phase 1 is complete with all six tasks checked. Phases 2–5 remain unchecked. Page and asset implementation has not started; wait for owner review before Phase 2.
