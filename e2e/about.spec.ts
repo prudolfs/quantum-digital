@@ -88,7 +88,7 @@ test('About loads the real workbench and responds to pointer movement', async ({
   page,
   isMobile,
 }) => {
-  test.skip(isMobile, 'Touch devices use the still artwork.')
+  test.skip(isMobile, 'Desktop interaction check.')
   await page.goto('/about')
   await expect(page.locator('.work-model')).toHaveAttribute(
     'data-model-stage',

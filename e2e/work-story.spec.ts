@@ -106,10 +106,7 @@ test('missing graphics keeps the fallback instead of loading the model', async (
   page,
   isMobile,
 }) => {
-  test.skip(
-    isMobile,
-    'Touch devices use the rendered poster without probing graphics.',
-  )
+  test.skip(isMobile, 'Desktop missing-graphics check.')
   await page.addInitScript(() => {
     const original = HTMLCanvasElement.prototype.getContext
     HTMLCanvasElement.prototype.getContext = function (
@@ -137,7 +134,7 @@ test('failed model loading returns to the rendered illustration', async ({
   page,
   isMobile,
 }) => {
-  test.skip(isMobile, 'Touch devices use the poster.')
+  test.skip(isMobile, 'Desktop interaction/lifecycle check.')
   await page.route('**/finance-hero.glb', (route) =>
     route.fulfill({ status: 503, body: 'Unavailable' }),
   )
@@ -154,7 +151,7 @@ test('live model waits behind the poster, rests when idle and pauses offscreen',
   page,
   isMobile,
 }, testInfo) => {
-  test.skip(isMobile, 'Touch devices use the poster.')
+  test.skip(isMobile, 'Desktop interaction/lifecycle check.')
   let release!: () => void
   const hold = new Promise<void>((resolve) => {
     release = resolve
@@ -210,7 +207,7 @@ test('graphics context loss restores the poster', async ({
   page,
   isMobile,
 }) => {
-  test.skip(isMobile, 'Touch devices use the poster.')
+  test.skip(isMobile, 'Desktop interaction/lifecycle check.')
   await page.goto(path)
   await expect(page.locator('.work-model')).toHaveAttribute(
     'data-model-stage',
@@ -236,7 +233,7 @@ test('a stalled model times out without hiding the source illustration', async (
   page,
   isMobile,
 }) => {
-  test.skip(isMobile, 'Touch devices use the poster.')
+  test.skip(isMobile, 'Desktop interaction/lifecycle check.')
   let release!: () => void
   const hold = new Promise<void>((resolve) => {
     release = resolve

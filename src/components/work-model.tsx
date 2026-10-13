@@ -3,7 +3,7 @@ import type { ModelController } from '@/lib/work-model-runtime'
 import { motion, useReducedMotion } from 'motion/react'
 import { financeModelArt, type WorkModelArt } from '@/lib/work-model-config'
 
-type Connection = { saveData?: boolean; effectiveType?: string }
+type Connection = { saveData?: boolean }
 
 export function WorkModel({
   art = financeModelArt,
@@ -21,16 +21,14 @@ export function WorkModel({
     const motionPreference = window.matchMedia(
       '(prefers-reduced-motion: reduce)',
     )
-    const pointer = window.matchMedia('(pointer: coarse)')
     const connection = (navigator as Navigator & { connection?: Connection })
       .connection
-    const memory = (navigator as Navigator & { deviceMemory?: number })
-      .deviceMemory
     const abort = new AbortController()
     let runtime: ModelController | undefined
     let idle: number | undefined
     let timeout: number | undefined
     let visible = true
+    const lastPointer = { x: 0, y: 0 }
     const fallback = () => {
       abort.abort()
       runtime?.dispose()
@@ -67,19 +65,14 @@ export function WorkModel({
         else {
           runtime = loaded
           runtime.setActive(visible && !document.hidden)
+          runtime.setPointer(lastPointer.x, lastPointer.y)
         }
       } catch {
         if (!abort.signal.aborted) fallback()
       }
     }
     const schedule = () => {
-      if (
-        motionPreference.matches ||
-        pointer.matches ||
-        connection?.saveData ||
-        /(^|-)2g|3g/.test(connection?.effectiveType ?? '') ||
-        (memory !== undefined && memory < 4)
-      ) {
+      if (motionPreference.matches || connection?.saveData) {
         setStage('static')
         return
       }
@@ -94,22 +87,40 @@ export function WorkModel({
     observer.observe(element)
     const visibility = () => runtime?.setActive(visible && !document.hidden)
     const preference = () => {
-      if (motionPreference.matches || pointer.matches) fallback()
+      if (motionPreference.matches) fallback()
+    }
+    const point = (event: PointerEvent) => {
+      const bounds = element.getBoundingClientRect()
+      if (!bounds.width || !bounds.height) return
+      lastPointer.x = Math.max(
+        -0.5,
+        Math.min(0.5, (event.clientX - bounds.left) / bounds.width - 0.5),
+      )
+      lastPointer.y = Math.max(
+        -0.5,
+        Math.min(0.5, (event.clientY - bounds.top) / bounds.height - 0.5),
+      )
+      runtime?.setPointer(lastPointer.x, lastPointer.y)
     }
     const move = (event: PointerEvent) => {
-      if (event.pointerType !== 'mouse') return
-      const bounds = element.getBoundingClientRect()
-      runtime?.setPointer(
-        (event.clientX - bounds.left) / bounds.width - 0.5,
-        (event.clientY - bounds.top) / bounds.height - 0.5,
-      )
+      if (event.pointerType === 'mouse') point(event)
     }
-    const leave = () => runtime?.setPointer(0, 0)
+    const touch = (event: PointerEvent) => {
+      if (event.pointerType === 'touch' || event.pointerType === 'pen')
+        point(event)
+    }
+    const leave = (event: PointerEvent) => {
+      if (event.pointerType !== 'mouse') return
+      lastPointer.x = lastPointer.y = 0
+      runtime?.setPointer(0, 0)
+    }
     element.addEventListener('pointermove', move)
     element.addEventListener('pointerleave', leave)
+    // Passive page-wide touch tracking retains the last pose without capturing gestures.
+    window.addEventListener('pointerdown', touch, { passive: true })
+    window.addEventListener('pointermove', touch, { passive: true })
     document.addEventListener('visibilitychange', visibility)
     motionPreference.addEventListener('change', preference)
-    pointer.addEventListener('change', preference)
     if (document.readyState === 'complete') schedule()
     else window.addEventListener('load', schedule, { once: true })
     return () => {
@@ -120,10 +131,11 @@ export function WorkModel({
       if (idle !== undefined) window.cancelIdleCallback(idle)
       element.removeEventListener('pointermove', move)
       element.removeEventListener('pointerleave', leave)
+      window.removeEventListener('pointerdown', touch)
+      window.removeEventListener('pointermove', touch)
       document.removeEventListener('visibilitychange', visibility)
       window.removeEventListener('load', schedule)
       motionPreference.removeEventListener('change', preference)
-      pointer.removeEventListener('change', preference)
     }
   }, [art])
   return (

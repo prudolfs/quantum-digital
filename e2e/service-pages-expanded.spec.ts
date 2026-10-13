@@ -127,26 +127,28 @@ for (const service of services) {
     )
   })
 
-  test(`${service.label} uses the real model on desktop and the still on mobile`, async ({
+  test(`${service.label} uses the real model on desktop and mobile`, async ({
     page,
     isMobile,
   }, testInfo) => {
     await page.goto(`/services/${service.slug}`)
     const art = page.locator('.service-illustration')
-    if (isMobile) {
-      await expect(art).toHaveAttribute('data-model-stage', 'static')
-      await expect(art.locator('canvas')).toHaveCount(0)
-      return
-    }
+    await art.scrollIntoViewIfNeeded()
     await expect(art).toHaveAttribute('data-model-stage', 'live', {
       timeout: 15000,
     })
     await expect(art.locator('canvas')).toHaveCount(1)
     const box = await art.boundingBox()
-    await page.mouse.move(
-      box!.x + box!.width * 0.85,
-      box!.y + box!.height * 0.3,
-    )
+    if (isMobile)
+      await page.touchscreen.tap(
+        box!.x + box!.width * 0.85,
+        box!.y + box!.height * 0.3,
+      )
+    else
+      await page.mouse.move(
+        box!.x + box!.width * 0.85,
+        box!.y + box!.height * 0.3,
+      )
     await page.screenshot({
       path: testInfo.outputPath(`${service.theme}-live.png`),
     })

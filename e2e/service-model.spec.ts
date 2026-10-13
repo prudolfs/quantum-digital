@@ -7,7 +7,7 @@ test('baked service model preserves the poster while loading, moves real geometr
   page,
   isMobile,
 }, testInfo) => {
-  test.skip(isMobile, 'Touch devices retain the still.')
+  test.skip(isMobile, 'Desktop mouse interaction check.')
   const errors: string[] = []
   page.on('pageerror', (error) => errors.push(error.message))
   let release!: () => void
@@ -96,44 +96,15 @@ test('baked service model preserves the poster while loading, moves real geometr
   expect(errors).toEqual([])
 })
 
-for (const constraint of ['saveData', '3g', 'low-memory']) {
-  test(`${constraint} skips the service model, runtime, and background`, async ({
-    page,
-  }) => {
-    await page.addInitScript((setting) => {
-      if (setting === 'low-memory')
-        Object.defineProperty(navigator, 'deviceMemory', {
-          configurable: true,
-          value: 2,
-        })
-      else
-        Object.defineProperty(navigator, 'connection', {
-          configurable: true,
-          value:
-            setting === '3g' ? { effectiveType: '3g' } : { saveData: true },
-        })
-    }, constraint)
-    const requests: string[] = []
-    page.on('request', (request) => requests.push(request.url()))
-    await page.goto(path)
-    await expect(page.locator(model)).toHaveAttribute(
-      'data-model-stage',
-      'static',
-    )
-    expect(
-      requests.filter((url) =>
-        /\.glb|work-model-runtime|product-background/.test(url),
-      ),
-    ).toEqual([])
-    await expect(page.locator(`${model} picture`)).toHaveCSS('opacity', '1')
-  })
-}
-
-test('mobile keeps the service artwork and does not fetch model assets', async ({
+test('saveData skips the service model, runtime, and background', async ({
   page,
-  isMobile,
 }) => {
-  test.skip(!isMobile, 'Mobile-specific source and runtime check.')
+  await page.addInitScript(() =>
+    Object.defineProperty(navigator, 'connection', {
+      configurable: true,
+      value: { saveData: true },
+    }),
+  )
   const requests: string[] = []
   page.on('request', (request) => requests.push(request.url()))
   await page.goto(path)
@@ -141,6 +112,38 @@ test('mobile keeps the service artwork and does not fetch model assets', async (
     'data-model-stage',
     'static',
   )
+  expect(
+    requests.filter((url) =>
+      /\.glb|work-model-runtime|product-background/.test(url),
+    ),
+  ).toEqual([])
+  await expect(page.locator(`${model} picture`)).toHaveCSS('opacity', '1')
+})
+
+test('mobile loads the model, retains its last touch pose, and rests without blocking scrolling', async ({
+  page,
+  isMobile,
+}, testInfo) => {
+  test.skip(!isMobile, 'Touch interaction check.')
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'deviceMemory', {
+      value: 2,
+      configurable: true,
+    })
+    Object.defineProperty(navigator, 'connection', {
+      value: { effectiveType: '3g', saveData: false },
+      configurable: true,
+    })
+  })
+  await page.goto(path)
+  const host = page.locator(`${model} .work-model-host`)
+  await host.scrollIntoViewIfNeeded()
+  await expect(page.locator(model)).toHaveAttribute(
+    'data-model-stage',
+    'live',
+    { timeout: 15_000 },
+  )
+  await expect(page.locator(`${model} canvas`)).toHaveCount(1)
   await expect
     .poll(() =>
       page
@@ -148,11 +151,48 @@ test('mobile keeps the service artwork and does not fetch model assets', async (
         .evaluate((image: HTMLImageElement) => image.currentSrc),
     )
     .toContain('product-hero-mobile.webp')
-  expect(
-    requests.filter((url) =>
-      /\.glb|work-model-runtime|product-background/.test(url),
-    ),
-  ).toEqual([])
+  await page.waitForTimeout(600)
+  const neutral = await host.screenshot()
+  const frames = () =>
+    page
+      .locator(`${model} .work-model-canvas`)
+      .getAttribute('data-model-frames')
+  const before = Number(await frames())
+  const box = await host.boundingBox()
+  await page.touchscreen.tap(
+    box!.x + box!.width * 0.85,
+    box!.y + box!.height * 0.3,
+  )
+  await expect.poll(async () => Number(await frames())).toBeGreaterThan(before)
+  await page.waitForTimeout(800)
+  const moved = await host.screenshot({
+    path: testInfo.outputPath('mobile-touch.png'),
+  })
+  expect(moved.equals(neutral)).toBe(false)
+  const settled = await frames()
+  await page.waitForTimeout(300)
+  expect(await frames()).toBe(settled)
+  const beforeScroll = await page.evaluate(() => scrollY)
+  const session = await page.context().newCDPSession(page)
+  for (let step = 0; step <= 8; step++) {
+    await session.send('Input.dispatchTouchEvent', {
+      type: step ? 'touchMove' : 'touchStart',
+      touchPoints: [
+        {
+          x: Math.round(box!.x + box!.width / 2),
+          y: Math.round(box!.y + box!.height * 0.8 - step * 25),
+        },
+      ],
+    })
+  }
+  await session.send('Input.dispatchTouchEvent', {
+    type: 'touchEnd',
+    touchPoints: [],
+  })
+  await expect
+    .poll(() => page.evaluate(() => scrollY))
+    .toBeGreaterThan(beforeScroll)
+  await session.detach()
 })
 
 for (const asset of ['product-hero.glb', 'product-background.webp']) {
@@ -160,7 +200,7 @@ for (const asset of ['product-hero.glb', 'product-background.webp']) {
     page,
     isMobile,
   }) => {
-    test.skip(isMobile, 'Touch devices do not load model assets.')
+    test.skip(isMobile, 'Desktop asset failure check.')
     await page.route(`**/${asset}`, (route) =>
       route.fulfill({ status: 503, body: 'Unavailable' }),
     )
@@ -181,7 +221,7 @@ test('unavailable graphics and context loss preserve the service content and pos
   browser,
   baseURL,
 }) => {
-  test.skip(isMobile, 'Touch devices do not probe graphics.')
+  test.skip(isMobile, 'Desktop context lifecycle check.')
   await page.goto(path)
   await expect(page.locator(model)).toHaveAttribute(
     'data-model-stage',

@@ -3,9 +3,7 @@ import AxeBuilder from '@axe-core/playwright'
 
 test('client navigation replaces each live model and keeps its poster during loading', async ({
   page,
-  isMobile,
 }) => {
-  test.skip(isMobile, 'Touch devices use the still artwork.')
   await page.goto('/work/care-coordination')
   await expect(page.locator('.work-model')).toHaveAttribute(
     'data-model-stage',
