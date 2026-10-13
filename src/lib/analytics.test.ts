@@ -1,5 +1,4 @@
 import { beforeEach, afterEach, expect, test, vi } from 'vitest'
-import type { CaptureResult } from 'posthog-js/dist/module.slim'
 const sdk = vi.hoisted(() => ({
   init: vi.fn(),
   capture: vi.fn(),
@@ -54,69 +53,6 @@ test('tracks the reviewed service route without accepting arbitrary service path
   ])
     expect(analyticsPath(`/services/${slug}`)).toBe(`/services/${slug}`)
 })
-test('drops unknown events and removes personal data, query strings, and SDK enrichment', async () => {
-  const { sanitizeAnalyticsEvent } = await import('./analytics')
-  const input = {
-    uuid: '11111111-1111-4111-8111-111111111111',
-    event: 'inquiry_submitted',
-    properties: {
-      page_path: '/chat',
-      source: 'contact_form',
-      token: 'phc_test',
-      distinct_id: 'anonymous-visitor',
-      email: 'private@example.com',
-      name: 'Private name',
-      summary: 'Confidential project',
-      draftId: 'private-draft',
-      $current_url: 'https://example.com/chat?email=private#secret',
-      $referrer: 'https://private.example.com/path',
-      $initial_referrer: 'private',
-      $set: { email: 'private@example.com' },
-      $device_id: '01960000-0000-7000-8000-000000000002',
-      $session_id: '01960000-0000-7000-8000-000000000001',
-      $cookieless_mode: true,
-      $host: 'private.example.com',
-      $pathname: '/chat?email=private@example.com',
-      $raw_user_agent: 'private custom text',
-    },
-  } as CaptureResult
-  const result = sanitizeAnalyticsEvent(input)!
-  expect(result.properties).toEqual({
-    page_path: '/chat',
-    source: 'contact_form',
-    token: 'phc_test',
-    distinct_id: 'anonymous-visitor',
-    $current_url: 'https://example.com/chat',
-    $host: 'example.com',
-    $pathname: '/chat',
-    $raw_user_agent: 'Mozilla/5.0 Test Browser',
-    $process_person_profile: false,
-    $geoip_disable: true,
-    $device_id: '01960000-0000-7000-8000-000000000002',
-    $session_id: '01960000-0000-7000-8000-000000000001',
-  })
-  for (const device of ['private@example.com', null, 'persistent-id']) {
-    expect(
-      sanitizeAnalyticsEvent({
-        ...input,
-        properties: { ...input.properties, $device_id: device },
-      })!.properties.$device_id,
-    ).toBeUndefined()
-  }
-  expect(
-    sanitizeAnalyticsEvent({
-      ...input,
-      properties: {
-        ...input.properties,
-        $device_id: '11111111-1111-4111-8111-111111111111',
-      },
-    })!.properties.$device_id,
-  ).toBe('11111111-1111-4111-8111-111111111111')
-  expect(sanitizeAnalyticsEvent({ ...input, event: '$autocapture' })).toBeNull()
-  expect(
-    sanitizeAnalyticsEvent({ ...input, properties: { page_path: '/admin' } }),
-  ).toBeNull()
-})
 test('captures once without transmitting the local deduplication ID', async () => {
   const { captureAnalyticsOnce } = await import('./analytics')
   captureAnalyticsOnce('inquiry_submitted', 'private-draft', 'contact_form')
@@ -138,6 +74,9 @@ test('captures once without transmitting the local deduplication ID', async () =
       disable_session_recording: true,
       person_profiles: 'never',
       advanced_disable_flags: true,
+      ip: true,
+      save_campaign_params: true,
+      save_referrer: true,
     }),
   )
   expect(sdk.init.mock.calls[0]?.[1].cookieless_mode).toBeUndefined()
@@ -206,7 +145,7 @@ test('does not initialize after consent is withdrawn during the SDK import', asy
   await vi.waitFor(() => expect(sdk.capture).toHaveBeenCalledTimes(1))
 })
 
-test('reports a scrubbed crash once and stops on consent withdrawal', async () => {
+test('reports the original crash once and stops on consent withdrawal', async () => {
   const { captureAppCrash } = await import('./analytics')
   const { setAnalyticsConsent } = await import('./analytics-consent')
   const error = new Error('private@example.com confidential chat')
@@ -217,35 +156,42 @@ test('reports a scrubbed crash once and stops on consent withdrawal', async () =
   captureAppCrash(error, 'route_error')
   captureAppCrash(error, 'unhandled_error')
   await vi.waitFor(() => expect(sdk.captureException).toHaveBeenCalledTimes(1))
-  expect(sdk.captureException.mock.calls[0][0].message).toBe('route_error')
+  expect(sdk.captureException.mock.calls[0][0]).toBe(error)
   expect(sdk.captureException.mock.calls[0][1]).toEqual({
     page_path: '/chat',
     crash_source: 'route_error',
   })
-  expect(sdk.captureException.mock.calls[0][0].stack).not.toContain('private')
   setAnalyticsConsent('rejected')
   captureAppCrash(new Error('another'), 'unhandled_rejection')
   expect(sdk.captureException).toHaveBeenCalledTimes(1)
 })
 
-test('allows only the minimal exception structure through the final event filter', async () => {
-  const { sanitizeAnalyticsEvent } = await import('./analytics')
-  const result = sanitizeAnalyticsEvent({
-    event: '$exception',
-    properties: {
-      page_path: '/chat',
-      crash_source: 'route_error',
-      $exception_list: [
-        { type: 'Error', value: 'route_error', stacktrace: { frames: [] } },
-      ],
-      $exception_message: 'private@example.com',
-      $exception_steps: ['chat text'],
-      $exception_personURL: 'private',
-    },
-  } as unknown as CaptureResult)
-  expect(result?.event).toBe('$exception')
-  expect(result?.properties.$exception_list).toHaveLength(1)
-  expect(JSON.stringify(result)).not.toMatch(
-    /private|chat text|exception_steps|exception_personURL/,
+test('uses standard SDK metadata without a property filter', async () => {
+  const { captureAnalytics } = await import('./analytics')
+  captureAnalytics('$pageview')
+  await vi.waitFor(() => expect(sdk.init).toHaveBeenCalledTimes(1))
+  const configuration = sdk.init.mock.calls[0][1]
+  expect(configuration.before_send).toBeUndefined()
+  expect(configuration.ip).toBe(true)
+  expect(configuration.save_referrer).toBe(true)
+  expect(configuration.save_campaign_params).toBe(true)
+})
+
+test('explicit verification reports a labelled exception after acceptance', async () => {
+  const { listenForAppCrashes } = await import('./analytics')
+  const cleanup = listenForAppCrashes()
+  const entry = vi
+    .mocked(window.addEventListener)
+    .mock.calls.find(([name]) => name === 'qd:verify-error-tracking')!
+  const listener = entry[1] as EventListener
+  listener(new Event('qd:verify-error-tracking'))
+  await vi.waitFor(() => expect(sdk.captureException).toHaveBeenCalledTimes(1))
+  expect(sdk.captureException.mock.calls[0][0].message).toBe(
+    'PostHog setup verification',
   )
+  expect(sdk.captureException.mock.calls[0][1]).toMatchObject({
+    crash_source: 'verification',
+    is_error_tracking_verification: true,
+  })
+  cleanup()
 })

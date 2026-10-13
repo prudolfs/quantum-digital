@@ -91,8 +91,8 @@ export function SiteAnalytics() {
     >
       <h2 id="analytics-consent-title">Analytics cookies</h2>
       <p>
-        Allow cookies to help measure page visits and inquiry steps. Your chat
-        messages and contact details stay out of analytics.{' '}
+        Allow cookies for website analytics and error reporting, including
+        visitor locations, referral sources, and inquiry steps.{' '}
         <Link to="/privacy">Privacy details</Link>
       </p>
       {!available ? (

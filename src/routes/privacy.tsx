@@ -68,15 +68,14 @@ function PrivacyPage() {
           it. You can change that choice below or through Cookie preferences in
           the footer. Rejecting stops future tracking and removes the analytics
           cookie; essential chat and admin cookies remain. PostHog receives the
-          public page path and browser information, including User-Agent. It
-          does not receive your name, email, chat messages, project details,
-          timing, or budget through these events. Session replay and automatic
-          form capture are disabled, and analytics excludes the private admin
-          pages, URL query strings, and fragments. Do Not Track and Global
-          Privacy Control signals are respected. With your analytics consent,
-          PostHog also receives basic crash reports: the public page path, error
-          category, and positions in site JavaScript files. Original error
-          messages and visitor input are excluded.
+          standard website analytics metadata: page URLs, referrers, campaign
+          parameters, browser/device information, and approximate location
+          inferred from your network IP address. Inquiry events describe the
+          step taken without adding the contact form fields or chat transcript.
+          Session replay and automatic form capture are disabled. Do Not Track
+          and Global Privacy Control signals are respected. With your analytics
+          consent, PostHog also receives app error messages and stack traces
+          through its standard error-reporting SDK.
         </p>
         <AnalyticsPreferencesButton />
       </section>

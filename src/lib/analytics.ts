@@ -1,11 +1,6 @@
-import type { CaptureResult, PostHog } from 'posthog-js/dist/module'
+import type { PostHog } from 'posthog-js/dist/module'
 import { servicePageRoutes } from '../../shared/service-pages'
 import { publicEnv } from '@/env'
-import {
-  safeCrash,
-  sanitizeExceptionList,
-  type CrashSource,
-} from './crash-report'
 import {
   getAnalyticsConsent,
   subscribeAnalyticsConsent,
@@ -24,16 +19,6 @@ export type AnalyticsEvent =
   | 'inquiry_submitted'
   | 'inquiry_submission_failed'
 export type AnalyticsSource = 'contact_form' | 'conversation'
-const events = new Set<string>([
-  '$exception',
-  '$pageview',
-  'chat_started',
-  'inquiry_requested',
-  'inquiry_reviewed',
-  'inquiry_submit_attempted',
-  'inquiry_submitted',
-  'inquiry_submission_failed',
-])
 const workSlugs = new Set([
   'care-coordination',
   'accounting-workflows',
@@ -55,62 +40,6 @@ export function analyticsPath(pathname: string) {
     return workSlugs.has(slug) ? pathname : '/work/:slug'
   }
   return null
-}
-
-// Replace SDK-enriched properties: no query strings, referrers, form text,
-// transcript/draft IDs, personal identities, or error messages leave the browser.
-export function sanitizeAnalyticsEvent(event: CaptureResult | null) {
-  if (!event || !events.has(event.event)) return null
-  const path = event.properties.page_path
-  if (typeof path !== 'string' || !analyticsPath(path)) return null
-  const pagePath = analyticsPath(path)!
-  const url = new URL(pagePath, publicEnv.VITE_SITE_URL)
-  const properties: Record<string, unknown> = {
-    page_path: pagePath,
-    $current_url: url.href,
-    $host: url.hostname,
-    $pathname: pagePath,
-    $process_person_profile: false,
-    $geoip_disable: true,
-  }
-  // Browser metadata supports traffic classification. Never accept custom text.
-  if (typeof navigator !== 'undefined' && navigator.userAgent)
-    properties.$raw_user_agent = navigator.userAgent
-  for (const key of ['token', 'distinct_id', '$lib', '$lib_version']) {
-    if (typeof event.properties[key] === 'string')
-      properties[key] = event.properties[key]
-  }
-  // Keep the SDK's random browser UUID, including older UUIDv4 cookies.
-  const device = event.properties.$device_id
-  if (
-    typeof device === 'string' &&
-    /^[\da-f]{8}-[\da-f]{4}-[47][\da-f]{3}-[89ab][\da-f]{3}-[\da-f]{12}$/i.test(
-      device,
-    )
-  )
-    properties.$device_id = device
-  // Web Analytics needs the SDK's session UUID to aggregate cookie-mode visits.
-  const session = event.properties.$session_id
-  if (
-    typeof session === 'string' &&
-    /^[\da-f]{8}-[\da-f]{4}-7[\da-f]{3}-[89ab][\da-f]{3}-[\da-f]{12}$/i.test(
-      session,
-    )
-  )
-    properties.$session_id = session
-  if (['contact_form', 'conversation'].includes(event.properties.source))
-    properties.source = event.properties.source
-  if (event.event === '$exception') {
-    const exceptions = sanitizeExceptionList(
-      event.properties.$exception_list,
-      event.properties.crash_source,
-      url.origin,
-    )
-    if (!exceptions) return null
-    properties.$exception_list = exceptions
-    properties.crash_source = event.properties.crash_source
-  }
-  return { ...event, properties }
 }
 
 let client: Promise<PostHog | undefined> | undefined
@@ -165,11 +94,10 @@ function getClient() {
         disable_product_tours: true,
         disable_external_dependency_loading: true,
         advanced_disable_flags: true,
-        save_campaign_params: false,
-        save_referrer: false,
+        save_campaign_params: true,
+        save_referrer: true,
         respect_dnt: true,
-        ip: false,
-        before_send: sanitizeAnalyticsEvent,
+        ip: true,
       })
       initialized = posthog
       posthog.opt_in_capturing({ captureEventName: false })
@@ -218,6 +146,12 @@ export function captureAnalyticsOnce(
   captureAnalytics(event, source)
 }
 
+export type CrashSource =
+  | 'route_error'
+  | 'unhandled_error'
+  | 'unhandled_rejection'
+  | 'verification'
+
 let crashCount = 0
 const reportedCrashes = new WeakSet<object>()
 export function captureAppCrash(error: unknown, source: CrashSource) {
@@ -230,13 +164,15 @@ export function captureAppCrash(error: unknown, source: CrashSource) {
   }
   crashCount++
   const path = analyticsPath(location.pathname)!
-  const safe = safeCrash(error, source, location.origin)
   void getClient().then((posthog) => {
     try {
       if (allowed())
-        posthog?.captureException(safe, {
+        posthog?.captureException(error, {
           page_path: path,
           crash_source: source,
+          ...(source === 'verification'
+            ? { is_error_tracking_verification: true }
+            : {}),
         })
     } catch {
       /* Crash reporting must never cause another crash. */
@@ -245,6 +181,8 @@ export function captureAppCrash(error: unknown, source: CrashSource) {
 }
 
 export function listenForAppCrashes() {
+  const verify = () =>
+    captureAppCrash(new Error('PostHog setup verification'), 'verification')
   const error = (event: ErrorEvent) => {
     if (event.error instanceof Error)
       captureAppCrash(event.error, 'unhandled_error')
@@ -255,8 +193,10 @@ export function listenForAppCrashes() {
   }
   window.addEventListener('error', error)
   window.addEventListener('unhandledrejection', rejection)
+  window.addEventListener('qd:verify-error-tracking', verify)
   return () => {
     window.removeEventListener('error', error)
     window.removeEventListener('unhandledrejection', rejection)
+    window.removeEventListener('qd:verify-error-tracking', verify)
   }
 }

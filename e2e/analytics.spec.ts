@@ -16,7 +16,7 @@ async function interceptAnalytics(page: Page) {
     Object.defineProperty(navigator, 'userAgentData', { get: () => undefined })
     Object.defineProperty(navigator, 'userAgent', {
       get: () =>
-        'Mozilla/5.0 AppleWebKit/537.36 Chrome/131.0.0.0 Safari/537.36',
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
     })
   })
   await page.route('**://*.posthog.com/**', async (route) => {
@@ -43,9 +43,10 @@ async function interceptAnalytics(page: Page) {
   return events
 }
 
-test('reports basic browser crashes after consent without original messages or visitor data', async ({
+test('reports standard SDK exceptions and an explicit setup check only after consent', async ({
   page,
 }) => {
+  test.setTimeout(60_000)
   const events = await interceptAnalytics(page)
   await page.goto('/')
   await page.getByRole('button', { name: 'Accept analytics' }).waitFor()
@@ -62,27 +63,29 @@ test('reports basic browser crashes after consent without original messages or v
     .poll(() => events.some((event) => event.event === '$pageview'))
     .toBe(true)
   await page.evaluate(() => {
-    const error = new TypeError('private@example.com confidential conversation')
-    error.stack = `TypeError: private@example.com\n    at secretName (${location.origin}/assets/example-123.js:12:34)`
+    const error = new TypeError('Synthetic browser failure')
+    error.stack = `TypeError: Synthetic browser failure\n    at exampleFunction (${location.origin}/assets/example-123.js:12:34)`
     window.dispatchEvent(new ErrorEvent('error', { error }))
     window.dispatchEvent(new ErrorEvent('error', { error }))
     window.dispatchEvent(
       new PromiseRejectionEvent('unhandledrejection', {
         promise: Promise.resolve(),
-        reason: new Error('private rejection'),
+        reason: new Error('Synthetic rejected promise'),
       }),
     )
   })
   await expect
-    .poll(() => events.filter((event) => event.event === '$exception').length)
+    .poll(() => events.filter((event) => event.event === '$exception').length, {
+      timeout: 10_000,
+    })
     .toBe(2)
   const crashes = events.filter((event) => event.event === '$exception')
   expect(crashes.map((event) => event.properties.crash_source)).toEqual(
     expect.arrayContaining(['unhandled_error', 'unhandled_rejection']),
   )
-  expect(JSON.stringify(crashes)).not.toMatch(
-    /private|confidential|secretName|exception_steps|context_line/,
-  )
+  expect(
+    crashes.every((event) => event.properties.$exception_level === 'error'),
+  ).toBe(true)
   const exceptions = crashes.find(
     (event) => event.properties.crash_source === 'unhandled_error',
   )!.properties.$exception_list as {
@@ -91,8 +94,20 @@ test('reports basic browser crashes after consent without original messages or v
     stacktrace: { frames: { filename: string; lineno: number }[] }
   }[]
   expect(exceptions[0].type).toBe('TypeError')
-  expect(exceptions[0].value).toBe('unhandled_error')
+  expect(exceptions[0].value).toBe('Synthetic browser failure')
   expect(exceptions[0].stacktrace.frames[0].lineno).toBe(12)
+  await page.evaluate(() =>
+    window.dispatchEvent(new Event('qd:verify-error-tracking')),
+  )
+  await expect
+    .poll(() => events.filter((event) => event.event === '$exception').length, {
+      timeout: 10_000,
+    })
+    .toBe(3)
+  expect(
+    events.find((event) => event.properties.crash_source === 'verification')
+      ?.properties.is_error_tracking_verification,
+  ).toBe(true)
   await page.getByRole('button', { name: 'Cookie preferences' }).click()
   await page.getByRole('button', { name: 'Reject analytics' }).click()
   await page.evaluate(() =>
@@ -101,7 +116,7 @@ test('reports basic browser crashes after consent without original messages or v
     ),
   )
   await page.waitForTimeout(500)
-  expect(events.filter((event) => event.event === '$exception')).toHaveLength(2)
+  expect(events.filter((event) => event.event === '$exception')).toHaveLength(3)
 })
 
 test('tracks public navigation and inquiry outcomes without contact data or restored conversions', async ({
@@ -176,7 +191,7 @@ test('tracks public navigation and inquiry outcomes without contact data or rest
   })
   const count = (name: string) =>
     events.filter((event) => event.event === name).length
-  await page.goto('/about?email=private@example.com#private-fragment')
+  await page.goto('/about?utm_source=linkedin&utm_campaign=launch#intro')
   await expect(
     page.getByRole('dialog', { name: 'Analytics cookies' }),
   ).toBeVisible()
@@ -192,7 +207,7 @@ test('tracks public navigation and inquiry outcomes without contact data or rest
   await expect.poll(() => count('$pageview'), { timeout: 10_000 }).toBe(1)
   expect(events[0]!.properties.page_path).toBe('/about')
   expect(events[0]!.properties.$pathname).toBe('/about')
-  expect(events[0]!.properties.$host).toBe(new URL(baseURL!).hostname)
+  expect(events[0]!.properties.$host).toBe(new URL(baseURL!).host)
   expect(events[0]!.properties.$raw_user_agent).toContain('Mozilla/5.0')
   expect(events[0]!.properties.$cookieless_mode).toBeUndefined()
   const visitor = events[0]!.properties.distinct_id
@@ -250,10 +265,14 @@ test('tracks public navigation and inquiry outcomes without contact data or rest
     (candidate) => candidate.event === '$pageview',
   )) {
     expect(event.properties.$pathname).toBe(event.properties.page_path)
-    expect(event.properties.$current_url).toBe(
-      new URL(event.properties.page_path as string, baseURL!).href,
+    expect(new URL(event.properties.$current_url as string).pathname).toBe(
+      event.properties.page_path,
     )
-    expect(event.properties.$host).toBe(new URL(baseURL!).hostname)
+    expect(event.properties.$browser).toBeTruthy()
+    expect(event.properties.$os).toBeTruthy()
+    expect(event.properties.$device_type).toBeTruthy()
+    expect(event.properties.$geoip_disable).not.toBe(true)
+    expect(event.properties.$host).toBe(new URL(baseURL!).host)
     expect(event.properties.$raw_user_agent).toContain('Mozilla/5.0')
     expect(event.properties.distinct_id).toBe(visitor)
     expect(event.properties.$device_id).toBe(device)
@@ -263,12 +282,17 @@ test('tracks public navigation and inquiry outcomes without contact data or rest
   expect(count('inquiry_requested')).toBe(1)
   expect(count('inquiry_reviewed')).toBe(1)
   expect(count('inquiry_submitted')).toBe(1)
+  const aboutView = events.find(
+    (event) =>
+      event.event === '$pageview' && event.properties.page_path === '/about',
+  )!
+  expect(aboutView.properties.$current_url).toContain('utm_source=linkedin')
+  expect(aboutView.properties.utm_source).toBe('linkedin')
   const payload = JSON.stringify(events)
   for (const value of [
     ...Object.values(details),
     draft.draftId,
     'private-inquiry',
-    'private-fragment',
   ])
     expect(payload).not.toContain(value)
   expect(
