@@ -86,6 +86,10 @@ Use gold for hero cursor effects and secondary tiles behind trailing CTA arrows.
 
 ## Accessibility and acceptance
 
+- Reveal public-page section introductions and cards once per page visit with Motion tweens: a 24px upward movement and opacity fade over 0.7 seconds, eased with `[0.22, 1, 0.36, 1]`. Adjacent cards stagger by 70ms, capped at 210ms. Trigger when 12% of the element enters the viewport, including cards entering the horizontal work track. Scrolling back does not replay the reveal.
+- Apply reveals to content elements, keeping sticky containers, geometric backgrounds, 3D viewers, and existing hero/conversation text effects independent. Remove reveal transforms after completion to keep text crisp. Server-rendered content remains visible without JavaScript; reduced motion skips reveals and switching it on finishes pending animations. Keyboard focus immediately reveals its content.
+- Chat's empty-conversation introduction (label, heading, and description) fades and rises 16px once on navigation over 0.55 seconds. New messages and tool calls/results fade and rise 12px over 0.32 seconds once when they appear. Streaming text, tool-input updates, and editing forms do not replay these tweens; restored history appears immediately. The logo, header controls, and composer stay immediately available. Restarting a conversation does not replay the introduction. Private admin tools do not use marketing reveals.
+
 - Target WCAG AA contrast, visible keyboard focus, semantic headings, and labeled controls. Never communicate status through color alone.
 - Respect reduced motion and retain one accessible heading when letters or shader overlays are used.
 - Check narrow, medium, and wide layouts, font loading, slow assets, unavailable graphics, context loss, and reduced motion.

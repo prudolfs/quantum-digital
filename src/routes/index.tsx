@@ -199,10 +199,12 @@ function HomePage() {
         aria-labelledby="questions-heading"
       >
         <div className="section-shell">
-          <p className="eyebrow">Before we begin</p>
-          <h2 id="questions-heading" className="marketing-title">
-            A few useful answers.
-          </h2>
+          <div data-page-reveal>
+            <p className="eyebrow">Before we begin</p>
+            <h2 id="questions-heading" className="marketing-title">
+              A few useful answers.
+            </h2>
+          </div>
           <div className="faq-list">
             {settings.questions.map((entry) => (
               <FaqItem

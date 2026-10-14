@@ -3,6 +3,7 @@ import {
   servicePageRoute,
 } from '../../shared/service-pages'
 import { BrandLink } from '@/components/brand-link'
+import { ChatReveal } from '@/components/chat-reveal'
 import { publicWorkRecord } from '../../shared/work-disclosure'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { ArrowUp, Square, RotateCcw, MessageSquare } from 'lucide-react'
@@ -15,6 +16,7 @@ import {
   useRef,
   useState,
   type FormEvent,
+  type ReactNode,
 } from 'react'
 import { Button } from '@/components/ui/button'
 import {
@@ -80,6 +82,9 @@ function ChatPage() {
   >({})
   const [sessionVersion, setSessionVersion] = useState(0)
   const [restoringResponse, setRestoringResponse] = useState(false)
+  const [restoredMessageIds, setRestoredMessageIds] = useState<
+    ReadonlySet<string>
+  >(() => new Set())
   const [restartError, setRestartError] = useState('')
   const textarea = useRef<HTMLTextAreaElement>(null)
   const scroller = useRef<HTMLDivElement>(null)
@@ -241,6 +246,13 @@ function ChatPage() {
             }
           }
         }
+        setRestoredMessageIds(
+          (previous) =>
+            new Set([
+              ...previous,
+              ...(result.messages ?? []).map((message) => message.id),
+            ]),
+        )
         setMessages(result.messages ?? [])
         setReceipts(result.receipts ?? {})
         setContactDrafts(result.contactDrafts ?? {})
@@ -448,7 +460,9 @@ function ChatPage() {
             aria-relevant="additions text"
           >
             {messages.map((message) => (
-              <article
+              <ChatReveal
+                as="article"
+                entrance={!restoredMessageIds.has(message.id)}
                 className={`chat-message chat-message--${message.role}`}
                 key={message.id}
               >
@@ -456,6 +470,19 @@ function ChatPage() {
                   {message.role === 'user' ? 'You' : 'AI assistant'}
                 </p>
                 {message.parts.map((part, index) => {
+                  const toolResult = (content: ReactNode) => (
+                    <ChatReveal
+                      key={
+                        isToolUIPart(part)
+                          ? `${part.toolCallId}:${part.state.startsWith('input-') ? 'pending' : part.state}`
+                          : index
+                      }
+                      className="chat-tool-reveal"
+                      entrance={!restoredMessageIds.has(message.id)}
+                    >
+                      {content}
+                    </ChatReveal>
+                  )
                   if (part.type === 'text')
                     return message.role === 'assistant' ? (
                       <ChatText
@@ -474,22 +501,24 @@ function ChatPage() {
                     part.state === 'output-available'
                   ) {
                     const parsed = contactFormSchema.safeParse(part.output)
-                    return parsed.success ? (
-                      <ChatContactForm
-                        key={part.toolCallId}
-                        form={parsed.data}
-                        restoredDraft={contactDrafts[parsed.data.formId]}
-                        active={Boolean(
-                          activeDraft &&
-                          isToolUIPart(activeDraft) &&
-                          activeDraft.toolCallId === part.toolCallId,
-                        )}
-                        busy={busy || reconnecting || restoringResponse}
-                        token={verificationToken}
-                        verified={verified}
-                        onConsumeToken={consumeToken}
-                      />
-                    ) : null
+                    return parsed.success
+                      ? toolResult(
+                          <ChatContactForm
+                            key={part.toolCallId}
+                            form={parsed.data}
+                            restoredDraft={contactDrafts[parsed.data.formId]}
+                            active={Boolean(
+                              activeDraft &&
+                              isToolUIPart(activeDraft) &&
+                              activeDraft.toolCallId === part.toolCallId,
+                            )}
+                            busy={busy || reconnecting || restoringResponse}
+                            token={verificationToken}
+                            verified={verified}
+                            onConsumeToken={consumeToken}
+                          />,
+                        )
+                      : null
                   }
                   if (
                     isToolUIPart(part) &&
@@ -497,41 +526,43 @@ function ChatPage() {
                     part.state === 'output-available'
                   ) {
                     const parsed = preparedInquirySchema.safeParse(part.output)
-                    return parsed.success ? (
-                      <InquiryReview
-                        key={part.toolCallId}
-                        draft={parsed.data}
-                        receipt={receipts[parsed.data.draftId]}
-                        active={
-                          activeDraft &&
-                          isToolUIPart(activeDraft) &&
-                          activeDraft.toolCallId === part.toolCallId
-                        }
-                        busy={busy || reconnecting}
-                        canEdit={!atLimit}
-                        onEdit={() =>
-                          void send(
-                            'I want to change the inquiry details before submitting. Please ask what I would like to change.',
-                          )
-                        }
-                      />
-                    ) : null
+                    return parsed.success
+                      ? toolResult(
+                          <InquiryReview
+                            key={part.toolCallId}
+                            draft={parsed.data}
+                            receipt={receipts[parsed.data.draftId]}
+                            active={
+                              activeDraft &&
+                              isToolUIPart(activeDraft) &&
+                              activeDraft.toolCallId === part.toolCallId
+                            }
+                            busy={busy || reconnecting}
+                            canEdit={!atLimit}
+                            onEdit={() =>
+                              void send(
+                                'I want to change the inquiry details before submitting. Please ask what I would like to change.',
+                              )
+                            }
+                          />,
+                        )
+                      : null
                   }
                   if (isToolUIPart(part) && part.state === 'output-available')
-                    return (
+                    return toolResult(
                       <ChatReference
                         key={part.toolCallId}
                         name={part.type}
                         output={part.output}
                         allowedLinks={allowedLinks}
-                      />
+                      />,
                     )
                   if (
                     isToolUIPart(part) &&
                     (part.state === 'input-streaming' ||
                       part.state === 'input-available')
                   )
-                    return (
+                    return toolResult(
                       <p
                         key={part.toolCallId}
                         className="chat-note"
@@ -542,19 +573,19 @@ function ChatPage() {
                           : part.type === 'tool-requestContactDetails'
                             ? 'Opening the contact form…'
                             : 'Looking up the published details…'}
-                      </p>
+                      </p>,
                     )
                   if (isToolUIPart(part) && part.state === 'output-error')
-                    return (
+                    return toolResult(
                       <p key={index} className="feedback-error">
                         {part.type === 'tool-prepareInquiry'
                           ? 'The inquiry draft couldn’t be prepared. Please retry.'
                           : 'The published details couldn’t be loaded. Please retry.'}
-                      </p>
+                      </p>,
                     )
                   return null
                 })}
-              </article>
+              </ChatReveal>
             ))}
             {status === 'submitted' && (
               <p className="chat-note" role="status">

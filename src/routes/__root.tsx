@@ -7,6 +7,7 @@ import {
 import type { ReactNode } from 'react'
 import { SiteAnalytics } from '@/components/site-analytics'
 import { SiteLayout } from '@/components/site-layout'
+import { PageReveals } from '@/components/page-reveals'
 import appCss from '@/styles.css?url'
 import interFont from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url'
 
@@ -43,6 +44,7 @@ export const Route = createRootRoute({
       <SiteLayout>
         <Outlet />
       </SiteLayout>
+      <PageReveals />
     </>
   ),
 })
