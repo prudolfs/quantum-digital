@@ -14,6 +14,9 @@ export const starterPrompts = [
   'Show me relevant work',
   'Let’s discuss working together',
 ] as const
+export const offTopicWarningSchema = z.object({
+  category: z.literal('off_topic'),
+})
 export const preparedInquirySchema = z.object({
   draftId: z.string().min(1),
   details: inquirySchema,

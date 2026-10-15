@@ -13,6 +13,7 @@ export const analyticsConfigured = Boolean(
 export type AnalyticsEvent =
   | '$pageview'
   | 'chat_started'
+  | 'chat_off_topic_attempt'
   | 'inquiry_requested'
   | 'inquiry_reviewed'
   | 'inquiry_submit_attempted'
@@ -126,6 +127,9 @@ export function captureAnalytics(
       if (!allowed()) return
       posthog?.capture(event, {
         page_path: path,
+        ...(event === 'chat_off_topic_attempt'
+          ? { severity: 'warning', category: 'off_topic' }
+          : {}),
         ...(source ? { source } : {}),
       })
     } catch {

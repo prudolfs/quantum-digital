@@ -18,6 +18,7 @@ Ordinary loopback development and browser tests skip analytics, even with Wrangl
 | --------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------- |
 | `$pageview`                 | Initial public route and client-side pathname navigation                                   | `page_path`, standard `$current_url`, `$host`, `$pathname` |
 | `chat_started`              | First visitor message in an empty conversation                                             | `page_path`                                                |
+| `chat_off_topic_attempt`    | Validated live off-topic tool result, once per assistant response                          | `page_path`, `severity: warning`, `category: off_topic`    |
 | `inquiry_requested`         | First successfully produced contact form or conversational inquiry draft in a conversation | `page_path`, `source`                                      |
 | `inquiry_reviewed`          | A new validated draft reaches review, from the contact form or assistant                   | `page_path`, `source`                                      |
 | `inquiry_submit_attempted`  | Visitor explicitly confirms submission                                                     | `page_path`, `source`                                      |

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, test, vi } from 'vitest'
 import { convertToModelMessages, validateUIMessages, type UIMessage } from 'ai'
 import { defaultContent } from '../../shared/content-defaults'
 import { chatContext, conversationError, createChatTools } from './chat-policy'
@@ -216,6 +216,7 @@ describe('published chat tools', () => {
     })
     expect(fixture.prepare).not.toHaveBeenCalled()
     expect(Object.keys(fixture.tools)).toEqual([
+      'flagOffTopicRequest',
       'requestContactDetails',
       'getCaseStudy',
       'explainEngagements',
@@ -388,4 +389,31 @@ it('includes published service facts and validates entry topics without reviving
   expect(custom.services[0]?.url).toBe('/#services')
   expect(custom.services[0]).not.toHaveProperty('scope')
   expect(custom.entryTopic).toBeUndefined()
+})
+
+test('off-topic markers contain only a fixed category and never prepare inquiries', async () => {
+  const fixture = tools()
+  expect(await fixture.tools.flagOffTopicRequest.execute!({}, options)).toEqual(
+    { category: 'off_topic' },
+  )
+  expect(fixture.prepare).not.toHaveBeenCalled()
+  const marker: UIMessage = {
+    id: 'scope-response',
+    role: 'assistant',
+    parts: [
+      {
+        type: 'tool-flagOffTopicRequest',
+        toolCallId: 'scope-call',
+        state: 'output-available',
+        input: {},
+        output: { category: 'off_topic' },
+      },
+    ],
+  }
+  expect(
+    conversationError([user(), marker, user('Tell me about your projects')]),
+  ).toBeNull()
+  await expect(
+    validateUIMessages({ messages: [user(), marker], tools: fixture.tools }),
+  ).resolves.toHaveLength(2)
 })

@@ -72,8 +72,10 @@ function PrivacyPage() {
           parameters, browser/device information, and approximate location
           inferred from your network IP address. Inquiry events describe the
           step taken without adding the contact form fields or chat transcript.
-          Session replay and automatic form capture are disabled. Do Not Track
-          and Global Privacy Control signals are respected. With your analytics
+          We also count requests identified as outside the assistant’s scope,
+          without adding their question text to that analytics event. Session
+          replay and automatic form capture are disabled. Do Not Track and
+          Global Privacy Control signals are respected. With your analytics
           consent, PostHog also receives app error messages and stack traces
           through its standard error-reporting SDK.
         </p>

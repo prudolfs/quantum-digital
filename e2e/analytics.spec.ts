@@ -493,3 +493,112 @@ test('rejects tracking, remembers consent, and clears cookies when consent is wi
     page.getByRole('dialog', { name: 'Analytics cookies' }),
   ).toHaveCount(0)
 })
+
+test('records a live off-topic warning once without recounting restored history', async ({
+  page,
+}) => {
+  test.setTimeout(60_000)
+  const events = await interceptAnalytics(page)
+  let saved: unknown[] = []
+  await page.route('**/api/chat-session', (route) =>
+    route.fulfill({
+      json: { available: true, messages: saved },
+    }),
+  )
+  await page.route('**/api/chat', (route) => {
+    saved = [
+      ...route.request().postDataJSON().messages,
+      {
+        id: 'scope-answer',
+        role: 'assistant',
+        parts: [
+          {
+            type: 'tool-flagOffTopicRequest',
+            toolCallId: 'scope-marker',
+            state: 'output-available',
+            input: {},
+            output: { category: 'off_topic' },
+          },
+          {
+            type: 'text',
+            text: 'I can help with projects or questions about Rudolfs’s background.',
+          },
+        ],
+      },
+    ]
+    const chunks = [
+      { type: 'start', messageId: 'scope-answer' },
+      {
+        type: 'tool-input-available',
+        toolCallId: 'scope-marker',
+        toolName: 'flagOffTopicRequest',
+        input: {},
+      },
+      {
+        type: 'tool-output-available',
+        toolCallId: 'scope-marker',
+        output: { category: 'off_topic' },
+      },
+      { type: 'text-start', id: 'redirect' },
+      {
+        type: 'text-delta',
+        id: 'redirect',
+        delta:
+          'I can help with projects or questions about Rudolfs’s background.',
+      },
+      { type: 'text-end', id: 'redirect' },
+      { type: 'finish', finishReason: 'stop' },
+    ]
+    return route.fulfill({
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'x-vercel-ai-ui-message-stream': 'v1',
+      },
+      body:
+        chunks.map((event) => `data: ${JSON.stringify(event)}\n\n`).join('') +
+        'data: [DONE]\n\n',
+    })
+  })
+  await page.goto('/chat')
+  await page.getByRole('button', { name: 'Accept analytics' }).click()
+  await page
+    .getByRole('textbox', { name: 'Message the assistant' })
+    .fill('Unrelated test question')
+  await page.getByRole('button', { name: 'Send', exact: true }).click()
+  await expect
+    .poll(
+      () =>
+        events.filter((event) => event.event === 'chat_off_topic_attempt')
+          .length,
+      { timeout: 15_000 },
+    )
+    .toBe(1)
+  const warning = events.find(
+    (event) => event.event === 'chat_off_topic_attempt',
+  )!
+  expect(warning.properties).toMatchObject({
+    severity: 'warning',
+    category: 'off_topic',
+    page_path: '/chat',
+  })
+  expect(JSON.stringify(warning)).not.toContain('Unrelated test question')
+  expect(JSON.stringify(warning)).not.toContain('scope-marker')
+  await expect(
+    page.getByText('That question is outside this chat’s scope.', {
+      exact: false,
+    }),
+  ).toBeVisible()
+  await page.reload()
+  await expect(page.locator('.chat-message--assistant')).toContainText(
+    'I can help with projects',
+  )
+  // The pageview flush also flushes any erroneously recaptured warning.
+  await expect
+    .poll(() => events.filter((event) => event.event === '$pageview').length, {
+      timeout: 15_000,
+    })
+    .toBeGreaterThanOrEqual(2)
+  expect(
+    events.filter((event) => event.event === 'chat_off_topic_attempt'),
+  ).toHaveLength(1)
+})

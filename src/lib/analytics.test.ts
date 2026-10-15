@@ -195,3 +195,21 @@ test('explicit verification reports a labelled exception after acceptance', asyn
   })
   cleanup()
 })
+
+test('off-topic warnings are consent-gated, deduplicated, and separate from crashes', async () => {
+  const { setAnalyticsConsent } = await import('./analytics-consent')
+  const { captureAnalyticsOnce } = await import('./analytics')
+  setAnalyticsConsent('rejected')
+  captureAnalyticsOnce('chat_off_topic_attempt', 'private-response-id')
+  expect(sdk.capture).not.toHaveBeenCalled()
+  setAnalyticsConsent('accepted')
+  captureAnalyticsOnce('chat_off_topic_attempt', 'private-response-id')
+  captureAnalyticsOnce('chat_off_topic_attempt', 'private-response-id')
+  await vi.waitFor(() => expect(sdk.capture).toHaveBeenCalledTimes(1))
+  expect(sdk.capture).toHaveBeenCalledWith('chat_off_topic_attempt', {
+    page_path: '/chat',
+    severity: 'warning',
+    category: 'off_topic',
+  })
+  expect(sdk.captureException).not.toHaveBeenCalled()
+})

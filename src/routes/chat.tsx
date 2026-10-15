@@ -29,6 +29,7 @@ import { ChatText, ChatReference } from '@/components/chat-references'
 import {
   chatLimits,
   starterPrompts,
+  offTopicWarningSchema,
   chatErrorNotice,
   contactFormSchema,
 } from '../../shared/chat'
@@ -82,6 +83,7 @@ function ChatPage() {
   >({})
   const [sessionVersion, setSessionVersion] = useState(0)
   const [restoringResponse, setRestoringResponse] = useState(false)
+  const seenScopeTools = useRef(new Set<string>())
   const [restoredMessageIds, setRestoredMessageIds] = useState<
     ReadonlySet<string>
   >(() => new Set())
@@ -141,6 +143,17 @@ function ChatPage() {
   useEffect(() => {
     for (const message of messages) {
       for (const part of message.parts) {
+        if (isToolUIPart(part) && part.type === 'tool-flagOffTopicRequest') {
+          if (
+            part.state === 'output-available' &&
+            !seenScopeTools.current.has(part.toolCallId) &&
+            offTopicWarningSchema.safeParse(part.output).success
+          ) {
+            seenScopeTools.current.add(part.toolCallId)
+            captureAnalyticsOnce('chat_off_topic_attempt', message.id)
+          }
+          continue
+        }
         if (
           !isToolUIPart(part) ||
           part.state !== 'output-available' ||
@@ -234,6 +247,8 @@ function ChatPage() {
         connection.setRevision(result.revision ?? 0)
         for (const message of result.messages ?? []) {
           for (const part of message.parts) {
+            if (isToolUIPart(part) && part.type === 'tool-flagOffTopicRequest')
+              seenScopeTools.current.add(part.toolCallId)
             if (
               isToolUIPart(part) &&
               part.state === 'output-available' &&
@@ -483,6 +498,20 @@ function ChatPage() {
                       {content}
                     </ChatReveal>
                   )
+                  if (
+                    isToolUIPart(part) &&
+                    part.type === 'tool-flagOffTopicRequest'
+                  )
+                    return part.state === 'output-available' &&
+                      offTopicWarningSchema.safeParse(part.output).success
+                      ? toolResult(
+                          <p className="chat-note">
+                            That question is outside this chat’s scope. I can
+                            help with project ideas, Quantum Digital’s work, or
+                            questions about Rudolfs’s experience and interests.
+                          </p>,
+                        )
+                      : null
                   if (part.type === 'text')
                     return message.role === 'assistant' ? (
                       <ChatText
