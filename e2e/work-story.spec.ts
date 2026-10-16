@@ -24,7 +24,7 @@ test('finance story stays readable with reduced motion and its walkthrough works
     page.getByRole('button', { name: '03 Ask a question.' }),
   ).toHaveAttribute('aria-pressed', 'true')
   await expect(page.locator('.work-steps li p')).toHaveCount(4)
-  await page.getByRole('link', { name: 'See inside the product' }).click()
+  await page.locator('#inside-product').scrollIntoViewIfNeeded()
   await expect(
     page.getByRole('heading', { name: 'The source stays in the picture.' }),
   ).toBeVisible()

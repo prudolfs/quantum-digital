@@ -121,3 +121,5 @@ Service section headings and explanatory copy are specific to product delivery, 
 Homepage service cards share corresponding content-row heights within each desktop/tablet pair. Subgrid aligns the category, title, description start, detail divider, and action despite different copy lengths; it uses content-driven sizing instead of a fixed card height. Mobile retains a natural single-column flow. A flex layout keeps actions low in browsers without subgrid support.
 
 Shared route-loading screens center their message and gold spinner within a roomy loading panel. Motion rotates the decorative spinner; reduced motion keeps it still, and a polite status announces the loading text.
+
+Selected-work workflows end with the step cards, matching the quieter service-page sections. Omit the repeated “Step X of Y” summary and “See inside the product” footer link; the evidence section follows in the normal page flow.

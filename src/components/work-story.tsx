@@ -93,13 +93,6 @@ function Workflow({ story }: { story: Story }) {
           </li>
         ))}
       </ol>
-      <p className="work-step-note" aria-live="polite">
-        Step {selected + 1} of {story.steps.length}:{' '}
-        {story.steps[selected].title}{' '}
-        <a href="#inside-product">
-          See inside the product <ArrowDown size={16} aria-hidden="true" />
-        </a>
-      </p>
     </section>
   )
 }

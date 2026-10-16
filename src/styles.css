@@ -2370,20 +2370,6 @@ nav {
   font-size: 1rem;
   color: var(--color-muted);
 }
-.work-step-note {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-  margin-top: 28px;
-  color: var(--color-muted);
-  font-size: 0.875rem;
-}
-.work-step-note a {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--color-ice);
-}
 .work-evidence {
   position: relative;
   isolation: isolate;
