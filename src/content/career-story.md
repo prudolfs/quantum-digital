@@ -96,6 +96,14 @@ Rudolfs also reports experience with Jev and Laya and describes himself as infor
 
 He also has experience running local models through Hugging Face and runs Laya locally. Local execution is another option in his model and architecture choices alongside hosted services. Specific model names, runtimes, hardware, quantization settings, and local performance measurements have not been supplied; do not infer them or claim a production deployment from these experiments.
 
+## Pi Durable, MCP, and changing integration choices
+
+Rudolfs chooses Pi Durable for projects where it fits, alongside his other custom agent architectures. Do not invent a project-specific reason, implementation detail, or deployment history beyond what he has described.
+
+He follows the evolution of Model Context Protocol (MCP). Earlier state/session-management aspects were among the tradeoffs behind his preference for custom agentic systems in many projects. As MCP has progressed, he increasingly sees it as a suitable choice for the right projects and uses it selectively. Present this as his evolving engineering judgment, not a blanket rejection of MCP or a claim that all MCP implementations require the same stateful architecture. His introductory and advanced MCP certificates are listed above.
+
+He is optimistic about WebMCP and its future potential. This is an area he follows, not a supplied claim that he has implemented or deployed WebMCP. Do not turn that optimism into a guarantee of browser support, a completed standard, or a feature of this website. His general approach remains to choose the integration and architecture that fit the project as the available tools evolve.
+
 ## Engineering views expressed in his post bank
 
 These are perspectives expressed in Rudolfs's authored posts, including drafts. They are not independent verification that every anecdote, numerical result, or proposed feature is a delivered commercial outcome.

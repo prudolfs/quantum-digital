@@ -18,6 +18,8 @@ The owner also confirms experience with Jev and Laya. The authored post bank pro
 
 His options also include local model execution through Hugging Face, with Laya as an example he runs locally. Do not invent model IDs, runtimes, hardware, quantization choices, performance results, or production deployments.
 
+The owner chooses Pi Durable and MCP selectively for suitable projects. His earlier preference for custom agentic systems included concerns about MCP state/session management, and his view has evolved with the protocol's progress. Keep this a historical engineering perspective rather than a universal limitation of MCP. He follows WebMCP with optimism; no WebMCP implementation, production deployment, or browser-support guarantee has been supplied. Do not invent project-specific Pi Durable selection reasons.
+
 The owner states that he can run and integrate Claude models through Amazon Bedrock and Google Cloud Vertex AI, supported by his January 2026 Anthropic certificates for those platforms. Present this as a stated capability and training background, without inventing a production deployment or treating the Anthropic certificates as separate AWS/Google Cloud certifications.
 
 The server tools are:
