@@ -10,6 +10,8 @@ Each request loads the published Convex content. The system context contains pos
 
 The owner distinguishes AI-augmented development with Cursor from summer 2024 (using multiple available models, including Opus) from starting Claude Code/Codex/Pi and AI-powered app development in 2025. The first stated AI app was the client's accounting mobile product, separate from the 2026 Finance Document Assistant. He was the solo developer of both the accounting app and the Care Coordination app (Seniory). He also originated all the accounting app's AI-feature ideas; that feature-ideation claim does not extend to Seniory without further information. Other ownership examples include his own indie-game ideas. Teamwork and mentoring include reported positive feedback at Accenture for mentoring his team and junior developers after bootcamps; do not invent quotes or measurable outcomes.
 
+Infrastructure context covers the owner's Subversion/Google Code beginnings, later Git use with GitLab/Bitbucket/GitHub, early VPS hosting and continued maintenance of a couple of DigitalOcean projects, and a shift toward serverless/managed hosting. AWS/Azure are described in the context of larger-company environments; personal and self-employed client preferences are Netlify, Vercel, Cloudflare, and Convex. His preference for Convex reflects reducing operational complexity and elaborate Terraform setups, without implying specific enterprise cloud responsibilities or Terraform expertise that he has not supplied. Migration dates and project-to-provider mappings remain unspecified.
+
 The server tools are:
 
 - `requestContactDetails`: open an editable contact form inside the conversation, prefilling only visitor-provided information. It does not save or submit an inquiry.

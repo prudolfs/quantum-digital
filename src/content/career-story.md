@@ -54,6 +54,14 @@ Use the résumé for employers, role dates, individual versus team contributions
 
 Describe these by their actual titles and issuer. They do not establish a separate Google Cloud or AWS certification, production experience with those hosting platforms, or a general “Anthropic-certified engineer” designation. No credential IDs, verification URLs, or expiry dates have been supplied.
 
+## Source control, hosting, and infrastructure
+
+Rudolfs started with Subversion (SVN) and used Google Code for early projects. He later switched to Git and has used GitLab, Bitbucket, and GitHub. Exact migration years and which projects used each host have not been specified.
+
+His early hosting work centered on VPS hosting. He still maintains a couple of projects on DigitalOcean. Over the years, his preference has moved toward serverless and managed platforms. He describes AWS and Azure as common platforms in the larger-company environments he has worked in; specific cloud services, responsibilities, and deployment scale have not been supplied.
+
+For his own projects and self-employed client work, he prefers Netlify, Vercel, and Cloudflare. He is also a strong proponent of Convex: for his projects, it reduces the infrastructure he needs to manage and the need for complex Terraform setups. Describe this as his practical preference for reducing operational complexity, not a claim that infrastructure-as-code is never useful or evidence of unspecified Terraform expertise.
+
 ## Ownership, teamwork, and mentoring
 
 Rudolfs takes ownership of his work: he contributes ideas and takes responsibility for the result, beyond carrying out individual tickets. In his indie games, he implemented his own ideas. He was the solo developer of the client's AI-powered business accounting mobile app and originated all of its AI-powered feature ideas. Describe both his development ownership and his contribution to the product's AI direction.
