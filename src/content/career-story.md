@@ -52,7 +52,7 @@ Use the résumé for employers, role dates, individual versus team contributions
   - Claude Code in Action
   - Building with the Claude API
 
-Describe these by their actual titles and issuer. They do not establish a separate Google Cloud or AWS certification, production experience with those hosting platforms, or a general “Anthropic-certified engineer” designation. No credential IDs, verification URLs, or expiry dates have been supplied.
+Describe these by their actual titles and issuer. Rudolfs states that he can run and integrate Claude models through Amazon Bedrock and Google Cloud Vertex AI, supported by the relevant Anthropic training certificates. Keep that stated capability distinct from a separate Google Cloud or AWS certification, a particular production deployment, or a general “Anthropic-certified engineer” designation. No credential IDs, verification URLs, or expiry dates have been supplied.
 
 ## Source control, hosting, and infrastructure
 
@@ -81,6 +81,20 @@ While using Cursor, he worked with multiple models from its available selection,
 In 2025, he began using Claude Code, Codex, and Pi and moved into building AI-powered applications, starting with the AI-powered business accounting mobile app for a client. Keep these milestones distinct: AI-augmented development with Cursor began in 2024; his stated start in AI-powered application development was in 2025. The 2025 accounting app is the mobile client project, separate from the Finance Document Assistant portfolio project listed for 2026.
 
 Cursor's appeal went beyond autocomplete: he could explore an unfamiliar codebase, ask questions, make a decision, and act. He described the experience as having a pair programmer available. A later CodeChat project explored that code-understanding problem through indexed-code answers with file/line references, rather than autonomous edits. This background does not create a new published case-study page or project link.
+
+## Model selection, coding harnesses, and agent architectures
+
+Rudolfs follows Artificial Analysis (artificialanalysis.ai) to keep up with new models and subscribes to weekly AI and robotics newsletters. He actively follows industry developments and uses that awareness to choose tools for the task. Newsletter titles have not been supplied. This describes his research habit, not access to live rankings within this chat or a claim that one model is always best.
+
+For coding, he generally uses frontier models. His usual harness choices are Claude Code for Anthropic models and Codex for OpenAI models. For other models, he uses Pi, and he sometimes uses Pi with OpenAI models too. These are his working preferences, not exclusive provider restrictions or guarantees about which harness supports which models. Do not invent specific current model versions or claim that this website's assistant runs the same model or harness he uses for coding.
+
+For AI-powered and agentic applications, he chooses the model to fit the task rather than automatically using the same model he would choose for coding. Vercel AI SDK is one option he uses; he can also choose Cloudflare or Convex AI solutions, or integrate directly with OpenRouter, according to the project's needs. His architecture options include Convex with vector search for RAG-style systems and Cloudflare Durable Objects with a Pi Durable setup for deployed agents. He has multiple architecture options for different projects. Distinguish his stated ability to use alternatives from claims about specific implementations: do not invent Cloudflare/Convex AI products or deployments, an exact package/version for Pi Durable, or additional infrastructure features he has not described.
+
+Keep coding assistance separate from the agent systems he builds for users. Explain his ability to select an appropriate approach using the supplied examples, without treating one architecture as mandatory for every project or turning historical preferences into current benchmark claims.
+
+Rudolfs also reports experience with Jev and Laya and describes himself as informed and technically up to date in this area. His authored post bank includes a Laya-controlled warehouse/forklift simulation in Robotics Lab. Preserve that lab/experiment context; do not infer a commercial deployment, exact Jev/Laya versions, or the depth and duration of his Jev experience. These examples support discussion of his practical exploration alongside his habit of following industry developments.
+
+He also has experience running local models through Hugging Face and runs Laya locally. Local execution is another option in his model and architecture choices alongside hosted services. Specific model names, runtimes, hardware, quantization settings, and local performance measurements have not been supplied; do not infer them or claim a production deployment from these experiments.
 
 ## Engineering views expressed in his post bank
 
