@@ -55,7 +55,9 @@ for (const story of stories) {
         page.locator('.work-actions a[href^="https://"]'),
       ).toHaveAttribute('href', story.repository)
     else await expect(page.locator('main a[href^="https://"]')).toHaveCount(0)
-    await expect(page.locator('.work-evidence-grid figure')).toHaveCount(2)
+    await expect(page.locator('.work-evidence-grid figure')).toHaveCount(
+      story.slug === 'research-workflow' ? 4 : 2,
+    )
     await expect(page.locator('.work-model')).toHaveAttribute(
       'data-model-stage',
       'static',

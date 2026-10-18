@@ -64,18 +64,18 @@ export const caseStudies: CaseStudy[] = [
     title: 'Research to Action',
     category: 'Internal tools & workflow automation',
     summary:
-      'An AI research workspace that turns unstructured opportunities into reviewed shortlists, explained scores, draft messages, and a trackable pipeline.',
-    role: 'Engineering project covering the application interface, AI processing, and workflow backend.',
+      'My personal AI research workspace for finding engineering opportunities, assessing fit, preparing tailored outreach, and tracking the next step in a real-time pipeline.',
+    role: 'Personal project · product design, application architecture, AI integration, and full-stack development.',
     context:
-      'Research often leaves useful information scattered across source pages, notes, and drafts. This workspace connects discovery and evaluation to the next action in one application.',
+      'I built Lead Research as a private tool for my own search for AI product engineering and forward deployed engineering opportunities from Latvia. It is a personal project demonstrating AI-powered application development.',
     challenge:
-      'Structure inconsistent source material, make recommendations understandable, and preserve the ability to review candidates before they enter the working pipeline.',
+      'Bring scattered job postings, remote eligibility, contracting terms, fit assessment, and outreach into one workflow that reflects my profile and leaves each decision open to review.',
     approach:
-      'Separate discovery, shortlist review, verification, extraction, enrichment, and scoring. Show processing states and duplicate warnings, and let users select what to import. Connect AI-generated drafts to the opportunity’s context rather than sending them automatically.',
+      'Connect agent research through MCP to a reviewable shortlist. Recheck selected sources, extract and score opportunities with AI, and generate contextual outreach drafts. Use Next.js, React, and Convex to connect those steps to a real-time application.',
     delivery:
-      'A real-time pipeline board, source-linked research, score breakdowns and reasons, company context, draft messages, comments, activity history, and searchable archives. Agent-submitted shortlists can be reviewed before selected candidates are verified and imported.',
+      'A private research application with a pipeline board, source-linked shortlists, explained scores, personal rescore context, working hours in Latvia, qualification questions, connection requests, LinkedIn and email drafts, comments, and activity history.',
     evidence:
-      'The application brings AI processing together with the operational details around it: selection, verification, status tracking, duplicate handling, retries, and a record of changes.',
+      'Four actual application screenshots use fictional data to show the pipeline, lead assessment, outreach drafts, and shortlist review. The engineering connects AI output to structured records, visible processing states, duplicate handling, and retries.',
   },
   {
     slug: 'finance-document-assistant',

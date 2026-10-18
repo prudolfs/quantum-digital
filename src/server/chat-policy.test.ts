@@ -84,7 +84,7 @@ describe('published chat tools', () => {
     },
   )
   it.each(['care-coordination', 'accounting-workflows', 'research-workflow'])(
-    'keeps %s abstract even if saved records contain project links',
+    'keeps %s project links private even if saved records contain them',
     async (slug) => {
       const fixture = tools()
       const original = defaultContent.caseStudies.find(
@@ -109,7 +109,11 @@ describe('published chat tools', () => {
       expect(result.study.demoUrl).toBeUndefined()
       expect(
         result.story?.evidence.every((entry) =>
-          entry.caption.startsWith('Reconstructed workflow'),
+          entry.caption.startsWith(
+            slug === 'research-workflow'
+              ? 'Actual app capture'
+              : 'Reconstructed workflow',
+          ),
         ),
       ).toBe(true)
       if (slug === 'accounting-workflows')

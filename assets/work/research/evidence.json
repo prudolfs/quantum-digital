@@ -1,0 +1,38 @@
+[
+  {
+    "name": "pipeline",
+    "source": "lead-research/screenshots/01-pipeline.png",
+    "width": 900,
+    "height": 900,
+    "quality": 0.72,
+    "bytes": 47542,
+    "qualification": "Actual application capture with fictional browser-local fixtures; no live backend or AI provider calls."
+  },
+  {
+    "name": "lead-assessment",
+    "source": "lead-research/screenshots/02-lead-assessment.png",
+    "width": 900,
+    "height": 900,
+    "quality": 0.72,
+    "bytes": 47950,
+    "qualification": "Actual application capture with fictional browser-local fixtures; no live backend or AI provider calls."
+  },
+  {
+    "name": "research-outreach",
+    "source": "lead-research/screenshots/03-research-outreach.png",
+    "width": 1080,
+    "height": 1080,
+    "quality": 0.72,
+    "bytes": 47230,
+    "qualification": "Actual application capture with fictional browser-local fixtures; no live backend or AI provider calls."
+  },
+  {
+    "name": "shortlist-review",
+    "source": "lead-research/screenshots/04-shortlist-review.png",
+    "width": 1080,
+    "height": 1080,
+    "quality": 0.72,
+    "bytes": 46246,
+    "qualification": "Actual application capture with fictional browser-local fixtures; no live backend or AI provider calls."
+  }
+]

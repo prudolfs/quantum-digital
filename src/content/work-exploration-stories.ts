@@ -3,89 +3,105 @@ import type { WorkStory } from '../../shared/work-story'
 export const researchStory: WorkStory = {
   headline: 'Research that',
   highlight: 'leads somewhere.',
-  experience: 'Discovery → review → a trackable next step',
-  stack: 'React · TypeScript · Convex · Agent tools',
-  workflowHeading: 'From scattered sources to a decision.',
+  experience: 'Personal AI workspace · research → assessment → outreach',
+  stack: 'Next.js · React · TypeScript · Convex · AI SDK · MCP',
+  workflowHeading: 'From a promising role to a useful conversation.',
   workflowIntro:
-    'Built around opportunity research: discover candidates, review the evidence, and choose what deserves a place in the pipeline. The same product thinking applies wherever research needs a clear next step.',
+    'I built Lead Research for my own search for AI product engineering and forward deployed engineering opportunities. It brings AI research, fit assessment, outreach drafts, and a real-time pipeline into one private application, shaped around working from Latvia.',
   steps: [
     {
-      title: 'Discover candidates.',
+      title: 'Discover relevant roles.',
       description:
-        'Gather opportunities into a shortlist with source material and relevance explanations. Discovery stays separate from imported pipeline records.',
+        'A research agent uses my profile and search criteria to gather opportunities and submit a source-linked shortlist through MCP. I can also add a lead directly.',
     },
     {
-      title: 'Review and select.',
+      title: 'Choose what to pursue.',
       description:
-        'Inspect the source, restrictions, and duplicate warnings. Only candidates selected by the person proceed to import.',
+        'I review job descriptions, remote eligibility, contracting terms, and duplicate warnings before selecting which roles to import.',
     },
     {
-      title: 'Verify the source.',
+      title: 'Recheck the posting.',
       description:
-        'Re-check selected opportunities. Inaccessible sources and uncertain eligibility remain visible states, with a path to review or retry.',
+        'Selected sources are checked again before import and scoring. Unavailable pages and unresolved eligibility stay visible for review or retry.',
     },
     {
-      title: 'Inspect the score.',
+      title: 'Assess the fit.',
       description:
-        'Extraction and scoring turn imported material into information for review. Per-record processing states keep failures separate from the rest of the batch.',
+        'AI turns the source material into a problem summary, score breakdown, fit reasons, risks, and qualification questions. I can add personal context and rescore an individual opportunity.',
     },
     {
-      title: 'Prepare a draft.',
+      title: 'Prepare the conversation.',
       description:
-        'Use the opportunity context to prepare outreach wording. The person reviews the draft; the workflow does not send messages or apply automatically.',
+        'The app generates a connection request, LinkedIn message, and email using the opportunity context. I review and send the wording myself.',
     },
     {
-      title: 'Track the next step.',
+      title: 'Keep the next step visible.',
       description:
-        'Move the opportunity through a pipeline, with comments and activity history keeping the decision connected to its context.',
+        'A real-time board tracks New, Outreach, Active, and Closed opportunities. Comments, activity history, and a searchable archive keep the research connected to what happens next.',
     },
   ],
-  evidenceHeading: 'The decision stays with the person.',
+  evidenceHeading: 'Inside my AI research workspace.',
   evidenceIntro:
-    'These original reconstructions use synthetic opportunities, example states, and illustrative scores. They explain the implemented workflow without exposing real research records or suggesting a live-source verification benchmark.',
+    'These four screenshots show the actual application with fictional companies, opportunities, scores, and outreach. Lead Research is a private personal project, built to support my own research and demonstrate AI-powered application development.',
   evidence: [
     {
-      title: 'Select what moves forward.',
+      title: 'One pipeline for the whole search.',
       description:
-        'A shortlist can contain a plausible candidate, an eligibility question, and a duplicate warning. Reviewing the list alone creates no pipeline records.',
-      image: '/work/research/shortlist-review.svg',
-      alt: 'Reconstructed shortlist showing synthetic opportunities marked ready for review, needs verification, and already imported.',
-      caption: 'Reconstructed workflow · synthetic opportunities',
+        'Scored opportunities sit alongside their stage and technology tags. The board makes it easy to see what is new, where a conversation has started, and which opportunities are active or closed.',
+      image: '/work/research/pipeline.webp',
+      alt: 'Lead Research application showing fictional opportunities, scores, and technology tags across New, Outreach, Active, and Closed columns.',
+      caption: 'Actual app capture · fictional pipeline data',
     },
     {
-      title: 'See the state behind the next step.',
+      title: 'Understand the score. Add your context.',
       description:
-        'Verification, scoring, and draft preparation have distinct states. A draft is an editable next step, with no automatic sending.',
-      image: '/work/research/pipeline-draft.svg',
-      alt: 'Reconstructed pipeline record with verification state, an illustrative score, and an outreach draft awaiting human review.',
-      caption: 'Reconstructed workflow · illustrative score and draft',
+        'A lead assessment connects the problem summary, fit breakdown, qualification questions, and working hours in Latvia. Optional personal context lets me rescore a role when my circumstances change.',
+      image: '/work/research/lead-assessment.webp',
+      alt: 'Lead assessment for a fictional AI product engineering role, with score breakdown, personal rescore context, qualification questions, and working hours in Latvia.',
+      caption: 'Actual app capture · fictional assessment and scores',
+    },
+    {
+      title: 'Turn research into a tailored introduction.',
+      description:
+        'Connection requests, LinkedIn messages, and email drafts draw on the role and my engineering background. The original input remains alongside the drafts for reference before I reach out.',
+      image: '/work/research/research-outreach.webp',
+      alt: 'Outreach section showing a connection request, LinkedIn message, email draft, and original input for a fictional opportunity.',
+      caption: 'Actual app capture · fictional outreach drafts',
+    },
+    {
+      title: 'Review the shortlist before importing.',
+      description:
+        'Source postings, full descriptions, fit explanations, and eligibility gaps stay visible during selection. Only the roles I choose move into verification and the working pipeline.',
+      image: '/work/research/shortlist-review.webp',
+      alt: 'Shortlist review dialog showing fictional roles, remote and B2B eligibility, source links, and two opportunities selected for import.',
+      caption: 'Actual app capture · fictional shortlist',
     },
   ],
-  decisionsHeading: 'Automation with visible boundaries.',
+  decisionsHeading: 'AI assistance connected to a working product.',
   decisionsIntro:
-    'The useful engineering is in selection, evidence, retries, and durable state—not just producing a list of suggestions.',
+    'The engineering connects model output to real application state: source material, review, scoring, drafts, and the next action all belong to the same opportunity.',
   decisions: [
     {
-      title: 'Keep discovery separate.',
+      title: 'Give agents a defined handoff.',
       description:
-        'Candidates remain reviewable before import. Unselected items do not become pipeline records or start extraction and scoring work.',
+        'MCP connects external research agents to shortlist submission. Discovery stays separate from import, so I can inspect the evidence and select roles before extraction and scoring begin.',
     },
     {
-      title: 'Make uncertainty explicit.',
+      title: 'Make assessments inspectable.',
       description:
-        'Eligibility, duplicate identity, inaccessible sources, and processing failures have their own states. A failed fetch does not prove an opportunity is closed.',
+        'Structured AI output feeds the assessment interface: summaries, score reasons, qualification gaps, and outreach. Source context and optional rescore context make the recommendation easier to question and refine.',
     },
     {
-      title: 'Make imports repeatable.',
+      title: 'Keep progress durable.',
       description:
-        'Transactional identity checks make repeated or parallel imports idempotent. Draft preparation uses the opportunity context while leaving sending to the person.',
+        'Convex keeps the board, processing states, comments, and activity history in sync. Per-record retries and transactional duplicate checks support repeatable imports, while outreach stays under my control.',
     },
   ],
-  closingHeading: 'Where should your research',
-  closingHighlight: 'take you next?',
+  closingHeading: 'Where could AI help',
+  closingHighlight: 'move your work forward?',
   closingDescription:
-    'Let’s connect the sources, decisions, and work that follows.',
-  chatLabel: 'Discuss a research workflow',
+    'Let’s build useful AI assistance into the application your workflow needs.',
+  chatLabel: 'Discuss an AI-powered application',
 }
 
 export const servicesStory: WorkStory = {
