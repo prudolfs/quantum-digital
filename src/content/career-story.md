@@ -16,6 +16,12 @@ He subsequently picked up Adobe Flex and worked on creative projects as well as 
 
 His responsibilities crossed client and server boundaries. A social game's Flash client could use PHP for asynchronous requests and Java for socket communication, such as chat and game rooms. Describe this breadth as his work on those systems, rather than claiming frontend roles did not exist in the industry.
 
+## Game development, graphics, and current 3D interests
+
+Rudolfs's game-development background includes working with graphics and animation. He has built web games with Flash and HTML5, including PixiJS and Phaser, and mobile games with Unity. Exact dates and project-specific responsibilities for these technologies have not been supplied.
+
+That background carries into his personal projects today, where he enjoys working with Three.js, React Three Fiber, and Blender. He has completed [Three.js Journey](https://threejs-journey.com/) and follows news and developments in the 3D scene. Describe the course as completed training; no completion date or separate certification has been supplied. Keep his current personal 3D work distinct from commercial delivery claims.
+
 ## Native mobile and a return to the web, before 2014
 
 Rudolfs had hoped Adobe AIR would provide a straightforward cross-platform route to iOS and Android. Disappointment with that route helped motivate his move into native Android development. This is his motivation, not a claim that AIR applications could never run on iOS.

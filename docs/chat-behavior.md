@@ -41,6 +41,8 @@ The scope tool accepts no visitor text and returns only `{ category: 'off_topic'
 
 When someone asks about Rudolfs outside work, approved hobbies are skateboarding, snowboarding, flying freestyle FPV drones, mountain biking (MTB), and playing synthesizer. These are included in the server-provided `about.hobbies` context. The assistant shares them when asked, without inventing equipment, achievements, skill levels, or services based on hobbies. This is a prompt-level scope policy; deterministic browser mocks do not evaluate model adherence.
 
+The career story also covers graphics and animation experience from Flash/HTML5 web games (PixiJS and Phaser) and Unity mobile games. Current Three.js, React Three Fiber, and Blender use is described as personal-project work. It records completion of Three.js Journey, with the owner-supplied course link, and following 3D news. Do not infer a course completion date, separate certification, or commercial 3D delivery from this background.
+
 ## Inquiry review
 
 Visitors can provide name, email, and summary conversationally or fill the tool-rendered contact form. The form prepares a server-held draft through `/api/inquiry-drafts`, then shows the same explicit review/confirmation as conversational intake. Contact information is only requested when the visitor wants to make an inquiry. Rudolfs is not live in chat; confirmed inquiries are followed up by email. Timing and budget can be skipped. The assistant prepares a server-held draft; the visitor reviews it and chooses **Confirm and submit inquiry** or **Make changes**.
