@@ -9,6 +9,12 @@ const stories: {
   repository?: string
 }[] = [
   {
+    slug: 'guided-business-builder',
+    art: 'builder',
+    headline: 'Explain your business.Shape what comes next.',
+    steps: 4,
+  },
+  {
     slug: 'research-workflow',
     art: 'research',
     headline: 'Research thatleads somewhere.',
@@ -56,7 +62,7 @@ for (const story of stories) {
       ).toHaveAttribute('href', story.repository)
     else await expect(page.locator('main a[href^="https://"]')).toHaveCount(0)
     await expect(page.locator('.work-evidence-grid figure')).toHaveCount(
-      story.slug === 'research-workflow' ? 4 : 2,
+      story.slug === 'service-operations-copilot' ? 2 : 4,
     )
     await expect(page.locator('.work-model')).toHaveAttribute(
       'data-model-stage',
@@ -74,7 +80,13 @@ for (const story of stories) {
       page.getByRole('heading', { name: 'Delivery', exact: true }),
     ).toBeVisible()
     if (story.slug === 'robotics-lab') {
-      await expect(page.locator('.work-applications > section')).toHaveCount(4)
+      await expect(page.locator('.work-applications > section')).toHaveCount(5)
+      await expect(
+        page.getByRole('heading', {
+          name: 'Greenhouse Caretaker',
+          exact: true,
+        }),
+      ).toBeVisible()
       await expect(
         page.getByRole('heading', { name: 'Warehouse Demo', exact: true }),
       ).toBeVisible()

@@ -1,4 +1,5 @@
 import { publicWorkRecord } from '../../shared/work-disclosure'
+import { builderStory } from './work-builder-story'
 import {
   researchStory,
   servicesStory,
@@ -8,6 +9,7 @@ import type { PublishedContent } from '../../shared/content'
 import type { WorkStory } from '../../shared/work-story'
 import {
   accountingModelArt,
+  builderModelArt,
   careModelArt,
   financeModelArt,
   researchModelArt,
@@ -252,6 +254,11 @@ type Presentation = {
   related: string[]
 }
 const presentations: Record<string, Presentation> = {
+  'guided-business-builder': {
+    story: builderStory,
+    art: builderModelArt,
+    related: ['research-workflow', 'finance-document-assistant'],
+  },
   'robotics-lab': {
     story: roboticsStory,
     art: roboticsModelArt,

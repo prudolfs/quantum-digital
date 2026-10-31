@@ -318,7 +318,7 @@ it('keeps new records private, validates slugs and HTTPS links, and protects pub
     sortOrder: 0,
   })
   expect((await t.query(api.content.published, {}))?.caseStudies).toHaveLength(
-    6,
+    defaultContent.caseStudies.length,
   )
   await expect(
     t.mutation(api.content.setCaseStudyPublication, {
@@ -333,7 +333,7 @@ it('keeps new records private, validates slugs and HTTPS links, and protects pub
     publish: true,
   })
   expect((await t.query(api.content.published, {}))?.caseStudies).toHaveLength(
-    7,
+    defaultContent.caseStudies.length + 1,
   )
   const old = (await owner.query(api.content.workspace, {})).caseStudies.find(
     (item) => item.draft.slug === defaultContent.caseStudies[0].slug,

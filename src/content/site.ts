@@ -24,6 +24,24 @@ export const positioning = {
 // Add only owner-approved, NDA-safe completed work. No example clients or results.
 export const caseStudies: CaseStudy[] = [
   {
+    slug: 'guided-business-builder',
+    title: 'Guided Business Builder',
+    category: 'Product engineering & applied AI / 2026',
+    summary:
+      'A guided workspace that turns a service business owner’s knowledge into a private website and customer assistant, with confirmed business facts, visual editing, and reviewed enquiries.',
+    role: 'Personal project · product design, architecture, AI integration, and full-stack development.',
+    context:
+      'Small service businesses need a way to explain their work, shape a website, and answer customer questions from the same business information. This working development prototype connects those steps in one application.',
+    challenge:
+      'Turn an owner’s description into useful website content and customer answers while keeping private details separate and giving the owner control over business facts and proposed changes.',
+    approach:
+      'Guide the owner through an interview and services setup, confirm a version of their business context, then generate a private website. Connect visual edit requests and assistant answers to approved knowledge using React, TanStack Start, Convex, and AI SDK.',
+    delivery:
+      'A development prototype with saved business discovery, public/private context review, private website generation, object-based editing, revision comparison and restore, assistant testing, and an enquiry inbox with reply drafts. Billing, public publication, and custom domains remain planned.',
+    evidence:
+      'Actual development screenshots use synthetic business details to show the interview, context approval, website editor, and approved assistant knowledge. The captured website and edit use deterministic demo generation; they illustrate the workflow rather than model-output quality.',
+  },
+  {
     slug: 'care-coordination',
     title: 'Care Coordination',
     category: 'Mobile products & applied AI',
@@ -117,16 +135,16 @@ export const caseStudies: CaseStudy[] = [
     title: 'Robotics Lab',
     category: 'Interactive software / 2026',
     summary:
-      'A browser-based robotics platform with a robot simulator, a 3D drone mission planner, a visual SLAM explorer, and a seeded warehouse delivery simulation.',
+      'A robotics platform with a robot simulator, drone mission planner, visual SLAM explorer, warehouse simulation, and a greenhouse workspace for teaching, training, and comparing robot policies.',
     role: 'Engineering portfolio project',
     context:
-      'A browser-based robotics platform built with TypeScript, React, and Three.js.',
+      'Interactive robotics applications built with TypeScript, React, and Three.js, with Python, MuJoCo, and PyTorch powering the greenhouse robot-learning workspace.',
     challenge:
-      'Make robotics simulation, spatial planning, and visual SLAM exploration accessible through interactive browser tools.',
+      'Make robotics simulation, spatial planning, visual SLAM, and robot learning accessible through interactive browser tools with inspectable state and behavior.',
     approach:
-      'Combine React and TypeScript application interfaces with Three.js for interactive 3D views.',
+      'Combine React and TypeScript interfaces with Three.js for interactive 3D views. In the greenhouse, stream authoritative MuJoCo state from Python, review recorded demonstrations, and compare learned policies with a scripted reference.',
     delivery:
-      'A robot simulator, a 3D drone mission planner, a visual SLAM explorer, and a warehouse delivery simulation.',
+      'A robot simulator, drone mission planner, visual SLAM explorer, warehouse delivery simulation, and Greenhouse Caretaker with manual teaching, demonstration review, imitation learning, bounded PPO practice, policy comparison, and multi-capsule missions.',
     repositoryUrl: 'https://github.com/prudolfs/robotics-lab',
     featured: false,
   },

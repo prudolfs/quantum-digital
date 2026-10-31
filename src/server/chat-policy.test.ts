@@ -43,7 +43,12 @@ describe('published chat tools', () => {
     ).toBe(false)
     expect(context.caseStudies).toEqual([])
   })
-  it.each(['research-workflow', 'service-operations-copilot', 'robotics-lab'])(
+  it.each([
+    'research-workflow',
+    'service-operations-copilot',
+    'robotics-lab',
+    'guided-business-builder',
+  ])(
     'bounds %s story publication and related work to the published collection',
     async (slug) => {
       const original = defaultContent.caseStudies.find(
@@ -63,7 +68,7 @@ describe('published chat tools', () => {
       )
       expect(findPublishedWork(content, slug)?.related).toEqual([])
       if (slug === 'robotics-lab') {
-        expect(result.story?.applications).toHaveLength(4)
+        expect(result.story?.applications).toHaveLength(5)
         expect(
           result.story?.applications?.find((app) => app.title === 'SLAM Studio')
             ?.status,
@@ -188,7 +193,9 @@ describe('published chat tools', () => {
     )
     expect(result).toMatchObject({
       available: true,
-      study: defaultContent.caseStudies[0],
+      study: defaultContent.caseStudies.find(
+        (study) => study.slug === 'care-coordination',
+      ),
       story: { highlight: 'Everyone connected.' },
       url: '/work/care-coordination',
     })
@@ -242,7 +249,9 @@ describe('published chat tools', () => {
   })
   it('keeps system context compact and leaves case-study details to the lookup tool', () => {
     const context = chatContext(defaultContent)
-    expect(context.caseStudies[0]).toMatchObject({
+    expect(
+      context.caseStudies.find((study) => study.slug === 'care-coordination'),
+    ).toMatchObject({
       slug: 'care-coordination',
       url: '/work/care-coordination',
     })

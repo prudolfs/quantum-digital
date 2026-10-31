@@ -7,12 +7,18 @@ import { resolve } from 'node:path'
 
 const theme = process.argv[2]
 if (
-  !['care', 'accounting', 'research', 'services', 'robotics', 'about'].includes(
-    theme,
-  )
+  ![
+    'builder',
+    'care',
+    'accounting',
+    'research',
+    'services',
+    'robotics',
+    'about',
+  ].includes(theme)
 )
   throw new Error(
-    'Choose care, accounting, research, services, robotics or about',
+    'Choose builder, care, accounting, research, services, robotics or about',
   )
 const root = resolve(import.meta.dirname, '../..')
 const source = resolve(root, 'assets/work', theme)

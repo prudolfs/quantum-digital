@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import { ConvexHttpClient } from 'convex/browser'
 import { api } from '../convex/_generated/api'
+import { caseStudies } from '../src/content/site'
 
 // Requires a fresh, isolated local deployment and a build pointing to ports 3310/3311.
 // These test credentials are never used in the connected cloud project.
@@ -45,7 +46,7 @@ test('owner setup, explicit publication, unsaved changes, and subsequent sign-in
     .getByRole('link', { name: 'Selected work' })
     .click()
   await page.getByRole('button', { name: 'Import current content' }).click()
-  await expect(page.locator('.admin-record')).toHaveCount(6)
+  await expect(page.locator('.admin-record')).toHaveCount(caseStudies.length)
   await page.getByRole('link', { name: /Care Coordination/ }).click()
   await page.getByLabel('Title', { exact: true }).fill('Private changed title')
   await expect(
@@ -64,14 +65,18 @@ test('owner setup, explicit publication, unsaved changes, and subsequent sign-in
     page.getByRole('button', { name: 'Publish saved draft' }),
   ).toBeEnabled()
   expect(
-    (await backend.query(api.content.published, {}))?.caseStudies[0].title,
+    (await backend.query(api.content.published, {}))?.caseStudies.find(
+      (study) => study.slug === 'care-coordination',
+    )?.title,
   ).toBe('Care Coordination')
   const before = await request.get('/work/care-coordination')
   expect(await before.text()).toContain('Care Coordination')
   await page.getByRole('button', { name: 'Publish saved draft' }).click()
   await expect(page.getByRole('status')).toContainText('Published.')
   expect(
-    (await backend.query(api.content.published, {}))?.caseStudies[0].title,
+    (await backend.query(api.content.published, {}))?.caseStudies.find(
+      (study) => study.slug === 'care-coordination',
+    )?.title,
   ).toBe('Private changed title')
   const after = await request.get('/work/care-coordination')
   expect(await after.text()).toContain('Private changed title')

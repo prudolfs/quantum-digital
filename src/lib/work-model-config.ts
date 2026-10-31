@@ -3,6 +3,7 @@ import servicesView from '../../assets/work/services/view.json'
 import researchView from '../../assets/work/research/view.json'
 import careView from '../../assets/work/care/view.json'
 import accountingView from '../../assets/work/accounting/view.json'
+import builderView from '../../assets/work/builder/view.json'
 
 export type WorkModelArt = {
   model: string
@@ -34,6 +35,19 @@ export const financeModelArt: WorkModelArt = {
   horizontalSpan: 5.93053125,
   verticalSpan: 3.656625,
   cropShift: [-0.011484375, 0.03215625],
+}
+
+export const builderModelArt: WorkModelArt = {
+  ...builderView,
+  camera: builderView.camera as [number, number, number],
+  target: builderView.target as [number, number, number],
+  cropShift: builderView.cropShift as [number, number],
+  model: '/work/builder/builder-hero.glb',
+  poster: '/work/builder/builder-hero.webp',
+  mobilePoster: '/work/builder/builder-hero-mobile.webp',
+  alt: 'A conceptual storefront inside a browser frame, connected to business-fact cards, an approval check, a customer conversation, and an enquiry.',
+  caption:
+    'Conceptual illustration · business knowledge to website and enquiries',
 }
 
 export const careModelArt: WorkModelArt = {

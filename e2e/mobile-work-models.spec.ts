@@ -9,6 +9,7 @@ test('all selected-work detail pages load 3D and respond to touch on mobile', as
   const errors: string[] = []
   page.on('pageerror', (error) => errors.push(error.message))
   for (const slug of [
+    'guided-business-builder',
     'care-coordination',
     'accounting-workflows',
     'research-workflow',

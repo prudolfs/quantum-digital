@@ -43,8 +43,8 @@ function Applications({ story }: { story: Story }) {
     >
       <SectionHeading
         number="Lab"
-        label="Four applications"
-        heading="Four ways to explore."
+        label={`${story.applications.length} applications`}
+        heading="Explore the lab."
         intro="Each application has its own focus and current boundaries. All of these worlds are simulated."
         id="applications-heading"
       />

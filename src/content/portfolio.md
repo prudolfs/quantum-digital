@@ -14,9 +14,13 @@ A mobile and web app for booking, tracking, and coordinating service jobs, with 
 
 ## 3. Robotics Lab | 2026
 
-A browser-based robotics platform with a robot simulator, 3D drone mission planner, visual SLAM explorer, and seeded warehouse delivery simulation. Built with TypeScript, React, and Three.js.
+A robotics platform with a robot simulator, 3D drone mission planner, visual SLAM explorer, seeded warehouse delivery simulation, and Greenhouse Caretaker. The greenhouse connects a React/Three.js workspace to Python/MuJoCo physics, demonstration review, PyTorch imitation learning, bounded PPO practice, and same-seed policy comparison. All environments are simulated, with idealized greenhouse sensing and grasping.
 
 [GitHub](https://github.com/prudolfs/robotics-lab)
+
+## Guided Business Builder | 2026
+
+A working development prototype helping service business owners turn their knowledge into a private website and customer assistant. Guided discovery and public/private context review lead to owner-confirmed business facts, private website generation, visual editing, revision comparison and restore, assistant tests, and reviewed enquiries with an owner inbox. Built with React, TanStack Start, Convex, and AI SDK. Billing, public publication, and custom domains remain planned.
 
 ## 4. QD Editor | 2026
 

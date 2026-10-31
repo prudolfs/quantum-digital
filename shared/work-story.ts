@@ -10,7 +10,7 @@ export const workStorySchema = z.object({
   stack: copy.optional(),
   applications: z
     .array(entry.extend({ status: copy }))
-    .max(4)
+    .max(6)
     .optional(),
   highlight: copy,
   workflowHeading: copy,

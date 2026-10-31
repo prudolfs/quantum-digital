@@ -185,8 +185,8 @@ export const servicesStory: WorkStory = {
 export const roboticsStory: WorkStory = {
   headline: 'Build a world.',
   highlight: 'See how robots move.',
-  experience: 'Simulation → sensing → planning → mapping',
-  stack: 'TypeScript · React · Three.js',
+  experience: 'Simulation → sensing → planning → learning',
+  stack: 'TypeScript · React · Three.js · Python · MuJoCo · PyTorch',
   applications: [
     {
       title: 'Robot Simulator',
@@ -216,35 +216,42 @@ export const roboticsStory: WorkStory = {
       status:
         'Implemented WebGPU simulation · Full Laya needs a reachable decision service; recordings stay in the current tab.',
     },
+    {
+      title: 'Greenhouse Caretaker',
+      description:
+        'Teach Pip to collect seed capsules, review demonstrations, train imitation policies, run bounded PPO practice, and compare learned behavior with a scripted reference.',
+      status:
+        'Implemented robot-learning workspace · Python/MuJoCo service required; learned execution needs locally trained checkpoints. Idealized sensing and grasping remain explicit.',
+    },
   ],
   workflowHeading: 'Make movement and estimation inspectable.',
   workflowIntro:
-    'These browser applications are engineering explorations of simulation, navigation, sensing, and mapping. They make the world and the algorithm’s view of it available for inspection.',
+    'These applications explore simulation, navigation, sensing, mapping, and robot learning. The greenhouse connects a browser workspace to authoritative Python physics, demonstration review, policy training, and learned execution.',
   steps: [
     {
       title: 'Choose a world.',
       description:
-        'Pick a simulator, drone mission, inspection lab, or seeded warehouse. Configure the scenario and inspect its starting state.',
+        'Pick a simulator, drone mission, inspection lab, seeded warehouse, or greenhouse. Configure the scenario and inspect its starting state.',
     },
     {
       title: 'Start the movement.',
       description:
-        'Drive a robot, execute a mission, run a guided inspection, or start a delivery. The world follows the simulation’s physical rules.',
+        'Drive a robot, execute a mission, run an inspection, or start a collection. In the greenhouse, teach manually or run a selected learned checkpoint.',
     },
     {
       title: 'Inspect the signals.',
       description:
-        'Look at routes, sensor readings, stereo observations, maps, or delivery progress. Keep estimated state distinct from the simulator’s ground truth.',
+        'Look at routes, sensor readings, stereo observations, maps, or delivery progress. Review greenhouse demonstrations and training results. Keep estimates distinct from ground truth.',
     },
     {
       title: 'Compare the behavior.',
       description:
-        'Use the comparisons and playback available in each application. Warehouse controllers share the same seed; recorded delivery playback does not call the decision service.',
+        'Compare controllers on shared seeds. Inspect recorded warehouse runs, or compare greenhouse imitation, PPO, and reference outcomes through recorded-state playback without sending live actions.',
     },
   ],
   evidenceHeading: 'The application, beyond the illustration.',
   evidenceIntro:
-    'These existing application captures show simulated environments: a seeded warehouse and the stereo workbench in SLAM Studio. They are actual interfaces, separate from the conceptual hero, and do not establish physical-robot performance or a new benchmark.',
+    'Actual application captures show a seeded warehouse, SLAM Studio, and the greenhouse learning workspace. All environments are simulated. The greenhouse uses idealized sensing and simplified grasping; these captures do not establish physical-robot performance.',
   evidence: [
     {
       title: 'Inspect a seeded delivery.',
@@ -263,6 +270,23 @@ export const roboticsStory: WorkStory = {
       caption:
         'Actual application capture · simulated lab · rendered stereo pixels',
     },
+    {
+      title: 'Watch a learned collection.',
+      description:
+        'Pip carries a capsule using a selected PPO checkpoint in the Python simulation. The interface exposes the controller, seed, events, and observations; robot-eye images are not policy inputs.',
+      image: '/work/robotics/greenhouse-carrying.webp',
+      alt: 'Greenhouse Caretaker paused on seed 42 with Pip carrying a capsule, the learned controller selected, and the observation inspector available.',
+      caption:
+        'Actual application capture · simulated greenhouse · learned policy',
+    },
+    {
+      title: 'Inspect where a policy fails.',
+      description:
+        'Recorded same-seed comparison exposes pickup failures in both selected learned policies while the scripted reference completes the task. Playback stays separate from live control.',
+      image: '/work/robotics/greenhouse-comparison.webp',
+      alt: 'Greenhouse policy comparison for validation seed 10006 showing saved BC, PPO, and scripted-reference outcomes with recorded playback.',
+      caption: 'Actual application capture · recorded validation comparison',
+    },
   ],
   decisionsHeading: 'Keep the simulation honest.',
   decisionsIntro:
@@ -271,7 +295,7 @@ export const roboticsStory: WorkStory = {
     {
       title: 'Separate simulation from rendering.',
       description:
-        'Deterministic dynamics and reusable algorithm packages sit outside React state and rendering. Applications compose those packages into different worlds and inspection tools.',
+        'Reusable simulation and algorithm packages sit outside React rendering. In the greenhouse, Python owns MuJoCo physics; the browser interpolates authoritative snapshots, and a separate PyTorch worker trains policies.',
     },
     {
       title: 'Distinguish estimates from truth.',
@@ -281,7 +305,7 @@ export const roboticsStory: WorkStory = {
     {
       title: 'Compare on the same scenario.',
       description:
-        'Warehouse controllers share seeded scenarios and physical rules. Delayed or invalid service decisions pause visibly, and recorded playback can inspect a run without the service.',
+        'Controllers share seeded scenarios and physical rules. Greenhouse demonstrations are reviewed before training, validation remains separate from training seeds, and recorded-state playback sends no live actions.',
     },
   ],
   closingHeading: 'What could an interactive world',
