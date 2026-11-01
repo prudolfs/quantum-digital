@@ -257,37 +257,72 @@ const presentations: Record<string, Presentation> = {
   'guided-business-builder': {
     story: builderStory,
     art: builderModelArt,
-    related: ['research-workflow', 'finance-document-assistant'],
+    related: [
+      'research-workflow',
+      'finance-document-assistant',
+      'service-operations-copilot',
+      'care-coordination',
+    ],
   },
   'robotics-lab': {
     story: roboticsStory,
     art: roboticsModelArt,
-    related: ['service-operations-copilot', 'finance-document-assistant'],
+    related: [
+      'service-operations-copilot',
+      'finance-document-assistant',
+      'research-workflow',
+      'guided-business-builder',
+    ],
   },
   'service-operations-copilot': {
     story: servicesStory,
     art: servicesModelArt,
-    related: ['care-coordination', 'research-workflow'],
+    related: [
+      'care-coordination',
+      'research-workflow',
+      'guided-business-builder',
+      'accounting-workflows',
+    ],
   },
   'research-workflow': {
     story: researchStory,
     art: researchModelArt,
-    related: ['finance-document-assistant', 'service-operations-copilot'],
+    related: [
+      'guided-business-builder',
+      'finance-document-assistant',
+      'service-operations-copilot',
+      'accounting-workflows',
+    ],
   },
   'finance-document-assistant': {
     story: financeStory,
     art: financeModelArt,
-    related: ['accounting-workflows', 'research-workflow'],
+    related: [
+      'accounting-workflows',
+      'research-workflow',
+      'guided-business-builder',
+      'service-operations-copilot',
+    ],
   },
   'care-coordination': {
     story: careStory,
     art: careModelArt,
-    related: ['service-operations-copilot', 'accounting-workflows'],
+    related: [
+      'service-operations-copilot',
+      'accounting-workflows',
+      'guided-business-builder',
+      'finance-document-assistant',
+    ],
   },
   'accounting-workflows': {
     story: accountingStory,
     art: accountingModelArt,
-    related: ['finance-document-assistant', 'care-coordination'],
+    related: [
+      'finance-document-assistant',
+      'care-coordination',
+      'service-operations-copilot',
+      'guided-business-builder',
+    ],
   },
 }
 

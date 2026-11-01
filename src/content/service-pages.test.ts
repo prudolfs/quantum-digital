@@ -12,8 +12,10 @@ it('uses published fields and maps by service identity, independently of artwork
   expect(page.service.art).toBe('ai')
   expect(page.route.label).toBe('Product development')
   expect(page.related.map((study) => study.slug)).toEqual([
+    'guided-business-builder',
     'care-coordination',
     'accounting-workflows',
+    'service-operations-copilot',
   ])
   expect(servicePageRoute({ id: 'unmapped-service' })).toBeUndefined()
   expect(servicePageRoute({ id: 'constructor' })).toBeUndefined()
@@ -46,7 +48,7 @@ it('provides distinct narratives and only currently published related examples f
     const page = findPublishedServicePage(defaultContent, route.slug)!
     headings.add(page.narrative.startingHeading)
     expect(page.narrative.questions).toHaveLength(5)
-    expect(page.related).toHaveLength(2)
+    expect(page.related).toHaveLength(4)
     expect(
       findPublishedServicePage(
         {

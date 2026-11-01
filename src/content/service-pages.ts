@@ -26,7 +26,7 @@ const product: ServiceNarrative = {
   processIntro:
     'Product decisions, architecture, and delivery stay connected. Each step gives us something concrete to review.',
   relatedIntro:
-    'A closer look at connected product journeys and mobile business workflows. These examples describe the work and its boundaries.',
+    'A closer look at guided website creation, connected product journeys, and mobile business workflows. These examples describe the work and its boundaries.',
   startingPoint: 'A useful journey, with a scope we agree together.',
   closingIntro:
     'Tell me about the people using it, what they need to do, and where you are starting from.',
@@ -118,7 +118,12 @@ const product: ServiceNarrative = {
         'We agree deployment, documentation, ownership, and any ongoing support as part of the scope. A focused delivery and a longer engineering partnership are both possible.',
     },
   ],
-  relatedSlugs: ['care-coordination', 'accounting-workflows'],
+  relatedSlugs: [
+    'guided-business-builder',
+    'care-coordination',
+    'accounting-workflows',
+    'service-operations-copilot',
+  ],
   closing: 'What should your first useful version do?',
   action: 'Tell me about your product',
 }
@@ -128,7 +133,7 @@ const ai: ServiceNarrative = {
   processIntro:
     'Start with representative inputs and a useful outcome. Review the results before making AI part of the everyday workflow.',
   relatedIntro:
-    'Document extraction, source-referenced answers, and assistance within service-job communication. These examples show the application around the model.',
+    'Website creation from approved business knowledge, source-referenced document answers, and assistance within service-job communication. These examples show the application around the model.',
   startingPoint: 'A defined task and examples we can assess together.',
   closingIntro:
     'What information or request needs interpreting, and how should someone review the result?',
@@ -219,7 +224,12 @@ const ai: ServiceNarrative = {
         'We consider the task, representative results, response time, cost, and provider data handling. Access permissions and which information may be sent to a provider are decisions to agree before connecting real data.',
     },
   ],
-  relatedSlugs: ['finance-document-assistant', 'service-operations-copilot'],
+  relatedSlugs: [
+    'guided-business-builder',
+    'finance-document-assistant',
+    'service-operations-copilot',
+    'research-workflow',
+  ],
   closing: 'Where would assistance be useful?',
   action: 'Tell me about your AI task',
 }
@@ -320,7 +330,12 @@ const workflow: ServiceNarrative = {
         'Only if that behavior is explicitly agreed for the workflow. Preparing a draft and sending it are separate actions. Review and confirmation can remain part of the process.',
     },
   ],
-  relatedSlugs: ['research-workflow', 'accounting-workflows'],
+  relatedSlugs: [
+    'research-workflow',
+    'accounting-workflows',
+    'service-operations-copilot',
+    'guided-business-builder',
+  ],
   closing: 'Which handoff would you improve first?',
   action: 'Tell me about your workflow',
 }
@@ -421,7 +436,12 @@ const integration: ServiceNarrative = {
         'Yes. A narrow exchange makes access, mappings, and failure behavior concrete. We can review it before connecting more flows or discussing a larger migration.',
     },
   ],
-  relatedSlugs: ['care-coordination', 'service-operations-copilot'],
+  relatedSlugs: [
+    'care-coordination',
+    'service-operations-copilot',
+    'finance-document-assistant',
+    'robotics-lab',
+  ],
   closing: 'What needs to work together?',
   action: 'Tell me about your systems',
 }
