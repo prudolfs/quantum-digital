@@ -1,5 +1,102 @@
 import { expect, test } from '@playwright/test'
 
+for (const position of [
+  { label: 'at the left edge', edge: 'left', index: 1 },
+  { label: 'at the right edge', edge: 'right', index: 3 },
+  { label: 'below its sticky position', edge: 'below', index: 0 },
+] as const) {
+  test(`a work card ${position.label} opens on the first mouse click`, async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(isMobile, 'Desktop mouse focus regression.')
+    await page.setViewportSize({ width: 1440, height: 1100 })
+    await page.goto('/')
+    await page.evaluate(() => document.fonts.ready)
+    const section = page.locator('#work')
+    const row = section.locator('.horizontal-track')
+    const card = row.locator('.work-card').nth(position.index)
+    await expect(section).toHaveClass(/horizontal-section--pinned/)
+    const scrollPosition = await card.evaluate((element, clippedEdge) => {
+      const track = element.closest('.horizontal-track')!
+      const runway = element.closest('.horizontal-section__runway')!
+      const start =
+        element.getBoundingClientRect().left -
+        track.getBoundingClientRect().left +
+        track.scrollLeft
+      const width = element.getBoundingClientRect().width
+      const offset =
+        clippedEdge === 'left'
+          ? start + width * 0.45
+          : clippedEdge === 'right'
+            ? start - track.clientWidth + width * 0.55
+            : 0
+      return {
+        top:
+          runway.getBoundingClientRect().top +
+          scrollY -
+          104 +
+          offset -
+          (clippedEdge === 'below' ? 120 : 0),
+        offset,
+      }
+    }, position.edge)
+    await page.evaluate((top) => scrollTo(0, top), scrollPosition.top)
+    await expect
+      .poll(() => row.evaluate((element) => element.scrollLeft))
+      .toBeCloseTo(scrollPosition.offset, 0)
+    await expect(card).toHaveCSS('opacity', '1')
+    const cardBounds = (await card.boundingBox())!
+    const rowBounds = (await row.boundingBox())!
+    const x =
+      (Math.max(cardBounds.x, rowBounds.x) +
+        Math.min(
+          cardBounds.x + cardBounds.width,
+          rowBounds.x + rowBounds.width,
+        )) /
+      2
+    const destination = await card.getAttribute('href')
+    const before = await page.evaluate(() => scrollY)
+    await page.mouse.move(x, cardBounds.y + cardBounds.height / 2)
+    await page.mouse.down()
+    // Keep the button down across frames: focus must not move the link away
+    // from the pointer between mousedown and mouseup.
+    await page.waitForTimeout(80)
+    expect(await page.evaluate(() => scrollY)).toBeCloseTo(before, 0)
+    expect(await row.evaluate((element) => element.scrollLeft)).toBeCloseTo(
+      scrollPosition.offset,
+      0,
+    )
+    await page.mouse.up()
+    await expect(page).toHaveURL(destination!)
+  })
+}
+
+test('keyboard focus still aligns the sticky work section and Enter opens the card', async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(isMobile, 'Desktop keyboard focus check.')
+  await page.setViewportSize({ width: 1440, height: 1100 })
+  await page.goto('/')
+  await page.evaluate(() => document.fonts.ready)
+  const section = page.locator('#work')
+  await expect(section).toHaveClass(/horizontal-section--pinned/)
+  const row = section.locator('.horizontal-track')
+  await row.focus()
+  const start = await section
+    .locator('.horizontal-section__runway')
+    .evaluate((element) => element.getBoundingClientRect().top + scrollY - 104)
+  await page.evaluate((top) => scrollTo(0, top - 120), start)
+  await page.keyboard.press('Tab')
+  const card = row.locator('.work-card').first()
+  await expect(card).toBeFocused()
+  await expect.poll(() => page.evaluate(() => scrollY)).toBeCloseTo(start, 0)
+  const destination = await card.getAttribute('href')
+  await page.keyboard.press('Enter')
+  await expect(page).toHaveURL(destination!)
+})
+
 test('vertical scrolling traverses fixed rows and releases at the end', async ({
   page,
   isMobile,

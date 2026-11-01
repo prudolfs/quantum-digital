@@ -138,9 +138,12 @@ export function HorizontalSection({
             if (
               !layout.pinned ||
               !track.current?.contains(event.target) ||
-              event.target === track.current
+              event.target === track.current ||
+              !event.target.matches(':focus-visible')
             )
               return
+            // Only keyboard focus should align the sticky section. A mouse
+            // focus scroll can move the link before mouseup and lose its click.
             requestAnimationFrame(() => {
               if (!runway.current || !track.current) return
               window.scrollTo({
