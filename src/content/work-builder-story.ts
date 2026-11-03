@@ -7,7 +7,7 @@ export const builderStory: WorkStory = {
   stack: 'React · TanStack Start · Convex · AI SDK',
   workflowHeading: 'One business. Connected knowledge.',
   workflowIntro:
-    'An owner knows their work. The product helps them explain it, review what can be shared, and use that knowledge in a private website and customer assistant. This is a working development prototype; public publication, billing, and custom domains remain planned.',
+    'An owner knows their work. The product helps them explain it, review what can be shared, and use that knowledge in a private website and customer assistant. The working prototype is entering owner validation, with Stripe sandbox checkout and release rehearsal implemented. Production payments, public publication, and custom domains remain planned.',
   steps: [
     {
       title: 'Describe the business.',
@@ -35,11 +35,11 @@ export const builderStory: WorkStory = {
     'These actual development captures use a fictional home-cleaning business. The saved website and edit use deterministic demo generation, showing the interface and review flow without measuring model quality.',
   evidence: [
     {
-      title: 'The website and the conversation.',
+      title: 'A request becomes a saved design.',
       description:
-        'A private website preview sits beside its editing chat. The owner can select part of the page or request a change across the website.',
-      image: '/work/builder/website-selection.webp',
-      alt: 'Guided Business Builder showing a private Clear Home demo website beside its website-editing chat.',
+        'The owner asks for an editorial, spacious website. The saved preview shows the updated typography and layout beside the editing conversation.',
+      image: '/work/builder/request-preview.webp',
+      alt: 'Private Clear Home demo website with an editorial design beside the saved request to make the site editorial and spacious.',
       caption: 'Actual development capture · synthetic business · demo website',
     },
     {
@@ -51,20 +51,20 @@ export const builderStory: WorkStory = {
       caption: 'Actual development capture · synthetic business interview',
     },
     {
-      title: 'Review before confirming.',
+      title: 'Answer from the same business facts.',
       description:
-        'The owner reviews business information and its visibility before confirming a context revision for website generation.',
-      image: '/work/builder/context-review.webp',
-      alt: 'Business context review screen for a fictional service business before owner confirmation.',
-      caption: 'Actual development capture · synthetic context review',
+        'The owner tests how the assistant explains services and helps a customer request a quote, using approved public knowledge.',
+      image: '/work/builder/business-assistant.webp',
+      alt: 'Private assistant test answering what home cleaning includes and how a customer can request a quote.',
+      caption: 'Actual development capture · synthetic assistant conversation',
     },
     {
-      title: 'Give the assistant approved knowledge.',
+      title: 'Turn the conversation into an enquiry.',
       description:
-        'Confirmed public facts provide a shared basis for customer answers. Private assistant tests let the owner inspect the experience before a public launch.',
-      image: '/work/builder/approved-knowledge.webp',
-      alt: 'Approved public business knowledge available to the customer assistant in the development application.',
-      caption: 'Actual development capture · synthetic assistant knowledge',
+        'A customer reviews their contact details, requested service, and preferred date before submitting. The owner keeps control of availability, quotes, and bookings.',
+      image: '/work/builder/enquiry-review.webp',
+      alt: 'Customer enquiry review showing contact details, cleaning request, preferred date, and explicit confirmation before submission.',
+      caption: 'Actual development capture · synthetic enquiry review',
     },
   ],
   decisionsHeading: 'Keep the owner in the loop.',
@@ -85,6 +85,11 @@ export const builderStory: WorkStory = {
       title: 'Make enquiries explicit.',
       description:
         'Customers review their enquiry before submission and receive a persisted receipt. Preferred dates remain requests for the owner to confirm.',
+    },
+    {
+      title: 'Rehearse payment and release.',
+      description:
+        'Reserve usage budgets and verify Stripe sandbox checkout, signed webhook updates, and refunds. Release rehearsal pairs exact website and context approvals with rollback and unpublication; production launch remains ahead.',
     },
   ],
   closingHeading: 'What does your business',

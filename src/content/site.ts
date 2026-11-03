@@ -37,9 +37,9 @@ export const caseStudies: CaseStudy[] = [
     approach:
       'Guide the owner through an interview and services setup, confirm a version of their business context, then generate a private website. Connect visual edit requests and assistant answers to approved knowledge using React, TanStack Start, Convex, and AI SDK.',
     delivery:
-      'A development prototype with saved business discovery, public/private context review, private website generation, object-based editing, revision comparison and restore, assistant testing, and an enquiry inbox with reply drafts. Billing, public publication, and custom domains remain planned.',
+      'A development prototype with saved business discovery, public/private context review, private website generation, object-based editing, revision comparison and restore, assistant testing, and an enquiry inbox with reply drafts. Stripe sandbox checkout, signed webhook updates, refunds, and release rehearsal are implemented as the prototype enters owner validation. Production payments, public publication, and custom domains remain planned.',
     evidence:
-      'Actual development screenshots use synthetic business details to show the interview, context approval, website editor, and approved assistant knowledge. The captured website and edit use deterministic demo generation; they illustrate the workflow rather than model-output quality.',
+      'Actual development screenshots use synthetic business details to show the illustrated interview, a saved website edit, the assistant conversation, and customer enquiry review. The captured website and edit use deterministic demo generation; they illustrate the workflow rather than model-output quality.',
   },
   {
     slug: 'care-coordination',

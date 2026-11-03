@@ -1,0 +1,62 @@
+/** Optimized derivatives of Guided Business Builder square application captures with synthetic business details. */
+import { chromium } from '@playwright/test'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { resolve } from 'node:path'
+
+const root = resolve(import.meta.dirname, '../..')
+const output = resolve(root, 'public/work/builder')
+await mkdir(output, { recursive: true })
+const browser = await chromium.launch({ headless: true })
+const captures = [
+  ['request-preview', 'screenshots/linked-in/request-preview.png'],
+  ['business-details', 'screenshots/linked-in/business-details.png'],
+  ['business-assistant', 'screenshots/linked-in/business-assistant.png'],
+  ['enquiry-review', 'screenshots/linked-in/enquiry-review.png'],
+]
+const provenance = []
+try {
+  const page = await browser.newPage()
+  for (const [name, path] of captures) {
+    const png = await readFile(
+      resolve(root, '../guided-business-builder', path),
+    )
+    const image = await page.evaluate(async (data) => {
+      const original = new Image()
+      original.src = `data:image/png;base64,${data}`
+      await original.decode()
+      for (const width of [1080, 900]) {
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = Math.round((width * original.height) / original.width)
+        canvas
+          .getContext('2d')
+          .drawImage(original, 0, 0, canvas.width, canvas.height)
+        for (const quality of [0.8, 0.72, 0.64, 0.56, 0.48]) {
+          const encoded = canvas.toDataURL('image/webp', quality).split(',')[1]
+          if (atob(encoded).length <= 50000)
+            return { encoded, width, height: canvas.height, quality }
+        }
+      }
+      throw new Error('Evidence cannot meet the 50KB budget')
+    }, png.toString('base64'))
+    const bytes = Buffer.from(image.encoded, 'base64')
+    await writeFile(resolve(output, name + '.webp'), bytes)
+    provenance.push({
+      name,
+      source: 'guided-business-builder/' + path,
+      width: image.width,
+      height: image.height,
+      quality: image.quality,
+      bytes: bytes.length,
+      qualification:
+        'Actual development capture with synthetic business details. Website and edit use deterministic demo generation; assistant and enquiry are private tests. No public publication or customer outcomes.',
+    })
+    console.log(name, bytes.length, 'bytes', image.width + '×' + image.height)
+  }
+  await writeFile(
+    resolve(root, 'assets/work/builder/evidence.json'),
+    JSON.stringify(provenance, null, 2) + '\n',
+  )
+} finally {
+  await browser.close()
+}

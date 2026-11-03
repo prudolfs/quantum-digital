@@ -20,7 +20,7 @@ A robotics platform with a robot simulator, 3D drone mission planner, visual SLA
 
 ## Guided Business Builder | 2026
 
-A working development prototype helping service business owners turn their knowledge into a private website and customer assistant. Guided discovery and public/private context review lead to owner-confirmed business facts, private website generation, visual editing, revision comparison and restore, assistant tests, and reviewed enquiries with an owner inbox. Built with React, TanStack Start, Convex, and AI SDK. Billing, public publication, and custom domains remain planned.
+A working development prototype helping service business owners turn their knowledge into a private website and customer assistant. Guided discovery and public/private context review lead to owner-confirmed business facts, private website generation, visual editing, revision comparison and restore, assistant tests, and reviewed enquiries with an owner inbox. Built with React, TanStack Start, Convex, and AI SDK. Stripe sandbox checkout, signed webhook updates, refunds, and release rehearsal are implemented as the prototype enters owner validation. Production payments, public publication, and custom domains remain planned.
 
 ## 4. QD Editor | 2026
 
