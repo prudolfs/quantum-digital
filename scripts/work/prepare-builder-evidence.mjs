@@ -8,10 +8,12 @@ const output = resolve(root, 'public/work/builder')
 await mkdir(output, { recursive: true })
 const browser = await chromium.launch({ headless: true })
 const captures = [
-  ['request-preview', 'screenshots/linked-in/request-preview.png'],
+  ['overview', 'screenshots/linked-in/overview.png'],
   ['business-details', 'screenshots/linked-in/business-details.png'],
-  ['business-assistant', 'screenshots/linked-in/business-assistant.png'],
+  ['context-review', 'screenshots/linked-in/context-review.png'],
+  ['request-preview', 'screenshots/linked-in/request-preview.png'],
   ['enquiry-review', 'screenshots/linked-in/enquiry-review.png'],
+  ['approved-knowledge', 'screenshots/linked-in/approved-knowledge.png'],
 ]
 const provenance = []
 try {
@@ -43,6 +45,7 @@ try {
     await writeFile(resolve(output, name + '.webp'), bytes)
     provenance.push({
       name,
+      pdfPage: provenance.length + 1,
       source: 'guided-business-builder/' + path,
       width: image.width,
       height: image.height,

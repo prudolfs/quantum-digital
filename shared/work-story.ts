@@ -20,7 +20,7 @@ export const workStorySchema = z.object({
   evidenceIntro: copy,
   evidence: z
     .array(entry.extend({ image: copy, alt: copy, caption: copy }))
-    .max(4),
+    .max(6),
   decisionsHeading: copy,
   decisionsIntro: copy,
   decisions: z.array(entry).max(6),
