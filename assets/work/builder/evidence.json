@@ -40,6 +40,16 @@
     "qualification": "Actual development capture with synthetic business details. Website and edit use deterministic demo generation; assistant and enquiry are private tests. No public publication or customer outcomes."
   },
   {
+    "name": "business-assistant",
+    "source": "guided-business-builder/screenshots/linked-in/business-assistant.png",
+    "width": 1080,
+    "height": 1080,
+    "quality": 0.8,
+    "bytes": 34500,
+    "qualification": "Actual development capture with synthetic business details. Website and edit use deterministic demo generation; assistant and enquiry are private tests. No public publication or customer outcomes.",
+    "pdfPage": null
+  },
+  {
     "name": "enquiry-review",
     "pdfPage": 5,
     "source": "guided-business-builder/screenshots/linked-in/enquiry-review.png",
@@ -47,16 +57,6 @@
     "height": 1080,
     "quality": 0.8,
     "bytes": 42024,
-    "qualification": "Actual development capture with synthetic business details. Website and edit use deterministic demo generation; assistant and enquiry are private tests. No public publication or customer outcomes."
-  },
-  {
-    "name": "approved-knowledge",
-    "pdfPage": 6,
-    "source": "guided-business-builder/screenshots/linked-in/approved-knowledge.png",
-    "width": 1080,
-    "height": 1080,
-    "quality": 0.8,
-    "bytes": 35122,
     "qualification": "Actual development capture with synthetic business details. Website and edit use deterministic demo generation; assistant and enquiry are private tests. No public publication or customer outcomes."
   }
 ]

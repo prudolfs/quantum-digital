@@ -39,7 +39,7 @@ export const caseStudies: CaseStudy[] = [
     delivery:
       'A development prototype with saved business discovery, public/private context review, private website generation, object-based editing, revision comparison and restore, assistant testing, and an enquiry inbox with reply drafts. Stripe sandbox checkout, signed webhook updates, refunds, and release rehearsal are implemented as the prototype enters owner validation. Production payments, public publication, and custom domains remain planned.',
     evidence:
-      'Six actual development screenshots follow the LinkedIn presentation: product overview, illustrated interview, context review, saved website edit, customer enquiry review, and approved assistant knowledge. Business details are synthetic. The captured website and edit use deterministic demo generation; they illustrate the workflow rather than model-output quality.',
+      'Six actual development screenshots show the product overview, illustrated interview, context review, saved website edit, assistant conversation, and customer enquiry review. Business details are synthetic. The captured website and edit use deterministic demo generation; they illustrate the workflow rather than model-output quality.',
   },
   {
     slug: 'care-coordination',

@@ -32,7 +32,7 @@ export const builderStory: WorkStory = {
   ],
   evidenceHeading: 'From the owner’s words to a working preview.',
   evidenceIntro:
-    'Six actual development captures follow the same sequence as the LinkedIn presentation: the product overview, business interview, context review, saved website edit, enquiry review, and approved knowledge. They use a fictional home-cleaning business. The website and edit use deterministic demo generation, showing the interface and review flow without measuring model quality.',
+    'Six actual development captures show the product overview, business interview, context review, saved website edit, assistant conversation, and enquiry review. They use a fictional home-cleaning business. The website and edit use deterministic demo generation, showing the interface and review flow without measuring model quality.',
   evidence: [
     {
       title: 'Give business knowledge a home.',
@@ -67,20 +67,20 @@ export const builderStory: WorkStory = {
       caption: 'Actual development capture · synthetic business · demo website',
     },
     {
+      title: 'Answer from the same business facts.',
+      description:
+        'The owner tests how the assistant explains services and helps a customer request a quote, using approved public knowledge.',
+      image: '/work/builder/business-assistant.webp',
+      alt: 'Private assistant test answering what home cleaning includes and how a customer can request a quote.',
+      caption: 'Actual development capture · synthetic assistant conversation',
+    },
+    {
       title: 'Turn the conversation into an enquiry.',
       description:
         'A customer reviews their contact details, requested service, and preferred date before submitting. The owner keeps control of availability, quotes, and bookings.',
       image: '/work/builder/enquiry-review.webp',
       alt: 'Customer enquiry review showing contact details, cleaning request, preferred date, and explicit confirmation before submission.',
       caption: 'Actual development capture · synthetic enquiry review',
-    },
-    {
-      title: 'Make the assistant’s knowledge visible.',
-      description:
-        'The approved-knowledge view shows the confirmed public facts available to the assistant, including the business story, customers, service area, contact instructions, and cleaning-service details.',
-      image: '/work/builder/approved-knowledge.webp',
-      alt: 'Approved knowledge view listing the confirmed public business facts that the customer assistant can use.',
-      caption: 'Actual development capture · synthetic approved knowledge',
     },
   ],
   decisionsHeading: 'Keep the owner in the loop.',
