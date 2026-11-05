@@ -23,7 +23,7 @@ test('owner setup, explicit publication, unsaved changes, and subsequent sign-in
   ).toBe(true)
   await page.goto('/admin')
   await expect(
-    page.getByRole('heading', { name: 'Set up your owner account' }),
+    page.getByRole('heading', { name: 'Create your owner account' }),
   ).toBeVisible()
   await page.getByLabel('Email', { exact: true }).fill('owner@example.com')
   await page

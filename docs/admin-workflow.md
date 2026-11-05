@@ -1,16 +1,36 @@
 # Owner admin workflow
 
-The workspace is `/admin`, with separate Inquiry inbox, Selected work, Services, and Site settings tabs. Its layout borrows the useful parts of `../we-move-it-2026`: searchable record previews, explicit saves, version checks, and protection for unsaved changes. There is no public registration, verification email, or password-reset email flow.
+The workspace is `/admin`, with separate Inquiry inbox, Selected work, Services, and Site settings tabs. Sign-in and recovery use the Quantum Digital logo, a centered access panel, and the homepage hexagon background. The workspace has searchable record previews, explicit saves, version checks, and protection for unsaved changes. Public registration is disabled. Owner setup verifies ownership using the setup key rather than a verification email; password recovery uses Resend.
 
 ## Create the owner once
 
-The connected development deployment is [peaceful-koala-818](https://dashboard.convex.dev/d/peaceful-koala-818). Its configured owner email is `rudolfs.pukitis@proton.me` and website origin is `http://localhost:3000`. Open that local origin, then `/admin`.
+The connected deployment is [peaceful-koala-818](https://dashboard.convex.dev/d/peaceful-koala-818), which currently also backs the public Worker. Its configured owner email is `rudolfs.pukitis@proton.me` and auth website origin is `https://quantum-digital.pukitis-rudolfs.workers.dev`. Open `/admin` on that public origin. Local admin development needs a separate backend with a matching local `SITE_URL`.
 
 Get `ADMIN_SETUP_KEY` from this deployment’s Convex environment settings, or the private ignored `.env.convex.cloud.local` file. Enter the owner email, key, and your chosen password twice. The key is a separately generated random secret, not your password or the Better Auth secret. No real owner password has been chosen by the implementation or tests.
 
-After creation, a permanent database marker and an existing-user check close bootstrap. Remove `ADMIN_SETUP_KEY` in Convex after completing setup; email/password sign-in continues working. Changing the key or owner email does not reopen setup or migrate the account. Password recovery is currently outside this scope. Sign-in rate limiting uses the Cloudflare client-IP header and persistent Better Auth storage.
+After creation, a permanent database marker and an existing-user check close bootstrap. Remove `ADMIN_SETUP_KEY` in Convex after completing setup; email/password sign-in continues working. Changing the key or owner email does not reopen setup or migrate the account. Sign-in rate limiting uses the Cloudflare client-IP header and persistent Better Auth storage.
 
 Production uses its own environment variables and first-time setup. Set `SITE_URL` to `https://quantum-digital.pukitis-rudolfs.workers.dev` there, with fresh setup/auth/bridge secrets. Cloudflare publishing and production deployment remain separate release steps.
+
+## Reset the owner password
+
+Configure these **server-only Convex environment variables** on the deployment used by the site:
+
+- `RESEND_API_KEY`: a Resend API key with permission to send email.
+- `ADMIN_EMAIL_FROM`: a sender address on a Resend-verified domain, such as `Quantum Digital <admin@your-verified-domain>`.
+- `ADMIN_OWNER_EMAIL`: must match the email on the existing Better Auth user. The admin login remains `rudolfs.pukitis@proton.me`; changing this environment variable alone does not change an existing account.
+- `ADMIN_PASSWORD_RESET_EMAIL`: optional fixed recovery recipient, otherwise the owner email is used. The approved temporary recipient is `pukitis.rudolfs@gmail.com`, matching the owner's Resend account. This does not change the admin login. Only server configuration can set this address; request parameters cannot choose the recipient.
+- `SITE_URL`: the working website origin, with no trailing slash. This is used for auth URLs and trusted callbacks. If an old custom domain is down, use the working Workers origin consistently in the backend and frontend build settings.
+
+The recipient can use Proton Mail; it does not need to be on the sender domain. A Proton address cannot be used as a Resend sender without controlling that domain. For initial testing, Resend's `onboarding@resend.dev` sender can send to the email registered on your Resend account. A down website does not necessarily mean its DNS or email domain is unavailable; verify domain ownership and DNS separately before choosing the sender.
+
+Choose **Forgot password?**, enter the account email, and select **Send reset link**. The response is generic for known and unknown emails. The link opens `/admin` with a single-use token that expires after 30 minutes. Enter matching 12–128-character passwords. A successful reset revokes existing sessions, clears the token from the URL, and returns to sign-in. Invalid/expired links offer a new request. Reset requests allow three attempts per five minutes per client IP; reset submissions allow five.
+
+Without email configuration, requests are disabled and the UI reports that email could not be sent. Better Auth returns a generic success even if a configured provider subsequently fails; inspect Convex auth logs and the Resend delivery dashboard when an email is missing. Tokens and provider response bodies are not logged by the email callback. No real email is sent by automated tests. Configure and deploy both backend and frontend before live delivery verification.
+
+References: [Better Auth password recovery](https://better-auth.com/docs/authentication/email-password), [Resend send-email API](https://resend.com/docs/api-reference/emails/send-email).
+
+The November 5, 2026 recovery rollout uses `Quantum Digital <onboarding@resend.dev>` as the temporary sender and `pukitis.rudolfs@gmail.com` as the fixed recovery recipient, matching the Resend account while `send.quantumdigital.dev` has failed verification. The Proton owner login and existing `BETTER_AUTH_SECRET` are unchanged. Backend functions and the branded frontend are deployed to the existing Convex deployment and public Worker. A live reset request through the public admin UI returned success, and Resend confirmed delivery to Gmail; the owner chooses the new password. The API key is stored only in Convex and ignored local configuration, never frontend bindings or committed files. The full quality check passes 131 tests, and the access screens passed six desktop/mobile browser checks. The release build and Cloudflare deployment dry-run pass.
 
 ## Edit content
 

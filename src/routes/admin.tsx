@@ -20,12 +20,16 @@ import {
 } from '@/components/admin-content'
 import { Button } from '@/components/ui/button'
 import { inquiryStatuses } from '../../shared/inquiry'
+import { BrandLink } from '@/components/brand-link'
+import { AdminAccess } from '@/components/admin-access'
 
 export const Route = createFileRoute('/admin')({
   validateSearch: z.object({
     status: z.enum(['all', 'new', 'contacted', 'closed']).catch('all'),
     section: z.enum(['inbox', 'work', 'services', 'settings']).catch('inbox'),
     edit: z.string().max(100).catch(''),
+    token: z.string().min(1).max(256).optional().catch(undefined),
+    error: z.literal('INVALID_TOKEN').optional().catch(undefined),
   }),
   loaderDeps: ({ search }) => ({ status: search.status }),
   loader: ({ deps }) => loadAdmin({ data: deps }),
@@ -33,6 +37,7 @@ export const Route = createFileRoute('/admin')({
     meta: [
       { title: 'Admin | Quantum Digital' },
       { name: 'robots', content: 'noindex, nofollow' },
+      { name: 'referrer', content: 'no-referrer' },
     ],
   }),
   component: AdminPage,
@@ -46,6 +51,7 @@ function AdminPage() {
   const [feedback, setFeedback] = useState('')
   const [busy, setBusy] = useState(false)
   const [dirty, setDirty] = useState(false)
+  const showAccess = !data.signedIn || Boolean(search.token || search.error)
   useBlocker({
     shouldBlockFn: () => {
       if (!dirty) return false
@@ -135,15 +141,13 @@ function AdminPage() {
     settings: 'Site settings',
   }
   return (
-    <div className="admin-app">
+    <div className={showAccess ? 'admin-app admin-app--access' : 'admin-app'}>
       <a className="skip-link" href="#main-content">
         Skip to content
       </a>
       <header className="admin-header">
-        <Link to="/" className="brand-link">
-          Quantum<span>Digital</span>
-        </Link>
-        {data.signedIn && (
+        <BrandLink />
+        {!showAccess && data.signedIn && (
           <div className="admin-account">
             <span>{data.workspace.ownerEmail}</span>
             <Button
@@ -174,7 +178,7 @@ function AdminPage() {
           </div>
         )}
       </header>
-      {data.signedIn && (
+      {!showAccess && data.signedIn && (
         <nav className="admin-navigation" aria-label="Admin sections">
           {(['inbox', 'work', 'services', 'settings'] as const).map(
             (section) => (
@@ -191,15 +195,13 @@ function AdminPage() {
         </nav>
       )}
       <main id="main-content" tabIndex={-1} className="admin-page">
-        <p className="eyebrow">Private admin</p>
-        <h1 className="section-title">
-          {data.signedIn
-            ? titles[search.section]
-            : data.setupAvailable
-              ? 'Set up your owner account'
-              : 'Inquiry inbox'}
-        </h1>
-        {error && (
+        {!showAccess && (
+          <>
+            <p className="eyebrow">Private admin</p>
+            <h1 className="section-title">{titles[search.section]}</h1>
+          </>
+        )}
+        {!showAccess && error && (
           <p className="feedback-error" role="alert">
             {error}
           </p>
@@ -209,79 +211,17 @@ function AdminPage() {
             {feedback}
           </p>
         )}
-        {!data.signedIn ? (
-          <div className="admin-signin">
-            <p className="body-copy">
-              {data.setupAvailable
-                ? 'Use the owner email and one-time setup key configured in Convex. Choose your password below. No email will be sent.'
-                : 'Sign in with your owner account. Public registration is disabled.'}
-            </p>
-            {data.unavailable && (
-              <p className="feedback-error" role="status">
-                Admin access is unavailable until the backend and owner setup
-                are configured.
-              </p>
-            )}
-            <form onSubmit={signIn}>
-              <label htmlFor="admin-email">Email</label>
-              <input
-                id="admin-email"
-                name="email"
-                type="email"
-                autoComplete="username"
-                required
-                maxLength={254}
-              />
-              {data.setupAvailable && (
-                <>
-                  <label htmlFor="admin-key">One-time setup key</label>
-                  <input
-                    id="admin-key"
-                    name="setupKey"
-                    type="password"
-                    autoComplete="off"
-                    required
-                    minLength={32}
-                    maxLength={256}
-                  />
-                </>
-              )}
-              <label htmlFor="admin-password">Password</label>
-              <input
-                id="admin-password"
-                name="password"
-                type="password"
-                autoComplete={
-                  data.setupAvailable ? 'new-password' : 'current-password'
-                }
-                required
-                minLength={12}
-                maxLength={128}
-              />
-              {data.setupAvailable && (
-                <>
-                  <label htmlFor="admin-confirm">Confirm password</label>
-                  <input
-                    id="admin-confirm"
-                    name="confirmPassword"
-                    type="password"
-                    autoComplete="new-password"
-                    required
-                    minLength={12}
-                    maxLength={128}
-                  />
-                </>
-              )}
-              <Button type="submit" disabled={busy || data.unavailable}>
-                {busy
-                  ? 'Please wait…'
-                  : data.setupAvailable
-                    ? 'Create owner account'
-                    : 'Sign in'}
-              </Button>
-            </form>
-          </div>
-        ) : (
+        {showAccess ? (
+          <AdminAccess
+            setupAvailable={data.setupAvailable}
+            unavailable={data.unavailable}
+            busy={busy}
+            error={error}
+            token={search.token}
+            invalidToken={search.error === 'INVALID_TOKEN'}
+            onSignIn={signIn}
+          />
+        ) : data.signedIn ? (
           <>
             {search.section === 'inbox' ? (
               <>
@@ -415,7 +355,7 @@ function AdminPage() {
               })()
             )}
           </>
-        )}
+        ) : null}
       </main>
     </div>
   )

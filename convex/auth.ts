@@ -8,6 +8,7 @@ import { mutation, query } from './_generated/server'
 import { v } from 'convex/values'
 import authConfig from './auth.config'
 import { setupOwnerSchema } from '../shared/content'
+import { z } from 'zod'
 
 const digest = async (value: string) =>
   new Uint8Array(
@@ -35,6 +36,50 @@ export function createAuth(ctx: GenericCtx<DataModel>, provisionOwner = false) {
       autoSignIn: false,
       minPasswordLength: 12,
       maxPasswordLength: 128,
+      resetPasswordTokenExpiresIn: 60 * 30,
+      revokeSessionsOnPasswordReset: true,
+      sendResetPassword:
+        process.env.RESEND_API_KEY && process.env.ADMIN_EMAIL_FROM
+          ? async ({ user, url }) => {
+              if (user.email.trim().toLowerCase() !== owner) return
+              const apiKey = process.env.RESEND_API_KEY
+              const from = process.env.ADMIN_EMAIL_FROM
+              // Only deployment configuration can choose a recovery mailbox;
+              // never accept a recipient from the reset request.
+              const recipient = z
+                .email()
+                .safeParse(
+                  (process.env.ADMIN_PASSWORD_RESET_EMAIL ?? owner).trim(),
+                )
+              if (!apiKey || !from)
+                throw new APIError('SERVICE_UNAVAILABLE', {
+                  message: 'Password reset email is unavailable.',
+                })
+              if (!recipient.success)
+                throw new APIError('SERVICE_UNAVAILABLE', {
+                  message: 'Password reset email is unavailable.',
+                })
+              const response = await fetch('https://api.resend.com/emails', {
+                method: 'POST',
+                headers: {
+                  Authorization: `Bearer ${apiKey}`,
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  from,
+                  to: [recipient.data],
+                  subject: 'Reset your Quantum Digital password',
+                  text: `Reset your Quantum Digital admin password using this link:\n\n${url}\n\nThis link expires in 30 minutes and can be used once. If you did not request it, you can ignore this email.`,
+                }),
+                signal: AbortSignal.timeout(10_000),
+              })
+              if (!response.ok)
+                throw new APIError('SERVICE_UNAVAILABLE', {
+                  message:
+                    'Password reset email is unavailable. Please try again later.',
+                })
+            }
+          : undefined,
     },
     databaseHooks: {
       user: {
@@ -57,12 +102,15 @@ export function createAuth(ctx: GenericCtx<DataModel>, provisionOwner = false) {
       max: 20,
       customRules: {
         '/sign-in/email': { window: 300, max: 5 },
+        '/request-password-reset': { window: 300, max: 3 },
+        '/reset-password': { window: 300, max: 5 },
         '/get-session': false,
         '/convex/token': false,
         '/convex/jwks': false,
       },
     },
     advanced: {
+      disableOriginCheck: false,
       useSecureCookies: new URL(siteURL).protocol === 'https:',
       ipAddress: { ipAddressHeaders: ['cf-connecting-ip'] },
     },
