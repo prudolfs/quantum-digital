@@ -3,6 +3,29 @@ import { useState, type FormEvent } from 'react'
 import type { FunctionReturnType } from 'convex/server'
 import type { api } from '../../convex/_generated/api'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+} from '@/components/ui/empty'
+import { AdminSelect } from '@/components/admin-select'
+import { AdminConfirm } from '@/components/admin-confirm'
+import { cn } from '@/lib/utils'
 import {
   saveCaseStudy,
   saveService,
@@ -52,14 +75,19 @@ export function ContentList({
   return (
     <>
       <div className="admin-list-toolbar">
-        <label>
-          Find {kind === 'work' ? 'a case study' : 'a service'}
-          <input
-            type="search"
-            value={filter}
-            onChange={(event) => setFilter(event.target.value)}
-          />
-        </label>
+        <FieldGroup>
+          <Field>
+            <FieldLabel htmlFor="content-search">
+              Find {kind === 'work' ? 'a case study' : 'a service'}
+            </FieldLabel>
+            <Input
+              id="content-search"
+              type="search"
+              value={filter}
+              onChange={(event) => setFilter(event.target.value)}
+            />
+          </Field>
+        </FieldGroup>
         <Button asChild>
           <Link
             to="/admin"
@@ -70,11 +98,18 @@ export function ContentList({
         </Button>
       </div>
       {visible.length === 0 ? (
-        <p className="admin-empty">
-          {records.length
-            ? 'No matching records.'
-            : 'No records yet. Create a draft to get started.'}
-        </p>
+        <Empty>
+          <EmptyHeader>
+            <EmptyTitle>
+              {records.length ? 'No matching records' : 'No records yet'}
+            </EmptyTitle>
+            <EmptyDescription>
+              {records.length
+                ? 'Try another title.'
+                : 'Create a draft to get started.'}
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       ) : (
         <div className="admin-record-list">
           {visible.map((record) => (
@@ -82,20 +117,29 @@ export function ContentList({
               key={record._id}
               to="/admin"
               search={{ section: kind, edit: record._id, status: 'all' }}
-              className="admin-record"
+              className="admin-record-link"
             >
-              <span className="admin-record-status">
-                {publicationLabel(record)}
-              </span>
-              <h2>{record.draft.title}</h2>
-              <p>
-                {'summary' in record.draft
-                  ? record.draft.summary
-                  : record.draft.description}
-              </p>
-              <span className="admin-record-meta">
-                Order {record.sortOrder} · Edit record →
-              </span>
+              <Card className="admin-record h-full">
+                <CardHeader>
+                  <div>
+                    <Badge variant="outline">{publicationLabel(record)}</Badge>
+                  </div>
+                  <CardTitle>
+                    <h2>{record.draft.title}</h2>
+                  </CardTitle>
+                  <CardDescription>
+                    Display order {record.sortOrder}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="content-record-preview">
+                    {'summary' in record.draft
+                      ? record.draft.summary
+                      : record.draft.description}
+                  </p>
+                </CardContent>
+                <CardFooter>Edit record</CardFooter>
+              </Card>
             </Link>
           ))}
         </div>
@@ -147,6 +191,7 @@ export function ContentEditor({
   const [order, setOrder] = useState(record?.sortOrder ?? 0)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [confirmUnpublish, setConfirmUnpublish] = useState(false)
   const fields = kind === 'work' ? workFields : serviceFields
 
   async function save(event: FormEvent) {
@@ -198,13 +243,6 @@ export function ContentEditor({
 
   async function publish(makePublic: boolean) {
     if (!record || dirty) return
-    if (
-      !makePublic &&
-      !window.confirm(
-        'Unpublish this record? It will disappear from the website and assistant context.',
-      )
-    )
-      return
     setBusy(true)
     setError('')
     try {
@@ -221,6 +259,7 @@ export function ContentEditor({
           : 'Unpublished. The draft is still available here.',
       )
       await router.invalidate({ sync: true })
+      setConfirmUnpublish(false)
     } catch {
       setError(
         'Publication wasn’t changed. The record may have changed elsewhere; reload and retry.',
@@ -244,13 +283,13 @@ export function ContentEditor({
         private until you publish.
       </p>
       {error && (
-        <p role="alert" className="feedback-error">
-          {error}
-        </p>
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
       <form onSubmit={save}>
         <fieldset disabled={busy}>
-          <div className="admin-field-grid">
+          <FieldGroup className="admin-field-grid">
             {fields.map(([name, label, maximum]) => {
               const long = [
                 'summary',
@@ -283,32 +322,30 @@ export function ContentEditor({
                 },
               }
               return (
-                <div
+                <Field
                   key={name}
-                  className={
-                    long ? 'admin-field admin-field--wide' : 'admin-field'
-                  }
+                  className={cn('admin-field', long && 'admin-field--wide')}
                 >
-                  <label htmlFor={props.id}>{label}</label>
+                  <FieldLabel htmlFor={props.id}>{label}</FieldLabel>
                   {long ? (
-                    <textarea
+                    <Textarea
                       {...props}
                       rows={
                         name === 'summary' || name === 'description' ? 3 : 5
                       }
                     />
                   ) : (
-                    <input
+                    <Input
                       {...props}
                       type={name.endsWith('Url') ? 'url' : 'text'}
                     />
                   )}
-                </div>
+                </Field>
               )
             })}
-            <div className="admin-field">
-              <label htmlFor="editor-order">Display order</label>
-              <input
+            <Field className="admin-field">
+              <FieldLabel htmlFor="editor-order">Display order</FieldLabel>
+              <Input
                 id="editor-order"
                 type="number"
                 min={0}
@@ -321,45 +358,45 @@ export function ContentEditor({
                   onDirtyChange(true)
                 }}
               />
-            </div>
+            </Field>
             {kind === 'services' ? (
-              <div className="admin-field">
-                <label htmlFor="editor-art">Illustration</label>
-                <select
+              <Field className="admin-field">
+                <FieldLabel htmlFor="editor-art">Illustration</FieldLabel>
+                <AdminSelect
                   id="editor-art"
+                  label="Illustration"
                   value={String(draft.art)}
-                  onChange={(event) => {
-                    setDraft((previous) => ({
-                      ...previous,
-                      art: event.target.value,
-                    }))
+                  disabled={busy}
+                  options={serviceArt.map((art) => ({
+                    value: art,
+                    label: art,
+                  }))}
+                  onChange={(art) => {
+                    setDraft((previous) => ({ ...previous, art }))
                     onDirtyChange(true)
                   }}
-                >
-                  {serviceArt.map((art) => (
-                    <option value={art} key={art}>
-                      {art}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                />
+              </Field>
             ) : (
-              <label className="admin-checkbox">
-                <input
-                  type="checkbox"
+              <Field orientation="horizontal" className="admin-checkbox">
+                <Checkbox
+                  id="editor-featured"
+                  disabled={busy}
                   checked={draft.featured === false}
-                  onChange={(event) => {
+                  onCheckedChange={(checked) => {
                     setDraft((previous) => ({
                       ...previous,
-                      featured: !event.target.checked,
+                      featured: checked !== true,
                     }))
                     onDirtyChange(true)
                   }}
                 />
-                Also list this case study on About
-              </label>
+                <FieldLabel htmlFor="editor-featured">
+                  Also list this case study on About
+                </FieldLabel>
+              </Field>
             )}
-          </div>
+          </FieldGroup>
           {kind === 'work' && (
             <p className="admin-help">
               Project links are optional. Changing a URL slug on publish changes
@@ -383,7 +420,7 @@ export function ContentEditor({
                 type="button"
                 variant="outline"
                 disabled={dirty}
-                onClick={() => void publish(false)}
+                onClick={() => setConfirmUnpublish(true)}
               >
                 Unpublish
               </Button>
@@ -396,6 +433,15 @@ export function ContentEditor({
           )}
         </fieldset>
       </form>
+      <AdminConfirm
+        open={confirmUnpublish}
+        title="Unpublish this record?"
+        description="It will disappear from the website and assistant context. Its draft will remain available here."
+        action="Unpublish"
+        busy={busy}
+        onCancel={() => setConfirmUnpublish(false)}
+        onConfirm={() => void publish(false)}
+      />
       {kind === 'work' &&
         record?.published &&
         'slug' in record.published.content && (
@@ -476,131 +522,147 @@ export function SettingsEditor({
         below is separate.
       </p>
       {error && (
-        <p role="alert" className="feedback-error">
-          {error}
-        </p>
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
       <form onSubmit={save}>
         <fieldset disabled={busy}>
-          {fields.map(([name, label, maximum]) => (
-            <div className="admin-field" key={name}>
-              <label htmlFor={`settings-${name}`}>{label}</label>
-              {name === 'homeTitle' || name === 'contactEmail' ? (
-                <input
-                  id={`settings-${name}`}
-                  type={name === 'contactEmail' ? 'email' : 'text'}
-                  value={draft[name]}
-                  required
-                  maxLength={maximum}
-                  onChange={(event) => {
-                    setDraft((previous) => ({
-                      ...previous,
-                      [name]: event.target.value,
-                    }))
-                    onDirtyChange(true)
-                  }}
-                />
-              ) : (
-                <textarea
-                  id={`settings-${name}`}
-                  value={draft[name]}
-                  required
-                  maxLength={maximum}
-                  rows={3}
-                  onChange={(event) => {
-                    setDraft((previous) => ({
-                      ...previous,
-                      [name]: event.target.value,
-                    }))
-                    onDirtyChange(true)
-                  }}
-                />
-              )}
-            </div>
-          ))}
-          <h2 className="section-title">Common questions</h2>
-          {draft.questions.map((entry, index) => (
-            <div className="admin-question" key={index}>
-              <label htmlFor={`question-${index}`}>Question {index + 1}</label>
-              <input
-                id={`question-${index}`}
-                value={entry.question}
-                required
-                maxLength={200}
-                onChange={(event) => {
-                  setDraft((previous) => ({
-                    ...previous,
-                    questions: previous.questions.map((question, i) =>
-                      i === index
-                        ? { ...question, question: event.target.value }
-                        : question,
-                    ),
-                  }))
-                  onDirtyChange(true)
-                }}
-              />
-              <label htmlFor={`answer-${index}`}>Answer</label>
-              <textarea
-                id={`answer-${index}`}
-                rows={3}
-                value={entry.answer}
-                required
-                maxLength={2000}
-                onChange={(event) => {
-                  setDraft((previous) => ({
-                    ...previous,
-                    questions: previous.questions.map((question, i) =>
-                      i === index
-                        ? { ...question, answer: event.target.value }
-                        : question,
-                    ),
-                  }))
-                  onDirtyChange(true)
-                }}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setDraft((previous) => ({
-                    ...previous,
-                    questions: previous.questions.filter((_, i) => i !== index),
-                  }))
-                  onDirtyChange(true)
-                }}
-              >
-                Remove question {index + 1}
-              </Button>
-            </div>
-          ))}
-          <Button
-            type="button"
-            variant="outline"
-            disabled={draft.questions.length >= 20}
-            onClick={() => {
-              setDraft((previous) => ({
-                ...previous,
-                questions: [
-                  ...previous.questions,
-                  { question: '', answer: '' },
-                ],
-              }))
-              onDirtyChange(true)
-            }}
-          >
-            Add question
-          </Button>
-          <div className="admin-editor-actions">
-            <Button type="submit">{busy ? 'Working…' : 'Save draft'}</Button>
+          <FieldGroup>
+            {fields.map(([name, label, maximum]) => (
+              <Field className="admin-field" key={name}>
+                <FieldLabel htmlFor={`settings-${name}`}>{label}</FieldLabel>
+                {name === 'homeTitle' || name === 'contactEmail' ? (
+                  <Input
+                    id={`settings-${name}`}
+                    type={name === 'contactEmail' ? 'email' : 'text'}
+                    value={draft[name]}
+                    required
+                    maxLength={maximum}
+                    onChange={(event) => {
+                      setDraft((previous) => ({
+                        ...previous,
+                        [name]: event.target.value,
+                      }))
+                      onDirtyChange(true)
+                    }}
+                  />
+                ) : (
+                  <Textarea
+                    id={`settings-${name}`}
+                    value={draft[name]}
+                    required
+                    maxLength={maximum}
+                    rows={3}
+                    onChange={(event) => {
+                      setDraft((previous) => ({
+                        ...previous,
+                        [name]: event.target.value,
+                      }))
+                      onDirtyChange(true)
+                    }}
+                  />
+                )}
+              </Field>
+            ))}
+            <h2 className="section-title">Common questions</h2>
+            {draft.questions.map((entry, index) => (
+              <Card key={index}>
+                <CardContent className="pt-6">
+                  <FieldGroup>
+                    <Field>
+                      <FieldLabel htmlFor={`question-${index}`}>
+                        Question {index + 1}
+                      </FieldLabel>
+                      <Input
+                        id={`question-${index}`}
+                        value={entry.question}
+                        required
+                        maxLength={200}
+                        onChange={(event) => {
+                          setDraft((previous) => ({
+                            ...previous,
+                            questions: previous.questions.map((question, i) =>
+                              i === index
+                                ? { ...question, question: event.target.value }
+                                : question,
+                            ),
+                          }))
+                          onDirtyChange(true)
+                        }}
+                      />
+                    </Field>
+                    <Field>
+                      <FieldLabel htmlFor={`answer-${index}`}>
+                        Answer
+                      </FieldLabel>
+                      <Textarea
+                        id={`answer-${index}`}
+                        rows={3}
+                        value={entry.answer}
+                        required
+                        maxLength={2000}
+                        onChange={(event) => {
+                          setDraft((previous) => ({
+                            ...previous,
+                            questions: previous.questions.map((question, i) =>
+                              i === index
+                                ? { ...question, answer: event.target.value }
+                                : question,
+                            ),
+                          }))
+                          onDirtyChange(true)
+                        }}
+                      />
+                    </Field>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setDraft((previous) => ({
+                          ...previous,
+                          questions: previous.questions.filter(
+                            (_, i) => i !== index,
+                          ),
+                        }))
+                        onDirtyChange(true)
+                      }}
+                    >
+                      Remove question {index + 1}
+                    </Button>
+                  </FieldGroup>
+                </CardContent>
+              </Card>
+            ))}
             <Button
               type="button"
               variant="outline"
-              disabled={dirty}
-              onClick={() => void publish()}
+              disabled={draft.questions.length >= 20}
+              onClick={() => {
+                setDraft((previous) => ({
+                  ...previous,
+                  questions: [
+                    ...previous.questions,
+                    { question: '', answer: '' },
+                  ],
+                }))
+                onDirtyChange(true)
+              }}
             >
-              Publish saved settings
+              Add question
             </Button>
-          </div>
+            <div className="admin-editor-actions">
+              <Button type="submit">{busy ? 'Working…' : 'Save draft'}</Button>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={dirty}
+                onClick={() => void publish()}
+              >
+                Publish saved settings
+              </Button>
+            </div>
+          </FieldGroup>
         </fieldset>
       </form>
     </div>

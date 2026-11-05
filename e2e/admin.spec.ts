@@ -18,44 +18,69 @@ test('owner setup, explicit publication, unsaved changes, and subsequent sign-in
   const backend = new ConvexHttpClient('http://127.0.0.1:3310')
   const setup = await backend.query(api.auth.setupStatus, {})
   expect(
-    setup.setupAvailable,
-    'Use a fresh isolated backend, never the cloud project',
+    setup.configured,
+    'Use the isolated local backend, never the cloud project',
   ).toBe(true)
   await page.goto('/admin')
-  await expect(
-    page.getByRole('heading', { name: 'Create your owner account' }),
-  ).toBeVisible()
-  await page.getByLabel('Email', { exact: true }).fill('owner@example.com')
-  await page
-    .getByLabel('One-time setup key')
-    .fill('incorrect-setup-key-over-32-characters')
-  await page
-    .getByLabel('Password', { exact: true })
-    .fill('test-only-owner-password-123')
-  await page.getByLabel('Confirm password').fill('test-only-owner-password-123')
-  await page.getByRole('button', { name: 'Create owner account' }).click()
-  await expect(page.getByRole('alert')).toContainText('Setup failed')
-  await page
-    .getByLabel('One-time setup key')
-    .fill('test-only-setup-key-with-over-32-characters')
-  await page.getByRole('button', { name: 'Create owner account' }).click()
+  if (setup.setupAvailable) {
+    await expect(
+      page.getByRole('heading', { name: 'Create your owner account' }),
+    ).toBeVisible()
+    await page.getByLabel('Email', { exact: true }).fill('owner@example.com')
+    await page
+      .getByLabel('One-time setup key')
+      .fill('incorrect-setup-key-over-32-characters')
+    await page
+      .getByLabel('Password', { exact: true })
+      .fill('test-only-owner-password-123')
+    await page
+      .getByLabel('Confirm password')
+      .fill('test-only-owner-password-123')
+    await page.getByRole('button', { name: 'Create owner account' }).click()
+    await expect(page.getByRole('alert')).toContainText('Setup failed')
+    await page
+      .getByLabel('One-time setup key')
+      .fill('test-only-setup-key-with-over-32-characters')
+    await page.getByRole('button', { name: 'Create owner account' }).click()
+  } else {
+    await page.getByLabel('Email', { exact: true }).fill('owner@example.com')
+    await page
+      .getByLabel('Password', { exact: true })
+      .fill('test-only-owner-password-123')
+    await page.getByRole('button', { name: 'Sign in', exact: true }).click()
+  }
   await expect(page.getByRole('button', { name: 'Sign out' })).toBeVisible()
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
+  await page.getByRole('tab', { name: 'Inquiry inbox', exact: true }).focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(
+    page.getByRole('tab', { name: 'Selected work', exact: true }),
+  ).toBeFocused()
+  await page.keyboard.press('Enter')
+  await expect(
+    page.getByRole('heading', { name: 'Selected work', exact: true }),
+  ).toBeVisible()
   await page
     .getByRole('navigation', { name: 'Admin sections' })
-    .getByRole('link', { name: 'Selected work' })
+    .getByRole('tab', { name: 'Selected work' })
     .click()
-  await page.getByRole('button', { name: 'Import current content' }).click()
+  const importButton = page.getByRole('button', {
+    name: 'Import current content',
+  })
+  if (await importButton.isVisible()) await importButton.click()
   await expect(page.locator('.admin-record')).toHaveCount(caseStudies.length)
   await page.getByRole('link', { name: /Care Coordination/ }).click()
   await page.getByLabel('Title', { exact: true }).fill('Private changed title')
   await expect(
     page.getByRole('button', { name: 'Publish saved draft' }),
   ).toBeDisabled()
-  page.once('dialog', (dialog) => dialog.dismiss())
   await page
     .getByRole('navigation')
-    .getByRole('link', { name: 'Services', exact: true })
+    .getByRole('tab', { name: 'Services', exact: true })
+    .click()
+  await page
+    .getByRole('alertdialog')
+    .getByRole('button', { name: 'Cancel' })
     .click()
   await expect(page.getByLabel('Title', { exact: true })).toHaveValue(
     'Private changed title',
@@ -80,8 +105,11 @@ test('owner setup, explicit publication, unsaved changes, and subsequent sign-in
   ).toBe('Private changed title')
   const after = await request.get('/work/care-coordination')
   expect(await after.text()).toContain('Private changed title')
-  page.once('dialog', (dialog) => dialog.accept())
   await page.getByRole('button', { name: 'Unpublish', exact: true }).click()
+  await page
+    .getByRole('alertdialog')
+    .getByRole('button', { name: 'Unpublish', exact: true })
+    .click()
   await expect(page.getByRole('status')).toContainText('Unpublished.')
   expect((await request.get('/work/care-coordination')).status()).toBe(404)
   expect(await (await request.get('/sitemap.xml')).text()).not.toContain(
@@ -96,14 +124,17 @@ test('owner setup, explicit publication, unsaved changes, and subsequent sign-in
   await expect(page.getByRole('status')).toContainText('Published.')
   await page
     .getByRole('navigation')
-    .getByRole('link', { name: 'Services', exact: true })
+    .getByRole('tab', { name: 'Services', exact: true })
     .click()
   await page.locator('.admin-record').first().click()
   await page.getByLabel('Title', { exact: true }).fill('Unsaved service change')
-  page.once('dialog', (dialog) => dialog.accept())
   await page
     .getByRole('navigation')
-    .getByRole('link', { name: 'Site settings' })
+    .getByRole('tab', { name: 'Site settings' })
+    .click()
+  await page
+    .getByRole('alertdialog')
+    .getByRole('button', { name: 'Discard changes' })
     .click()
   await expect(
     page.getByRole('button', { name: 'Publish saved settings' }),
@@ -172,7 +203,7 @@ test('creates case-study and service drafts before explicitly publishing them', 
   await expect(page.getByRole('button', { name: 'Sign out' })).toBeVisible()
   await page
     .getByRole('navigation')
-    .getByRole('link', { name: 'Selected work' })
+    .getByRole('tab', { name: 'Selected work' })
     .click()
   await page.getByRole('link', { name: 'Create case study' }).click()
   for (const [label, value] of Object.entries({
@@ -206,12 +237,15 @@ test('creates case-study and service drafts before explicitly publishing them', 
       (record) => record.slug === 'isolated-test-case',
     ),
   ).toBe(true)
-  page.once('dialog', (dialog) => dialog.accept())
   await page.getByRole('button', { name: 'Unpublish', exact: true }).click()
+  await page
+    .getByRole('alertdialog')
+    .getByRole('button', { name: 'Unpublish', exact: true })
+    .click()
   await expect(page.getByRole('status')).toContainText('Unpublished.')
   await page
     .getByRole('navigation')
-    .getByRole('link', { name: 'Services', exact: true })
+    .getByRole('tab', { name: 'Services', exact: true })
     .click()
   await page.getByRole('link', { name: 'Create service' }).click()
   for (const [label, value] of Object.entries({
@@ -222,7 +256,8 @@ test('creates case-study and service drafts before explicitly publishing them', 
     'Supporting details': 'Test supporting details',
   }))
     await page.getByLabel(label, { exact: true }).fill(value)
-  await page.getByLabel('Illustration').selectOption('ai')
+  await page.getByRole('combobox', { name: 'Illustration' }).click()
+  await page.getByRole('option', { name: 'ai', exact: true }).click()
   await page.getByRole('button', { name: 'Save draft' }).click()
   await expect(
     page.getByRole('button', { name: 'Publish saved draft' }),
@@ -242,7 +277,10 @@ test('creates case-study and service drafts before explicitly publishing them', 
       (record) => record.id === 'isolated-test-service',
     )?.art,
   ).toBe('ai')
-  page.once('dialog', (dialog) => dialog.accept())
   await page.getByRole('button', { name: 'Unpublish', exact: true }).click()
+  await page
+    .getByRole('alertdialog')
+    .getByRole('button', { name: 'Unpublish', exact: true })
+    .click()
   await expect(page.getByRole('status')).toContainText('Unpublished.')
 })

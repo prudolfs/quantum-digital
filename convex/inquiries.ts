@@ -13,6 +13,13 @@ import type { UIMessage } from 'ai'
 import { requestLimits } from '../shared/security'
 import { internal } from './_generated/api'
 import { inquiryEvent, inquiryPostHogDefaults } from '../shared/inquiry-event'
+import { paginationOptsValidator } from 'convex/server'
+import type { QueryCtx } from './_generated/server'
+import type { Doc } from './_generated/dataModel'
+import {
+  readableConversation,
+  inquirySummarySchema,
+} from '../shared/inquiry-admin'
 
 const detailFields = {
   name: v.string(),
@@ -164,6 +171,24 @@ export const confirm = internalMutation({
       status: 'new',
       updatedAt: Date.now(),
     })
+    const thread = await ctx.db
+      .query('chatThreads')
+      .withIndex('by_session', (q) => q.eq('sessionHash', sessionHash))
+      .unique()
+    const messages =
+      thread && thread.expiresAt > Date.now()
+        ? readableConversation(
+            await ctx.db
+              .query('chatMessages')
+              .withIndex('by_thread', (q) => q.eq('threadId', thread._id))
+              .collect(),
+          )
+        : []
+    await ctx.db.insert('inquiryConversations', {
+      inquiryId,
+      messages,
+      capturedAt: Date.now(),
+    })
     await ctx.db.patch(draftId, {
       inquiryId,
       expiresAt: Date.now() + 30 * 86_400_000,
@@ -256,6 +281,226 @@ export const updateStatus = mutation({
     if (!(await ctx.db.get(inquiryId)))
       throw new ConvexError('Inquiry not found.')
     await ctx.db.patch(inquiryId, { status, updatedAt: Date.now() })
+  },
+})
+
+async function conversationFor(
+  ctx: QueryCtx | MutationCtx,
+  inquiry: Doc<'inquiries'>,
+) {
+  const saved = await ctx.db
+    .query('inquiryConversations')
+    .withIndex('by_inquiry', (q) => q.eq('inquiryId', inquiry._id))
+    .unique()
+  if (saved) return saved
+  // Older inquiries can use their original chat only while it is still retained.
+  const draft = await ctx.db
+    .query('inquiryDrafts')
+    .withIndex('by_inquiry', (q) => q.eq('inquiryId', inquiry._id))
+    .first()
+  const thread = draft
+    ? await ctx.db
+        .query('chatThreads')
+        .withIndex('by_session', (q) => q.eq('sessionHash', draft.sessionHash))
+        .unique()
+    : null
+  const rows =
+    thread && thread.expiresAt > Date.now()
+      ? await ctx.db
+          .query('chatMessages')
+          .withIndex('by_thread', (q) => q.eq('threadId', thread._id))
+          .collect()
+      : []
+  return {
+    messages: readableConversation(
+      rows.filter((row) => row._creationTime <= inquiry._creationTime),
+    ),
+    capturedAt: inquiry._creationTime,
+  }
+}
+
+export const inbox = query({
+  args: {
+    status: v.optional(
+      v.union(v.literal('new'), v.literal('contacted'), v.literal('closed')),
+    ),
+    from: v.optional(v.number()),
+    to: v.optional(v.number()),
+    paginationOpts: paginationOptsValidator,
+  },
+  handler: async (
+    ctx,
+    { status, from = 0, to = Number.MAX_SAFE_INTEGER, paginationOpts },
+  ) => {
+    await requireOwner(ctx)
+    if (
+      from >= to ||
+      paginationOpts.numItems < 1 ||
+      paginationOpts.numItems > 48
+    )
+      throw new ConvexError('Invalid inbox filters.')
+    const source = status
+      ? ctx.db
+          .query('inquiries')
+          .withIndex('by_status', (q) =>
+            q
+              .eq('status', status)
+              .gte('_creationTime', from)
+              .lt('_creationTime', to),
+          )
+      : ctx.db
+          .query('inquiries')
+          .withIndex('by_creation_time', (q) =>
+            q.gte('_creationTime', from).lt('_creationTime', to),
+          )
+    const result = await source.order('desc').paginate(paginationOpts)
+    const page = await Promise.all(
+      result.page.map(async (inquiry) => {
+        const conversation = await ctx.db
+          .query('inquiryConversations')
+          .withIndex('by_inquiry', (q) => q.eq('inquiryId', inquiry._id))
+          .unique()
+        return {
+          ...inquiry,
+          summary: inquiry.summary.slice(0, 240),
+          hasSummary: Boolean(conversation?.summary),
+        }
+      }),
+    )
+    return { ...result, page }
+  },
+})
+
+export const detail = query({
+  args: { inquiryId: v.id('inquiries') },
+  handler: async (ctx, { inquiryId }) => {
+    await requireOwner(ctx)
+    const inquiry = await ctx.db.get(inquiryId)
+    if (!inquiry) throw new ConvexError('Inquiry not found.')
+    const conversation = await conversationFor(ctx, inquiry)
+    return {
+      inquiry,
+      messages: conversation.messages,
+      capturedAt: conversation.capturedAt,
+      summary: 'summary' in conversation ? conversation.summary : undefined,
+      summarizedAt:
+        'summarizedAt' in conversation ? conversation.summarizedAt : undefined,
+      summaryModel:
+        'summaryModel' in conversation ? conversation.summaryModel : undefined,
+    }
+  },
+})
+
+export const remove = mutation({
+  args: { inquiryId: v.id('inquiries') },
+  handler: async (ctx, { inquiryId }) => {
+    await requireOwner(ctx)
+    const inquiry = await ctx.db.get(inquiryId)
+    if (!inquiry) throw new ConvexError('Inquiry not found.')
+    const copies = await ctx.db
+      .query('inquiryConversations')
+      .withIndex('by_inquiry', (q) => q.eq('inquiryId', inquiryId))
+      .collect()
+    const drafts = await ctx.db
+      .query('inquiryDrafts')
+      .withIndex('by_inquiry', (q) => q.eq('inquiryId', inquiryId))
+      .collect()
+    for (const row of [...copies, ...drafts]) await ctx.db.delete(row._id)
+    await ctx.db.delete(inquiryId)
+  },
+})
+
+export const beginSummary = mutation({
+  args: { inquiryId: v.id('inquiries'), requestId: v.string() },
+  handler: async (ctx, { inquiryId, requestId }) => {
+    const owner = await requireOwner(ctx)
+    const inquiry = await ctx.db.get(inquiryId)
+    if (!inquiry) throw new ConvexError('Inquiry not found.')
+    const conversation = await conversationFor(ctx, inquiry)
+    if ('summary' in conversation && conversation.summary)
+      return { cached: true as const, summary: conversation.summary }
+    if (!conversation.messages.length)
+      throw new ConvexError('The original conversation is no longer available.')
+    if (
+      'summaryStartedAt' in conversation &&
+      (conversation.summaryStartedAt ?? 0) > Date.now() - 60_000
+    )
+      throw new ConvexError(
+        'A summary is already being generated. Please try again shortly.',
+      )
+    await consumeRate(ctx, `admin-summary:${owner._id}`, 50, 86_400_000)
+    const lock = { summaryRequestId: requestId, summaryStartedAt: Date.now() }
+    if ('_id' in conversation) await ctx.db.patch(conversation._id, lock)
+    else
+      await ctx.db.insert('inquiryConversations', {
+        inquiryId,
+        ...conversation,
+        ...lock,
+      })
+    return {
+      cached: false as const,
+      messages: conversation.messages,
+      details: {
+        name: inquiry.name,
+        summary: inquiry.summary,
+        timing: inquiry.timing,
+        budget: inquiry.budget,
+      },
+    }
+  },
+})
+
+export const finishSummary = mutation({
+  args: {
+    inquiryId: v.id('inquiries'),
+    requestId: v.string(),
+    model: v.string(),
+    summary: v.object({
+      overview: v.string(),
+      requirements: v.array(v.string()),
+      constraints: v.array(v.string()),
+      nextSteps: v.array(v.string()),
+      openQuestions: v.array(v.string()),
+    }),
+  },
+  handler: async (ctx, { inquiryId, requestId, summary, model }) => {
+    await requireOwner(ctx)
+    const row = await ctx.db
+      .query('inquiryConversations')
+      .withIndex('by_inquiry', (q) => q.eq('inquiryId', inquiryId))
+      .unique()
+    if (
+      !row ||
+      row.summaryRequestId !== requestId ||
+      !(await ctx.db.get(inquiryId))
+    )
+      throw new ConvexError('The inquiry changed. Reopen it and try again.')
+    const parsed = inquirySummarySchema.safeParse(summary)
+    if (!parsed.success) throw new ConvexError('Invalid summary.')
+    await ctx.db.patch(row._id, {
+      summary: parsed.data,
+      summaryModel: model,
+      summarizedAt: Date.now(),
+      summaryStartedAt: undefined,
+      summaryRequestId: undefined,
+    })
+    return parsed.data
+  },
+})
+
+export const cancelSummary = mutation({
+  args: { inquiryId: v.id('inquiries'), requestId: v.string() },
+  handler: async (ctx, { inquiryId, requestId }) => {
+    await requireOwner(ctx)
+    const row = await ctx.db
+      .query('inquiryConversations')
+      .withIndex('by_inquiry', (q) => q.eq('inquiryId', inquiryId))
+      .unique()
+    if (row?.summaryRequestId === requestId)
+      await ctx.db.patch(row._id, {
+        summaryStartedAt: undefined,
+        summaryRequestId: undefined,
+      })
   },
 })
 

@@ -38,9 +38,9 @@ function PrivacyPage() {
           are stored in Convex so you can continue when you return using the
           same browser. Conversations expire after 30 days of inactivity and are
           removed by an hourly cleanup job. Restart chat deletes the current
-          conversation’s messages; confirmed inquiries remain separate. Please
-          avoid sharing secrets, sensitive personal information, or confidential
-          client material.
+          conversation’s messages; confirmed inquiries and their saved
+          conversation copies remain separate. Please avoid sharing secrets,
+          sensitive personal information, or confidential client material.
         </p>
       </section>
       <section>
@@ -56,7 +56,12 @@ function PrivacyPage() {
           optional timing and budget, inquiry ID, source, status, and submission
           time, is also sent server-side to PostHog to track incoming requests.
           This happens when you confirm submission, independently of optional
-          website analytics cookies. Chat transcripts are not included. These
+          website analytics cookies. Chat transcripts are not included in
+          PostHog. A copy of the visible conversation up to confirmation is
+          saved with your inquiry in the private inbox. Rudolfs can request an
+          AI-generated recap of that copy through the configured AI service via
+          Vercel AI Gateway. Saved conversation copies and summaries follow the
+          same retention as the inquiry and can be deleted with it. These
           details are used to review your request and follow up by email, and
           retained until they are no longer needed or you request removal.
         </p>

@@ -70,6 +70,7 @@ export default defineSchema({
     contactFormId: v.optional(v.string()),
   })
     .index('by_expiresAt', ['expiresAt'])
+    .index('by_inquiry', ['inquiryId'])
     .index('by_session_form', ['sessionHash', 'contactFormId']),
   inquiries: defineTable({
     ...fields,
@@ -81,6 +82,29 @@ export default defineSchema({
     ),
     updatedAt: v.number(),
   }).index('by_status', ['status']),
+  inquiryConversations: defineTable({
+    inquiryId: v.id('inquiries'),
+    capturedAt: v.number(),
+    messages: v.array(
+      v.object({
+        role: v.union(v.literal('user'), v.literal('assistant')),
+        text: v.string(),
+      }),
+    ),
+    summary: v.optional(
+      v.object({
+        overview: v.string(),
+        requirements: v.array(v.string()),
+        constraints: v.array(v.string()),
+        nextSteps: v.array(v.string()),
+        openQuestions: v.array(v.string()),
+      }),
+    ),
+    summaryModel: v.optional(v.string()),
+    summarizedAt: v.optional(v.number()),
+    summaryRequestId: v.optional(v.string()),
+    summaryStartedAt: v.optional(v.number()),
+  }).index('by_inquiry', ['inquiryId']),
   rateLimits: defineTable({
     key: v.string(),
     count: v.number(),

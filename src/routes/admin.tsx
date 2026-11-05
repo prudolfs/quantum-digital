@@ -1,37 +1,36 @@
-import {
-  createFileRoute,
-  Link,
-  useBlocker,
-  useRouter,
-} from '@tanstack/react-router'
+import { createFileRoute, useBlocker, useRouter } from '@tanstack/react-router'
 import { useState, type FormEvent } from 'react'
 import { z } from 'zod'
 import { authClient } from '@/lib/auth-client'
-import {
-  loadAdmin,
-  setupOwner,
-  initializeContent,
-  changeInquiryStatus,
-} from '@/server/admin'
+import { loadAdmin, setupOwner, initializeContent } from '@/server/admin'
 import {
   ContentList,
   ContentEditor,
   SettingsEditor,
 } from '@/components/admin-content'
 import { Button } from '@/components/ui/button'
-import { inquiryStatuses } from '../../shared/inquiry'
+import { inboxFiltersSchema } from '../../shared/inquiry-admin'
 import { BrandLink } from '@/components/brand-link'
 import { AdminAccess } from '@/components/admin-access'
+import { AdminInbox } from '@/components/admin-inbox'
+import { AdminConfirm } from '@/components/admin-confirm'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { Toaster } from '@/components/ui/sonner'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 export const Route = createFileRoute('/admin')({
-  validateSearch: z.object({
-    status: z.enum(['all', 'new', 'contacted', 'closed']).catch('all'),
+  validateSearch: inboxFiltersSchema.extend({
     section: z.enum(['inbox', 'work', 'services', 'settings']).catch('inbox'),
     edit: z.string().max(100).catch(''),
     token: z.string().min(1).max(256).optional().catch(undefined),
     error: z.literal('INVALID_TOKEN').optional().catch(undefined),
   }),
-  loaderDeps: ({ search }) => ({ status: search.status }),
+  loaderDeps: ({ search }) => ({
+    status: search.status,
+    from: search.from,
+    to: search.to,
+    cursor: search.cursor,
+  }),
   loader: ({ deps }) => loadAdmin({ data: deps }),
   head: () => ({
     meta: [
@@ -51,14 +50,11 @@ function AdminPage() {
   const [feedback, setFeedback] = useState('')
   const [busy, setBusy] = useState(false)
   const [dirty, setDirty] = useState(false)
+  const [confirmSignOut, setConfirmSignOut] = useState(false)
   const showAccess = !data.signedIn || Boolean(search.token || search.error)
-  useBlocker({
-    shouldBlockFn: () => {
-      if (!dirty) return false
-      if (!window.confirm('Discard your unsaved changes?')) return true
-      setDirty(false)
-      return false
-    },
+  const blocker = useBlocker({
+    shouldBlockFn: () => dirty,
+    withResolver: true,
     enableBeforeUnload: dirty,
   })
 
@@ -102,17 +98,17 @@ function AdminPage() {
     }
   }
 
-  async function update(
-    inquiryId: string,
-    status: (typeof inquiryStatuses)[number],
-  ) {
+  async function signOut() {
     setBusy(true)
     setError('')
     try {
-      await changeInquiryStatus({ data: { inquiryId, status } })
+      const result = await authClient.signOut()
+      if (result.error) throw new Error('Sign-out failed')
+      setDirty(false)
+      setConfirmSignOut(false)
       await router.invalidate({ sync: true })
     } catch {
-      setError('The status wasn’t updated. Please retry.')
+      setError('Sign-out failed. Please retry.')
     } finally {
       setBusy(false)
     }
@@ -152,25 +148,11 @@ function AdminPage() {
             <span>{data.workspace.ownerEmail}</span>
             <Button
               variant="outline"
+              size="sm"
               disabled={busy}
-              onClick={async () => {
-                if (
-                  dirty &&
-                  !window.confirm('Discard your unsaved changes and sign out?')
-                )
-                  return
-                setBusy(true)
-                setError('')
-                try {
-                  const result = await authClient.signOut()
-                  if (result.error) throw new Error('Sign-out failed')
-                  setDirty(false)
-                  await router.invalidate({ sync: true })
-                } catch {
-                  setError('Sign-out failed. Please retry.')
-                } finally {
-                  setBusy(false)
-                }
+              onClick={() => {
+                if (dirty) setConfirmSignOut(true)
+                else void signOut()
               }}
             >
               Sign out
@@ -178,185 +160,144 @@ function AdminPage() {
           </div>
         )}
       </header>
-      {!showAccess && data.signedIn && (
-        <nav className="admin-navigation" aria-label="Admin sections">
-          {(['inbox', 'work', 'services', 'settings'] as const).map(
-            (section) => (
-              <Link
-                key={section}
-                to="/admin"
-                search={{ section, status: 'all', edit: '' }}
-                aria-current={search.section === section ? 'page' : undefined}
-              >
-                {titles[section]}
-              </Link>
-            ),
+      <Tabs
+        value={search.section}
+        className="contents"
+        activationMode="manual"
+        onValueChange={(section) =>
+          void router.navigate({
+            to: '/admin',
+            search: {
+              section: section as typeof search.section,
+              status: 'all',
+              edit: '',
+            },
+          })
+        }
+      >
+        {!showAccess && data.signedIn && (
+          <nav className="admin-navigation" aria-label="Admin sections">
+            <TabsList aria-label="Admin sections">
+              {(['inbox', 'work', 'services', 'settings'] as const).map(
+                (section) => (
+                  <TabsTrigger key={section} value={section}>
+                    {titles[section]}
+                  </TabsTrigger>
+                ),
+              )}
+            </TabsList>
+          </nav>
+        )}
+        <main id="main-content" tabIndex={-1} className="admin-page">
+          {!showAccess && (
+            <>
+              <h1 className="admin-title">{titles[search.section]}</h1>
+            </>
           )}
-        </nav>
-      )}
-      <main id="main-content" tabIndex={-1} className="admin-page">
-        {!showAccess && (
-          <>
-            <p className="eyebrow">Private admin</p>
-            <h1 className="section-title">{titles[search.section]}</h1>
-          </>
-        )}
-        {!showAccess && error && (
-          <p className="feedback-error" role="alert">
-            {error}
-          </p>
-        )}
-        {feedback && (
-          <p className="admin-feedback" role="status">
-            {feedback}
-          </p>
-        )}
-        {showAccess ? (
-          <AdminAccess
-            setupAvailable={data.setupAvailable}
-            unavailable={data.unavailable}
-            busy={busy}
-            error={error}
-            token={search.token}
-            invalidToken={search.error === 'INVALID_TOKEN'}
-            onSignIn={signIn}
-          />
-        ) : data.signedIn ? (
-          <>
-            {search.section === 'inbox' ? (
-              <>
-                <div className="inbox-toolbar">
-                  <label htmlFor="inbox-status">Show inquiries</label>
-                  <select
-                    id="inbox-status"
-                    value={search.status}
-                    onChange={(event) =>
-                      router.navigate({
-                        to: '/admin',
-                        search: {
-                          ...search,
-                          status: event.target.value as typeof search.status,
-                        },
-                      })
-                    }
-                  >
-                    <option value="all">All</option>
-                    {inquiryStatuses.map((status) => (
-                      <option key={status} value={status}>
-                        {status}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <p className="chat-note">
-                  Most recent 100 matching inquiries. Submitted through chat.
-                </p>
-                {data.inquiries.length === 0 ? (
-                  <p className="body-copy inbox-empty">No inquiries yet.</p>
-                ) : (
-                  <div className="inquiry-list">
-                    {data.inquiries.map((inquiry) => (
-                      <article key={inquiry._id} className="inquiry-card">
-                        <div className="inquiry-card__heading">
-                          <h2>{inquiry.name}</h2>
-                          <time
-                            dateTime={new Date(
-                              inquiry._creationTime,
-                            ).toISOString()}
-                          >
-                            {new Date(inquiry._creationTime).toLocaleString(
-                              'en-GB',
-                              {
-                                timeZone: 'Europe/Riga',
-                              },
-                            )}{' '}
-                            (Riga)
-                          </time>
-                        </div>
-                        <a
-                          className="text-link"
-                          href={`mailto:${inquiry.email}`}
-                        >
-                          {inquiry.email}
-                        </a>
-                        <p className="inquiry-summary">{inquiry.summary}</p>
-                        {inquiry.timing && <p>Timing: {inquiry.timing}</p>}
-                        {inquiry.budget && <p>Budget: {inquiry.budget}</p>}
-                        <label htmlFor={`status-${inquiry._id}`}>Status</label>
-                        <select
-                          id={`status-${inquiry._id}`}
-                          value={inquiry.status}
-                          disabled={busy}
-                          onChange={(event) =>
-                            void update(
-                              inquiry._id,
-                              event.target
-                                .value as (typeof inquiryStatuses)[number],
-                            )
-                          }
-                        >
-                          {inquiryStatuses.map((status) => (
-                            <option key={status} value={status}>
-                              {status}
-                            </option>
-                          ))}
-                        </select>
-                      </article>
-                    ))}
-                  </div>
-                )}
-              </>
-            ) : !data.workspace.initialized ? (
-              <div className="admin-empty">
-                <p>
-                  Import the current approved content to start editing. The
-                  website will keep the same published content.
-                </p>
-                <Button disabled={busy} onClick={() => void initialize()}>
-                  {busy ? 'Importing…' : 'Import current content'}
-                </Button>
-              </div>
-            ) : search.section === 'settings' ? (
-              data.workspace.settings && (
-                <SettingsEditor
-                  key={data.workspace.settings.version}
-                  record={data.workspace.settings}
-                  dirty={dirty}
-                  onDirtyChange={setDirty}
-                  onFeedback={setFeedback}
+          {!showAccess && error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          {feedback && (
+            <Alert role="status" className="mt-5">
+              <AlertDescription>{feedback}</AlertDescription>
+            </Alert>
+          )}
+          {showAccess ? (
+            <AdminAccess
+              setupAvailable={data.setupAvailable}
+              unavailable={data.unavailable}
+              busy={busy}
+              error={error}
+              token={search.token}
+              invalidToken={search.error === 'INVALID_TOKEN'}
+              onSignIn={signIn}
+            />
+          ) : data.signedIn ? (
+            <TabsContent value={search.section}>
+              {search.section === 'inbox' ? (
+                <AdminInbox
+                  key={`${search.status}:${search.from ?? ''}:${search.to ?? ''}`}
+                  page={data.inquiries}
+                  filters={search}
                 />
-              )
-            ) : (
-              (() => {
-                const kind = search.section
-                const records =
-                  kind === 'work'
-                    ? data.workspace.caseStudies
-                    : data.workspace.services
-                const record = records.find((item) => item._id === search.edit)
-                if (!search.edit)
-                  return <ContentList kind={kind} records={records} />
-                if (search.edit !== 'new' && !record)
-                  return (
-                    <p className="admin-empty">
-                      Record not found. Choose a record from the list.
-                    </p>
-                  )
-                return (
-                  <ContentEditor
-                    key={`${kind}:${search.edit}:${record?.version ?? 0}`}
-                    kind={kind}
-                    record={record}
+              ) : !data.workspace.initialized ? (
+                <div className="admin-empty">
+                  <p>
+                    Import the current approved content to start editing. The
+                    website will keep the same published content.
+                  </p>
+                  <Button disabled={busy} onClick={() => void initialize()}>
+                    {busy ? 'Importing…' : 'Import current content'}
+                  </Button>
+                </div>
+              ) : search.section === 'settings' ? (
+                data.workspace.settings && (
+                  <SettingsEditor
+                    key={data.workspace.settings.version}
+                    record={data.workspace.settings}
                     dirty={dirty}
                     onDirtyChange={setDirty}
                     onFeedback={setFeedback}
                   />
                 )
-              })()
-            )}
-          </>
-        ) : null}
-      </main>
+              ) : (
+                (() => {
+                  const kind = search.section
+                  const records =
+                    kind === 'work'
+                      ? data.workspace.caseStudies
+                      : data.workspace.services
+                  const record = records.find(
+                    (item) => item._id === search.edit,
+                  )
+                  if (!search.edit)
+                    return <ContentList kind={kind} records={records} />
+                  if (search.edit !== 'new' && !record)
+                    return (
+                      <p className="admin-empty">
+                        Record not found. Choose a record from the list.
+                      </p>
+                    )
+                  return (
+                    <ContentEditor
+                      key={`${kind}:${search.edit}:${record?.version ?? 0}`}
+                      kind={kind}
+                      record={record}
+                      dirty={dirty}
+                      onDirtyChange={setDirty}
+                      onFeedback={setFeedback}
+                    />
+                  )
+                })()
+              )}
+            </TabsContent>
+          ) : null}
+        </main>
+      </Tabs>
+      <Toaster />
+      <AdminConfirm
+        open={blocker.status === 'blocked'}
+        title="Discard unsaved changes?"
+        description="Your changes haven’t been saved. Leave this page and discard them?"
+        action="Discard changes"
+        destructive
+        onCancel={() => blocker.reset?.()}
+        onConfirm={() => {
+          setDirty(false)
+          blocker.proceed?.()
+        }}
+      />
+      <AdminConfirm
+        open={confirmSignOut}
+        title="Discard changes and sign out?"
+        description="Your unsaved changes will be lost."
+        action="Sign out"
+        busy={busy}
+        onCancel={() => setConfirmSignOut(false)}
+        onConfirm={() => void signOut()}
+      />
     </div>
   )
 }

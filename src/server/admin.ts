@@ -7,6 +7,9 @@ import { assertSameOrigin } from './intake'
 import { publicEnv } from '@/env'
 import { api } from '../../convex/_generated/api'
 import type { Id } from '../../convex/_generated/dataModel'
+import { inboxFiltersSchema, inboxDateBounds } from '../../shared/inquiry-admin'
+import { generateInquirySummary } from './inquiry-summary'
+import { env } from 'cloudflare:workers'
 import {
   caseStudySchema,
   serviceSchema,
@@ -15,9 +18,7 @@ import {
 } from '../../shared/content'
 
 export const loadAdmin = createServerFn({ method: 'GET' })
-  .validator(
-    z.object({ status: z.enum(['all', 'new', 'contacted', 'closed']) }),
-  )
+  .validator(inboxFiltersSchema)
   .handler(async ({ data }) => {
     const auth = authUtilities()
     if (!auth || !publicEnv.VITE_CONVEX_URL)
@@ -41,10 +42,11 @@ export const loadAdmin = createServerFn({ method: 'GET' })
         }
       const [workspace, inquiries] = await Promise.all([
         auth.fetchAuthQuery(api.content.workspace, {}),
-        auth.fetchAuthQuery(
-          api.inquiries.list,
-          data.status === 'all' ? {} : { status: data.status },
-        ),
+        auth.fetchAuthQuery(api.inquiries.inbox, {
+          ...(data.status === 'all' ? {} : { status: data.status }),
+          ...inboxDateBounds(data.from, data.to),
+          paginationOpts: { numItems: 12, cursor: data.cursor ?? null },
+        }),
       ])
       return {
         signedIn: true as const,
@@ -167,4 +169,59 @@ export const changeInquiryStatus = createServerFn({ method: 'POST' })
       status: data.status,
     })
     return { updated: true }
+  })
+
+const inquiryIdSchema = z.object({ inquiryId: z.string().min(1).max(100) })
+
+export const loadInquiry = createServerFn({ method: 'POST' })
+  .validator(inquiryIdSchema)
+  .handler(async ({ data }) =>
+    (await ownerAuth()).fetchAuthQuery(api.inquiries.detail, {
+      inquiryId: data.inquiryId as Id<'inquiries'>,
+    }),
+  )
+
+export const deleteInquiry = createServerFn({ method: 'POST' })
+  .validator(inquiryIdSchema)
+  .handler(async ({ data }) =>
+    (await ownerAuth()).fetchAuthMutation(api.inquiries.remove, {
+      inquiryId: data.inquiryId as Id<'inquiries'>,
+    }),
+  )
+
+export const summarizeInquiry = createServerFn({ method: 'POST' })
+  .validator(inquiryIdSchema)
+  .handler(async ({ data }) => {
+    const auth = await ownerAuth()
+    const inquiryId = data.inquiryId as Id<'inquiries'>
+    if (!env.AI_GATEWAY_API_KEY || !env.AI_MODEL)
+      throw new Error('Conversation summaries are temporarily unavailable.')
+    const requestId = crypto.randomUUID()
+    const reservation = await auth.fetchAuthMutation(
+      api.inquiries.beginSummary,
+      { inquiryId, requestId },
+    )
+    if (reservation.cached) return reservation.summary
+    try {
+      const summary = await generateInquirySummary(reservation, {
+        apiKey: env.AI_GATEWAY_API_KEY,
+        model: env.AI_MODEL,
+      })
+      return await auth.fetchAuthMutation(api.inquiries.finishSummary, {
+        inquiryId,
+        requestId,
+        summary,
+        model: env.AI_MODEL,
+      })
+    } catch {
+      await auth
+        .fetchAuthMutation(api.inquiries.cancelSummary, {
+          inquiryId,
+          requestId,
+        })
+        .catch(() => undefined)
+      throw new Error(
+        'The conversation summary couldn’t be generated. Please try again.',
+      )
+    }
   })
