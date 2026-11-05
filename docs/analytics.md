@@ -4,7 +4,9 @@
 
 The owner's public `phc_` project token and EU ingestion host (`https://eu.i.posthog.com`) are configured in `wrangler.jsonc` as `VITE_POSTHOG_PROJECT_TOKEN` and `VITE_POSTHOG_HOST`. They are browser configuration, not Convex environment variables or Cloudflare secrets. A PostHog personal API key (`phx_`) must never be used here. See [PostHog's public-token guidance](https://posthog.com/docs/privacy).
 
-These two keys are included in the explicit Vite public allow-list and the guarded release build. Cloudflare Workers Builds environment variables can override them; changing them requires rebuilding and deploying. Empty both build variables to disable analytics. Configure a separate project or leave analytics disabled for branch previews if preview traffic should not mix with production.
+These two keys are included in the explicit Vite public allow-list and the guarded release build. Cloudflare Workers Builds environment variables can override them; changing them requires rebuilding and deploying. Empty both build variables to disable browser analytics. Configure a separate project or leave analytics disabled for branch previews if preview traffic should not mix with production.
+
+The server-side confirmed inquiry integration defaults to the same public project token and EU host in `shared/inquiry-event.ts`. Convex environment variables `POSTHOG_PROJECT_TOKEN` and `POSTHOG_HOST` override those defaults. Set `POSTHOG_PROJECT_TOKEN` to an empty string to disable server-side delivery, including on local/disposable Convex backends. Browser build overrides do not change the backend project. Vitest disables live backend delivery and the delivery tests mock ingestion. Deploy the Convex functions and the matching frontend privacy disclosure together to activate this change.
 
 Analytics uses normal **cookie-based tracking**. It no longer sets `cookieless_mode` or sends `$cookieless_mode`; Cookieless server hash mode is not required for these events. The EU project token and host remain the same. The SDK stays unloaded until the visitor accepts analytics, then uses first-party cookie persistence with a 180-day expiry and no cross-subdomain tracking. No person profiles or identification are added.
 
@@ -14,16 +16,17 @@ Ordinary loopback development and browser tests skip analytics, even with Wrangl
 
 ## Events
 
-| Event                       | Trigger                                                                                    | Properties                                                 |
-| --------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------- |
-| `$pageview`                 | Initial public route and client-side pathname navigation                                   | `page_path`, standard `$current_url`, `$host`, `$pathname` |
-| `chat_started`              | First visitor message in an empty conversation                                             | `page_path`                                                |
-| `chat_off_topic_attempt`    | Validated live off-topic tool result, once per assistant response                          | `page_path`, `severity: warning`, `category: off_topic`    |
-| `inquiry_requested`         | First successfully produced contact form or conversational inquiry draft in a conversation | `page_path`, `source`                                      |
-| `inquiry_reviewed`          | A new validated draft reaches review, from the contact form or assistant                   | `page_path`, `source`                                      |
-| `inquiry_submit_attempted`  | Visitor explicitly confirms submission                                                     | `page_path`, `source`                                      |
-| `inquiry_submitted`         | Website receives a successful saved receipt with an inquiry ID                             | `page_path`, `source`                                      |
-| `inquiry_submission_failed` | Confirmation fails; draft remains retryable                                                | `page_path`, `source`                                      |
+| Event                       | Trigger                                                                                    | Properties                                                                     |
+| --------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| `$pageview`                 | Initial public route and client-side pathname navigation                                   | `page_path`, standard `$current_url`, `$host`, `$pathname`                     |
+| `chat_started`              | First visitor message in an empty conversation                                             | `page_path`                                                                    |
+| `chat_off_topic_attempt`    | Validated live off-topic tool result, once per assistant response                          | `page_path`, `severity: warning`, `category: off_topic`                        |
+| `inquiry_requested`         | First successfully produced contact form or conversational inquiry draft in a conversation | `page_path`, `source`                                                          |
+| `inquiry_reviewed`          | A new validated draft reaches review, from the contact form or assistant                   | `page_path`, `source`                                                          |
+| `inquiry_submit_attempted`  | Visitor explicitly confirms submission                                                     | `page_path`, `source`                                                          |
+| `inquiry_submitted`         | Website receives a successful saved receipt with an inquiry ID                             | `page_path`, `source`                                                          |
+| `chat_inquiry_submitted`    | Convex saves a newly confirmed inquiry                                                     | All saved inquiry fields, `inquiry_id`, `submitted_at`, `page_path`, `is_test` |
+| `inquiry_submission_failed` | Confirmation fails; draft remains retryable                                                | `page_path`, `source`                                                          |
 
 `source` is only `contact_form` or `conversation`. Request counts once per active conversation; each distinct reviewed/submitted draft counts once per browser lifecycle. IDs used for local deduplication are never sent. Restored tool results and saved receipts do not count as new requests or submissions. Restart allows a new request funnel.
 
@@ -33,9 +36,9 @@ Page-view events fire on pathname changes, rather than separately for query/hash
 
 Consent is the collection gate. After acceptance, the application sends the SDK's standard metadata without a `before_send` property filter: full page URLs, referrers, campaign parameters, browser/OS/device/screen information, visitor/device/session IDs, and ordinary exception metadata. IP processing and GeoIP enrichment are enabled so new visits can populate the country map. Existing events captured with GeoIP disabled are unchanged.
 
-Custom inquiry events still describe only the action and its source; the app does not add chat transcripts, contact form fields, or database IDs to them. Automatic form capture, session replay, performance recording, heatmaps, surveys, feature flags, and console capture remain disabled. Public route tracking and Do Not Track/Global Privacy Control handling remain in place. Rejecting or withdrawing consent prevents initialization/capture and clears analytics cookies.
+Browser inquiry events describe only the action and its source. The separate `chat_inquiry_submitted` event sends the confirmed name, email, summary, optional timing/budget, source, status, update time, inquiry ID, and submission time from Convex. It runs upon explicit inquiry confirmation independently of optional browser analytics consent. It includes no chat transcript, session hash, or draft metadata, sets `is_test: false`, disables person profiles and GeoIP, and uses an inquiry-specific distinct ID. The confirmation UI and privacy page disclose this transfer. Automatic form capture, session replay, performance recording, heatmaps, surveys, feature flags, and console capture remain disabled. Public route tracking and Do Not Track/Global Privacy Control handling remain in place for browser analytics. Rejecting or withdrawing browser consent prevents SDK initialization/capture and clears analytics cookies.
 
-Analytics is browser-side and best effort: blockers, offline browsers, or navigation can prevent delivery. A submission event follows a confirmed server receipt; it never changes database writes or inquiry confirmation. Convex's private inbox remains the authoritative inquiry record. No analytics calls or errors can block chat, navigation, or submission. The privacy page explains this collection.
+Browser analytics is best effort: blockers, offline browsers, or navigation can prevent delivery. The server event is scheduled atomically with the saved inquiry, only on its first confirmation. Failed ingestion retries after 30, 60, and 120 seconds with the same event UUID and submission timestamp for PostHog deduplication. Delivery stops after four failed attempts with a fixed error log that contains no inquiry fields. Convex's private inbox remains the authoritative inquiry record; delivery errors do not undo a saved inquiry. The implementation uses [PostHog's capture API](https://posthog.com/docs/api/capture).
 
 ## Basic crash reporting
 

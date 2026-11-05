@@ -51,9 +51,14 @@ function PrivacyPage() {
           budget you choose to provide. Drafts expire after one hour and are
           removed by an hourly cleanup job. An inquiry is submitted only when
           you click the confirmation button. Confirmed details, submission time,
-          and status are stored in Convex and visible only in the private admin
-          inbox. They are used to review your request and follow up by email,
-          and retained until they are no longer needed or you request removal.
+          and status are stored in Convex in the private admin inbox. A copy of
+          all confirmed inquiry fields, including name, email, project summary,
+          optional timing and budget, inquiry ID, source, status, and submission
+          time, is also sent server-side to PostHog to track incoming requests.
+          This happens when you confirm submission, independently of optional
+          website analytics cookies. Chat transcripts are not included. These
+          details are used to review your request and follow up by email, and
+          retained until they are no longer needed or you request removal.
         </p>
       </section>
       <section>
@@ -70,14 +75,16 @@ function PrivacyPage() {
           cookie; essential chat and admin cookies remain. PostHog receives the
           standard website analytics metadata: page URLs, referrers, campaign
           parameters, browser/device information, and approximate location
-          inferred from your network IP address. Inquiry events describe the
-          step taken without adding the contact form fields or chat transcript.
-          We also count requests identified as outside the assistant’s scope,
-          without adding their question text to that analytics event. Session
-          replay and automatic form capture are disabled. Do Not Track and
-          Global Privacy Control signals are respected. With your analytics
-          consent, PostHog also receives app error messages and stack traces
-          through its standard error-reporting SDK.
+          inferred from your network IP address. Browser inquiry events describe
+          the step taken without adding contact fields or chat transcripts; the
+          separate server-side confirmed inquiry event includes the fields
+          described above. We also count requests identified as outside the
+          assistant’s scope, without adding their question text to that
+          analytics event. Session replay and automatic form capture are
+          disabled. Do Not Track and Global Privacy Control signals are
+          respected. With your analytics consent, PostHog also receives app
+          error messages and stack traces through its standard error-reporting
+          SDK.
         </p>
         <AnalyticsPreferencesButton />
       </section>

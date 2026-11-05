@@ -1,6 +1,8 @@
 import { ConvexError, v } from 'convex/values'
 import {
   internalMutation,
+  internalAction,
+  internalQuery,
   mutation,
   query,
   type MutationCtx,
@@ -9,6 +11,8 @@ import { requireOwner } from './owner'
 import { inquirySchema } from '../shared/inquiry'
 import type { UIMessage } from 'ai'
 import { requestLimits } from '../shared/security'
+import { internal } from './_generated/api'
+import { inquiryEvent, inquiryPostHogDefaults } from '../shared/inquiry-event'
 
 const detailFields = {
   name: v.string(),
@@ -164,7 +168,59 @@ export const confirm = internalMutation({
       inquiryId,
       expiresAt: Date.now() + 30 * 86_400_000,
     })
+    await ctx.scheduler.runAfter(0, internal.inquiries.sendPostHogEvent, {
+      inquiryId,
+      eventId: crypto.randomUUID(),
+    })
     return { inquiryId }
+  },
+})
+
+export const forPostHog = internalQuery({
+  args: { inquiryId: v.id('inquiries') },
+  handler: (ctx, { inquiryId }) => ctx.db.get(inquiryId),
+})
+
+export const sendPostHogEvent = internalAction({
+  args: {
+    inquiryId: v.id('inquiries'),
+    eventId: v.string(),
+    attempt: v.optional(v.number()),
+  },
+  handler: async (ctx, { inquiryId, eventId, attempt = 0 }) => {
+    const token =
+      process.env.POSTHOG_PROJECT_TOKEN ?? inquiryPostHogDefaults.token
+    const host = process.env.POSTHOG_HOST ?? inquiryPostHogDefaults.host
+    if (!token || !host) return
+    const inquiry = await ctx.runQuery(internal.inquiries.forPostHog, {
+      inquiryId,
+    })
+    if (!inquiry) return
+    try {
+      const response = await fetch(`${host.replace(/\/$/, '')}/i/v0/e/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          api_key: token,
+          ...inquiryEvent(inquiry, eventId),
+        }),
+        signal: AbortSignal.timeout(10_000),
+      })
+      if (!response.ok) throw new Error('PostHog ingestion failed')
+    } catch {
+      // Keep the inquiry saved; retry with the same UUID and submission time.
+      if (attempt < 3)
+        await ctx.scheduler.runAfter(
+          30_000 * 2 ** attempt,
+          internal.inquiries.sendPostHogEvent,
+          {
+            inquiryId,
+            eventId,
+            attempt: attempt + 1,
+          },
+        )
+      else console.error('PostHog inquiry delivery failed after four attempts')
+    }
   },
 })
 

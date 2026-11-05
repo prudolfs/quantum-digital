@@ -65,9 +65,80 @@ beforeEach(() => {
     'test-only-bridge-secret-never-used-in-production',
   )
 })
-afterEach(() => vi.unstubAllEnvs())
+afterEach(() => {
+  vi.unstubAllEnvs()
+  vi.unstubAllGlobals()
+  vi.useRealTimers()
+})
 
 describe('confirmed chat inquiries', () => {
+  it('delivers all saved fields once even when confirmation is retried', async () => {
+    vi.useFakeTimers()
+    vi.stubEnv('POSTHOG_PROJECT_TOKEN', 'phc_test_only')
+    const capture = vi.fn().mockResolvedValue(new Response('1'))
+    vi.stubGlobal('fetch', capture)
+    const t = setup()
+    const draft = await t.mutation(internal.inquiries.prepare, {
+      sessionHash: 'visitor-a',
+      details: { ...details, budget: 'EUR 10,000' },
+    })
+    expect(capture).not.toHaveBeenCalled()
+    const receipt = await t.mutation(internal.inquiries.confirm, {
+      sessionHash: 'visitor-a',
+      draftId: draft.draftId,
+    })
+    await t.mutation(internal.inquiries.confirm, {
+      sessionHash: 'visitor-a',
+      draftId: draft.draftId,
+    })
+    await t.finishAllScheduledFunctions(vi.runAllTimers)
+    expect(capture).toHaveBeenCalledTimes(1)
+    const payload = JSON.parse(capture.mock.calls[0][1].body)
+    expect(payload).toMatchObject({
+      api_key: 'phc_test_only',
+      event: 'chat_inquiry_submitted',
+      distinct_id: `inquiry:${receipt.inquiryId}`,
+      properties: {
+        ...details,
+        email: 'visitor@example.com',
+        budget: 'EUR 10,000',
+        inquiry_id: receipt.inquiryId,
+        source: 'chat',
+        status: 'new',
+        is_test: false,
+        $process_person_profile: false,
+      },
+    })
+    expect(payload.properties).not.toHaveProperty('sessionHash')
+  })
+
+  it('retries failed ingestion without losing the inquiry or changing event identity', async () => {
+    vi.useFakeTimers()
+    vi.stubEnv('POSTHOG_PROJECT_TOKEN', 'phc_test_only')
+    const capture = vi
+      .fn()
+      .mockResolvedValueOnce(new Response('unavailable', { status: 503 }))
+      .mockResolvedValue(new Response('1'))
+    vi.stubGlobal('fetch', capture)
+    const t = setup()
+    const draft = await t.mutation(internal.inquiries.prepare, {
+      sessionHash: 'visitor-a',
+      details,
+    })
+    await t.mutation(internal.inquiries.confirm, {
+      sessionHash: 'visitor-a',
+      draftId: draft.draftId,
+    })
+    await t.finishAllScheduledFunctions(vi.runAllTimers)
+    expect(capture).toHaveBeenCalledTimes(2)
+    expect(JSON.parse(capture.mock.calls[0][1].body)).toEqual(
+      JSON.parse(capture.mock.calls[1][1].body),
+    )
+    expect(
+      await t.run((ctx) => ctx.db.query('inquiries').collect()),
+    ).toHaveLength(1)
+  })
+
   it('prepares a draft without submitting, then confirms exactly once', async () => {
     const t = setup()
     const draft = await t.mutation(internal.inquiries.prepare, {

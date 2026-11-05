@@ -118,7 +118,8 @@ export function InquiryReview({
         <>
           <p className="chat-note">
             Nothing has been submitted yet. Confirm to send these details to
-            Rudolfs.
+            Rudolfs. Confirmed inquiry details are also sent to PostHog to track
+            incoming requests. See our <a href="/privacy">privacy policy</a>.
           </p>
           {error && (
             <p className="feedback-error" role="alert">
