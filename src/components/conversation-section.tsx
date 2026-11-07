@@ -123,10 +123,14 @@ export function ConversationSection() {
         </p>
         <div className="action-row">
           <ChatLink />
-          <Button asChild variant="outline" size="lg">
-            <Link to="/chat">
-              Visit the chat page <ActionIcon icon={MessageSquare} />
-            </Link>
+          <Button
+            render={<Link to="/chat" />}
+            nativeButton={false}
+            role="link"
+            variant="outline"
+            size="lg"
+          >
+            Visit the chat page <ActionIcon icon={MessageSquare} />
           </Button>
         </div>
       </div>

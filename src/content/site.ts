@@ -26,7 +26,7 @@ export const caseStudies: CaseStudy[] = [
   {
     slug: 'guided-business-builder',
     title: 'Guided Business Builder',
-    category: 'Product engineering & applied AI / 2026',
+    category: 'Product engineering & applied AI',
     summary:
       'A guided workspace that turns a service business owner’s knowledge into a private website and customer assistant, with confirmed business facts, visual editing, and reviewed enquiries.',
     role: 'Personal project · product design, architecture, AI integration, and full-stack development.',
@@ -98,7 +98,7 @@ export const caseStudies: CaseStudy[] = [
   {
     slug: 'finance-document-assistant',
     title: 'Finance Document Assistant',
-    category: 'Applied AI / 2026',
+    category: 'Applied AI',
     summary:
       'An AI assistant for extracting and validating receipts and invoices, answering questions with source references, and generating totals, tables, and charts.',
     role: 'Engineering portfolio project',
@@ -115,7 +115,7 @@ export const caseStudies: CaseStudy[] = [
   {
     slug: 'service-operations-copilot',
     title: 'Service Operations Copilot',
-    category: 'Product engineering & AI / 2026',
+    category: 'Product engineering & AI',
     summary:
       'A mobile and web application for booking, tracking, and coordinating service jobs, with real-time chat, AI summaries, voice input, and reply suggestions.',
     role: 'Engineering portfolio project',
@@ -133,7 +133,7 @@ export const caseStudies: CaseStudy[] = [
   {
     slug: 'robotics-lab',
     title: 'Robotics Lab',
-    category: 'Interactive software / 2026',
+    category: 'Interactive software',
     summary:
       'A robotics platform with a robot simulator, drone mission planner, visual SLAM explorer, warehouse simulation, and a greenhouse workspace for teaching, training, and comparing robot policies.',
     role: 'Engineering portfolio project',

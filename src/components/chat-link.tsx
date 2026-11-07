@@ -5,10 +5,15 @@ import { Button } from '@/components/ui/button'
 
 export function ChatLink({ className }: { className?: string }) {
   return (
-    <Button asChild variant="text" size="lg" className={className}>
-      <Link to="/chat">
-        Tell me about your project <ActionIcon icon={MessageSquare} />
-      </Link>
+    <Button
+      render={<Link to="/chat" />}
+      nativeButton={false}
+      role="link"
+      variant="text"
+      size="lg"
+      className={className}
+    >
+      Tell me about your project <ActionIcon icon={MessageSquare} />
     </Button>
   )
 }

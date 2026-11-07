@@ -16,7 +16,7 @@ import {
   Trash2,
   X,
 } from 'lucide-react'
-import { toast } from 'sonner'
+import { toast } from '@/components/ui/toast'
 import type { api } from '../../convex/_generated/api'
 import type { InboxFilters, InquirySummary } from '../../shared/inquiry-admin'
 import { inquiryStatuses } from '../../shared/inquiry'
@@ -139,7 +139,10 @@ export function AdminInbox({
         search: { section: 'inbox', edit: '', ...next },
       })
     } catch {
-      toast.error('The inbox couldn’t be loaded. Please retry.')
+      toast.add({
+        type: 'error',
+        title: 'The inbox couldn’t be loaded. Please retry.',
+      })
     } finally {
       setBusy(false)
     }
@@ -151,13 +154,16 @@ export function AdminInbox({
       await deleteInquiry({ data: { inquiryId: deleting._id } })
       if (selected?._id === deleting._id) setSelected(null)
       setDeleting(null)
-      toast.success('Inquiry deleted.')
+      toast.add({ type: 'success', title: 'Inquiry deleted.' })
       // Return to the newest page when deleting the last row of an older page.
       if (page.page.length === 1 && filters.cursor)
         await navigate({ ...filters, cursor: undefined })
       else await router.invalidate({ sync: true })
     } catch {
-      toast.error('The inquiry wasn’t deleted. Please retry.')
+      toast.add({
+        type: 'error',
+        title: 'The inquiry wasn’t deleted. Please retry.',
+      })
     } finally {
       setDeleteBusy(false)
     }
@@ -196,15 +202,17 @@ export function AdminInbox({
         <Field>
           <FieldLabel>Submitted</FieldLabel>
           <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                disabled={busy}
-                aria-label={`Filter by date: ${dateLabel}`}
-              >
-                <CalendarDays data-icon="inline-start" />
-                {dateLabel}
-              </Button>
+            <PopoverTrigger
+              render={
+                <Button
+                  variant="outline"
+                  disabled={busy}
+                  aria-label={`Filter by date: ${dateLabel}`}
+                />
+              }
+            >
+              <CalendarDays data-icon="inline-start" />
+              {dateLabel}
             </PopoverTrigger>
             <PopoverContent
               className="w-auto p-0"
@@ -511,9 +519,12 @@ function InquiryDialog({
         },
       })
       await router.invalidate()
-      toast.success('Status updated.')
+      toast.add({ type: 'success', title: 'Status updated.' })
     } catch {
-      toast.error('The status wasn’t updated. Please retry.')
+      toast.add({
+        type: 'error',
+        title: 'The status wasn’t updated. Please retry.',
+      })
     } finally {
       setWorking(false)
     }
@@ -529,11 +540,13 @@ function InquiryDialog({
           : current,
       )
       await router.invalidate()
-      toast.success('Conversation summary saved.')
+      toast.add({ type: 'success', title: 'Conversation summary saved.' })
     } catch {
-      toast.error(
-        'The conversation summary couldn’t be generated. Please try again.',
-      )
+      toast.add({
+        type: 'error',
+        title:
+          'The conversation summary couldn’t be generated. Please try again.',
+      })
     } finally {
       setSummarizing(false)
     }
@@ -598,7 +611,10 @@ function InquiryDialog({
                         .writeText(detail.inquiry.email)
                         .then(() => setCopied(true))
                         .catch(() =>
-                          toast.error('The email address couldn’t be copied.'),
+                          toast.add({
+                            type: 'error',
+                            title: 'The email address couldn’t be copied.',
+                          }),
                         )
                     }}
                   >
@@ -742,11 +758,13 @@ function InquiryDialog({
             <Trash2 data-icon="inline-start" />
             Delete inquiry
           </Button>
-          <Button asChild>
-            <a href={`mailto:${selected?.email ?? ''}`}>
-              <Mail data-icon="inline-start" />
-              Reply by email
-            </a>
+          <Button
+            nativeButton={false}
+            role="link"
+            render={<a href={`mailto:${selected?.email ?? ''}`} />}
+          >
+            <Mail data-icon="inline-start" />
+            Reply by email
           </Button>
         </div>
       </DialogContent>

@@ -88,13 +88,17 @@ export function ContentList({
             />
           </Field>
         </FieldGroup>
-        <Button asChild>
-          <Link
-            to="/admin"
-            search={{ section: kind, edit: 'new', status: 'all' }}
-          >
-            Create {kind === 'work' ? 'case study' : 'service'}
-          </Link>
+        <Button
+          nativeButton={false}
+          role="link"
+          render={
+            <Link
+              to="/admin"
+              search={{ section: kind, edit: 'new', status: 'all' }}
+            />
+          }
+        >
+          Create {kind === 'work' ? 'case study' : 'service'}
         </Button>
       </div>
       {visible.length === 0 ? (

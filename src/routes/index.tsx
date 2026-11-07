@@ -1,11 +1,12 @@
 import { ActionIcon } from '@/components/action-icon'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { ArrowUpRight, ArrowRight } from 'lucide-react'
+import { ArrowRight, ArrowUpRight } from 'lucide-react'
 import { ChatLink } from '@/components/chat-link'
 import { ConversationSection } from '@/components/conversation-section'
 import { HorizontalSection } from '@/components/horizontal-section'
 import { FaqItem } from '@/components/faq-item'
 import { Hero } from '@/components/hero'
+import { WorkCard } from '@/components/work-card'
 import { ServiceArt } from '@/components/service-art'
 import { engagements } from '@/content/site'
 import { pageHead } from '@/lib/seo'
@@ -52,21 +53,7 @@ function HomePage() {
               aria-label="Selected work cards"
             >
               {caseStudies.map((study) => (
-                <Link
-                  className="work-card"
-                  to="/work/$slug"
-                  params={{ slug: study.slug }}
-                  key={study.slug}
-                >
-                  <p className="eyebrow">{study.category}</p>
-                  <h3>
-                    {study.title} <ArrowUpRight aria-hidden="true" />
-                  </h3>
-                  <p className="body-copy">{study.summary}</p>
-                  <span className="text-link">
-                    Read the case study <ActionIcon icon={ArrowRight} />
-                  </span>
-                </Link>
+                <WorkCard key={study.slug} study={study} />
               ))}
             </div>
           ) : (

@@ -53,8 +53,13 @@ export function ErrorState({ reset, error }: ErrorComponentProps) {
         >
           Try again
         </Button>
-        <Button asChild variant="outline">
-          <Link to="/">Back to home</Link>
+        <Button
+          render={<Link to="/" />}
+          nativeButton={false}
+          role="link"
+          variant="outline"
+        >
+          Back to home
         </Button>
       </div>
     </section>
@@ -69,8 +74,8 @@ export function NotFoundState() {
       <p className="body-copy">
         The page may have moved, or the address may be incorrect.
       </p>
-      <Button asChild>
-        <Link to="/">Back to home</Link>
+      <Button render={<Link to="/" />} nativeButton={false} role="link">
+        Back to home
       </Button>
     </section>
   )

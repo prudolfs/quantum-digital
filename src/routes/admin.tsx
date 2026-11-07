@@ -15,7 +15,7 @@ import { AdminAccess } from '@/components/admin-access'
 import { AdminInbox } from '@/components/admin-inbox'
 import { AdminConfirm } from '@/components/admin-confirm'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { Toaster } from '@/components/ui/sonner'
+import { Toaster } from '@/components/ui/toast'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
 export const Route = createFileRoute('/admin')({
@@ -163,7 +163,6 @@ function AdminPage() {
       <Tabs
         value={search.section}
         className="contents"
-        activationMode="manual"
         onValueChange={(section) =>
           void router.navigate({
             to: '/admin',
@@ -177,7 +176,7 @@ function AdminPage() {
       >
         {!showAccess && data.signedIn && (
           <nav className="admin-navigation" aria-label="Admin sections">
-            <TabsList aria-label="Admin sections">
+            <TabsList aria-label="Admin sections" activateOnFocus={false}>
               {(['inbox', 'work', 'services', 'settings'] as const).map(
                 (section) => (
                   <TabsTrigger key={section} value={section}>

@@ -289,3 +289,26 @@ test('offers summary generation and preserves inquiry details when the provider 
     dialog.getByRole('button', { name: 'Generate summary' }),
   ).toBeEnabled()
 })
+
+test('keyboard users can dismiss a nested select before closing the inquiry and return to its card', async ({
+  page,
+}) => {
+  const open = page
+    .getByTestId('inquiry-card')
+    .first()
+    .getByRole('button', { name: 'View inquiry' })
+  await open.focus()
+  await page.keyboard.press('Enter')
+  const dialog = page.getByRole('dialog')
+  const status = dialog.getByRole('combobox', { name: 'Inquiry status' })
+  await status.focus()
+  await page.keyboard.press('ArrowDown')
+  await expect(page.getByRole('listbox')).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('listbox')).toHaveCount(0)
+  await expect(dialog).toBeVisible()
+  await expect(status).toBeFocused()
+  await page.keyboard.press('Escape')
+  await expect(dialog).toHaveCount(0)
+  await expect(open).toBeFocused()
+})

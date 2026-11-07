@@ -114,10 +114,14 @@ export function Hero({
           </p>
           <div className="action-row hero-actions">
             <ChatLink />
-            <Button asChild size="lg" variant="outline">
-              <a href="#work">
-                Explore my work <ActionIcon icon={ArrowDown} />
-              </a>
+            <Button
+              render={<a href="#work" />}
+              nativeButton={false}
+              role="link"
+              size="lg"
+              variant="outline"
+            >
+              Explore my work <ActionIcon icon={ArrowDown} />
             </Button>
           </div>
         </div>

@@ -23,7 +23,14 @@ export function AdminSelect({
   onChange: (value: string) => void
 }) {
   return (
-    <Select value={value} disabled={disabled} onValueChange={onChange}>
+    <Select
+      items={options}
+      value={value}
+      disabled={disabled}
+      onValueChange={(next) => {
+        if (next !== null) onChange(next)
+      }}
+    >
       <SelectTrigger id={id} aria-label={label}>
         <SelectValue />
       </SelectTrigger>
