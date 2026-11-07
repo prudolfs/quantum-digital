@@ -719,7 +719,7 @@ nav {
 .work-card [data-slot='card-description'] {
   color: var(--color-brand);
   min-height: 3.2em;
-  font-size: 0.875rem;
+  font-size: 1rem;
   line-height: 1.6;
 }
 .work-card [data-slot='card-content'] {
@@ -734,7 +734,6 @@ nav {
 .work-card .text-link {
   width: 100%;
   justify-content: space-between;
-  font-size: 0.875rem;
 }
 .work-card:is(:hover, :focus-visible) .text-link {
   color: var(--color-brand);
@@ -885,9 +884,6 @@ nav {
   scroll-snap-type: none;
   scrollbar-width: none;
 }
-.horizontal-section .marketing-title {
-  font-size: clamp(2rem, 4vh, 3.5rem);
-}
 .horizontal-section .section-intro {
   display: flex;
   flex-direction: column;
@@ -906,10 +902,6 @@ nav {
 }
 .work-card h3 {
   min-height: 2.5em;
-  font-size: 1.375rem;
-  font-weight: 500;
-  line-height: 1.25;
-  letter-spacing: -0.035em;
 }
 .horizontal-track .body-copy {
   font-size: 1rem;
