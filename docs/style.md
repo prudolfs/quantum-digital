@@ -77,10 +77,12 @@ Use gold for hero cursor effects and secondary tiles behind trailing CTA arrows.
 
 ## Section backgrounds
 
-- Keep pointy-top hexagons in the hero and reuse them in the final conversation section. Use triangles in Services and 45° rotated squares (diamonds) in Working together. Keep Selected work and The approach plain to give the page quieter intervals.
+- Keep pointy-top hexagons in the hero and reuse them in the final conversation section. Use 45° rotated triangles in Services and 45° rotated squares (diamonds) in Working together. Keep Selected work and The approach plain to give the page quieter intervals.
 - Show these patterns on desktop, tablet, and mobile. Patterned sections span the full viewport width, with an inner content container retaining the standard gutters and maximum width. Avoid viewport-width overflow tricks or clipping patterns to the content container.
 - Use repeating SVG tiles with ice-colored strokes at roughly 2.5% opacity. Fade the top and bottom edges of section patterns, and keep them behind content without intercepting pointer events. Patterns remain static and visible when motion is reduced.
 - Additional patterns should follow the same geometric line style, scale, and restrained contrast; add them selectively rather than decorating every section.
+- Reuse `--pattern-hexagon-size` and `--pattern-diamond-size` on service, work, About, chat, and admin pages. Keep hexagons at the homepage scale (55.4256 × 96px, or 41.5692 × 72px on mobile) and diamonds at 64 × 64px. The rotated triangle SVG repeats its fixed-size pattern internally across a full-section background. Never stretch a small tile to fill a page.
+- Detail-page heroes match the homepage’s blue radial lighting on the right. Keep that lighting separate from the hexagon layer so the pattern fade does not darken the glow.
 - Fade the conversation section’s graphics to transparent over the bottom 96px so cursor trails blend into the footer. Keep the top edge at full opacity.
 - In the final conversation section, type “working towards?” once on its first appearance, reserving its full layout space throughout. Reuse the hero’s gold cursor sparks and localized fluid title distortion across the full section, without the particle shape cycle. Enable title distortion for mouse and touch input when graphics are supported; pause graphics offscreen or when the tab is hidden. Keep the full semantic heading readable without JavaScript, with reduced motion, and after graphics failure or context loss.
 

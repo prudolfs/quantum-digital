@@ -58,6 +58,8 @@
 }
 
 :root {
+  --pattern-hexagon-size: 55.4256px 96px;
+  --pattern-diamond-size: 64px 64px;
   color-scheme: dark;
   scrollbar-color: var(--color-portal-gold) var(--color-surface);
   scrollbar-width: thin;
@@ -455,7 +457,7 @@ nav {
   position: absolute;
   z-index: -1;
   inset: 0;
-  background: url('/hero-hexagons.svg') 20px 0 / 55.4256px 96px;
+  background: url('/hero-hexagons.svg') 20px 0 / var(--pattern-hexagon-size);
   mask-image: linear-gradient(black, transparent 95%);
   pointer-events: none;
 }
@@ -620,15 +622,16 @@ nav {
 }
 .section-pattern--triangles::before {
   background-image: url('/section-triangles.svg');
-  background-size: 64px 110.8512px;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
 }
 .section-pattern--hexagons::before {
   background-image: url('/hero-hexagons.svg');
-  background-size: 55.4256px 96px;
+  background-size: var(--pattern-hexagon-size);
 }
 .section-pattern--diamonds::before {
   background-image: url('/section-diamonds.svg');
-  background-size: 64px 64px;
+  background-size: var(--pattern-diamond-size);
 }
 .section-intro {
   display: grid;
@@ -1153,6 +1156,9 @@ nav {
   }
 }
 @media (max-width: 639px) {
+  :root {
+    --pattern-hexagon-size: 41.5692px 72px;
+  }
   html {
     scroll-padding-top: 176px;
   }
@@ -1165,9 +1171,6 @@ nav {
   }
   .hero-layout {
     padding-top: 180px;
-  }
-  .hero-section::before {
-    background-size: 41.5692px 72px;
   }
   .hero-copy .eyebrow {
     font-size: 0.875rem;
@@ -1482,7 +1485,7 @@ nav {
   z-index: -1;
   inset: 0;
   pointer-events: none;
-  background: url('/hero-hexagons.svg') center top / 55.4256px 96px;
+  background: url('/hero-hexagons.svg') center top / var(--pattern-hexagon-size);
   mask-image: linear-gradient(black, transparent 90%);
 }
 .admin-app:not(.admin-app--access) {
@@ -2344,17 +2347,24 @@ nav {
   isolation: isolate;
   padding-block: 0 56px;
 }
-.work-hero::before {
+.work-hero::before,
+.work-hero::after {
   content: '';
   position: absolute;
   z-index: -1;
   inset: -144px 0 0;
-  background:
-    radial-gradient(ellipse at 76% 52%, #0c294a70, transparent 55%),
-    url('/hero-hexagons.svg') center top / 1050px;
-  opacity: 0.4;
-  mask-image: linear-gradient(#000 65%, transparent);
   pointer-events: none;
+}
+.work-hero::before {
+  background: radial-gradient(
+    ellipse at 83% 45%,
+    rgb(0 123 255 / 8%),
+    transparent 55%
+  );
+}
+.work-hero::after {
+  background: url('/hero-hexagons.svg') 20px 0 / var(--pattern-hexagon-size);
+  mask-image: linear-gradient(black, transparent 95%);
 }
 .work-back {
   display: inline-flex;
@@ -2562,8 +2572,7 @@ nav {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: url('/section-diamonds.svg') center / 1000px;
-  opacity: 0.14;
+  background: url('/section-diamonds.svg') center / var(--pattern-diamond-size);
   mask-image: linear-gradient(transparent, #000 30%, #000 70%, transparent);
   pointer-events: none;
 }
@@ -2884,8 +2893,7 @@ nav {
   position: absolute;
   z-index: -1;
   inset: 0;
-  background: url('/section-diamonds.svg') center / 640px;
-  opacity: 0.18;
+  background: url('/section-diamonds.svg') center / var(--pattern-diamond-size);
   mask-image: linear-gradient(transparent, #000 25%, #000 75%, transparent);
   pointer-events: none;
 }
